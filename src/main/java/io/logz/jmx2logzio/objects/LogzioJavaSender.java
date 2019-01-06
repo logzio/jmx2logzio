@@ -2,10 +2,10 @@ package io.logz.jmx2logzio.objects;
 
 public class LogzioJavaSender {
 
-    private String url;
-    private String type;
+    private String url = "https://listener.logz.io:8071";
+    private String type = "javaSenderType";
     private String Token;
-    private int threadPoolSize;
+    private int threadPoolSize = 3;
 
     public String getUrl() {
         return url;

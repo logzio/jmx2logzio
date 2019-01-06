@@ -4,6 +4,7 @@ import com.typesafe.config.Config;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 //import org.apache.kafka.clients.producer.ProducerConfig;
 //import org.apache.kafka.common.serialization.StringSerializer;
+import io.logz.jmx2logzio.objects.LogzioJavaSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +24,7 @@ public class Jmx2LogzioConfiguration {
     private String jolokiaFullUrl;
 
 //    private Kafka kafka;
+    private LogzioJavaSender logzioJavaSender;
 
     /* Short name of the sampled service, required = false */
     private String serviceName;
@@ -107,7 +109,11 @@ public class Jmx2LogzioConfiguration {
             blackListPattern = Pattern.compile(".*");
         }
 
-
+        logzioJavaSender = new LogzioJavaSender();
+        logzioJavaSender.setUrl(config.getString("logzioJavaSender.url"));
+        logzioJavaSender.setToken(config.getString("logzioJavaSender.token"));
+        logzioJavaSender.setType(config.hasPath("logzioJavaSender.type") ? config.getString("javaSenderType") : logzioJavaSender.getType());
+        logzioJavaSender.setThreadPoolSize(config.hasPath("logzioJavaSender.threadPoolSize") ? config.getInt("logzioJavaSender.threadPoolSize") : logzioJavaSender.getThreadPoolSize());
 //        kafka = new Kafka();
 //        kafka.url = config.getString("kafka.url");
 //        kafka.topic = config.getString("kafka.topic");
