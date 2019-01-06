@@ -42,7 +42,7 @@ public class Jmx2Logzio {
     }
 
     public void run() {
-        logger.info("java sender: url = {}, token = {}", conf.getListenerUrl(), conf.getToken());
+        logger.info("java sender: url = {}, token = {}", conf.getSender().getUrl(), conf.getSender().getToken());
         enableHangupSupport();
         MetricsPipeline pipeline = new MetricsPipeline(conf, client);
         long initialDelay = calcDurationInSecondsUntilNextPollingIntervalStartTime();
