@@ -81,9 +81,9 @@ public class Jmx2Logzio {
      */
     private static final class HangupInterceptor extends Thread {
         private Logger logger = LoggerFactory.getLogger(HangupInterceptor.class);
-        private Jmx2Kafka main;
+        private Jmx2Logzio main;
 
-        public HangupInterceptor(Jmx2Kafka main) {
+        public HangupInterceptor(Jmx2Logzio main) {
             this.main = main;
         }
 
