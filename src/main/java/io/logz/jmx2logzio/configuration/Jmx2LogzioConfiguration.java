@@ -136,6 +136,13 @@ public class Jmx2LogzioConfiguration {
         return jolokiaFullUrl;
     }
 
+    public String getListenerUrl() {
+        return logzioJavaSender.getUrl();
+    }
+
+    public String getToken() {
+        return logzioJavaSender.getToken();
+    }
 //    public String getKafkaUrl() {
 //        return kafka.url;
 //    }

@@ -41,7 +41,7 @@ public class Jmx2Logzio {
     }
 
     public void run() {
-        logger.info("kafka: url = {}, topic = {}", conf.getKafkaUrl(), conf.getKafkaTopic());
+        logger.info("java sender: url = {}, token = {}", conf.getListenerUrl(), conf.getToken());
         enableHangupSupport();
         MetricsPipeline pipeline = new MetricsPipeline(conf, client);
         long initialDelay = calcDurationInSecondsUntilNextPollingIntervalStartTime();
