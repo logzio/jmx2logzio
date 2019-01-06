@@ -1,9 +1,9 @@
 package io.logz.jmx2logzio;
 
-import io.logz.jmx2kafka.clients.JavaAgentClient;
-import io.logz.jmx2kafka.clients.JolokiaClient;
-import io.logz.jmx2kafka.configuration.Jmx2KafkaConfiguration;
-import io.logz.jmx2kafka.exceptions.IllegalConfiguration;
+import io.logz.jmx2logzio.clients.JavaAgentClient;
+import io.logz.jmx2logzio.clients.JolokiaClient;
+import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
+import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import io.logz.jmx2logzio.objects.MBeanClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import org.slf4j.Logger;
@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static io.logz.jmx2kafka.configuration.Jmx2KafkaConfiguration.MetricClientType.JOLOKIA;
-import static io.logz.jmx2kafka.configuration.Jmx2KafkaConfiguration.MetricClientType.MBEAN_PLATFORM;
+import static io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration.MetricClientType.JOLOKIA;
+import static io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration.MetricClientType.MBEAN_PLATFORM;
 
 public class Jmx2Logzio {
 
