@@ -12,6 +12,7 @@ public class LogzioJavaSender {
     private int threadPoolSize = 3;
     private boolean debug = true;
     private boolean compressRequests = true;
+    private boolean fromDisk = true;
 
     // In-memory queue parameters
     private int  inMemoryQueueCapacityInBytes = 1024*1024*100;
@@ -109,5 +110,13 @@ public class LogzioJavaSender {
 
     public void setGcPersistedQueueFilesIntervalSeconds(int gcPersistedQueueFilesIntervalSeconds) {
         this.gcPersistedQueueFilesIntervalSeconds = gcPersistedQueueFilesIntervalSeconds;
+    }
+
+    public boolean isFromDisk() {
+        return fromDisk;
+    }
+
+    public void setFromDisk(boolean fromDisk) {
+        this.fromDisk = fromDisk;
     }
 }
