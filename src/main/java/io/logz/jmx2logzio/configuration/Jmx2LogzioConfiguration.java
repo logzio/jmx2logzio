@@ -102,11 +102,11 @@ public class Jmx2LogzioConfiguration {
             whiteListPattern = Pattern.compile(".*");
         }
 
-        try {
-            blackListPattern = Pattern.compile(config.hasPath("service.poller.black-list-regex") ? config.getString("service.poller.black-list-regex") : ".*");
+        try { // $a is a regexp that will never match anything (will match an "a" character after the end of the string
+            blackListPattern = Pattern.compile(config.hasPath("service.poller.black-list-regex") ? config.getString("service.poller.black-list-regex") : "$a");
         } catch (Exception e) {
             logger.error("Failed to parse regex {} with error {}",  config.getString("service.poller.black-list-regex"), e.getMessage());
-            blackListPattern = Pattern.compile(".*");
+            blackListPattern = Pattern.compile("$a");
         }
 
         logzioJavaSender = new LogzioJavaSender();
