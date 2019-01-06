@@ -111,10 +111,7 @@ public class Jmx2LogzioConfiguration {
 
         logzioJavaSender = new LogzioJavaSender();
         logzioJavaSender.setUrl(config.getString("logzioJavaSender.url"));
-        logzioJavaSender.setToken(config.getString("logzioJavaSender.token"));
-        logzioJavaSender.setType(config.hasPath("logzioJavaSender.type") ? config.getString("javaSenderType") : logzioJavaSender.getType());
-        logzioJavaSender.setThreadPoolSize(config.hasPath("logzioJavaSender.threadPoolSize") ? config.getInt("logzioJavaSender.threadPoolSize") : logzioJavaSender.getThreadPoolSize());
-//        kafka = new Kafka();
+        logzioJavaSender.setToken(config.getString("logzioJavaSender.token"));//        kafka = new Kafka();
 //        kafka.url = config.getString("kafka.url");
 //        kafka.topic = config.getString("kafka.topic");
 //        kafka.clientId = config.hasPath("kafka.clientId") ? config.getString("kafka.clientId") : kafka.clientId;

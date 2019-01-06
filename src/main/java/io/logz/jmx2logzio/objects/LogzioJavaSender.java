@@ -3,7 +3,7 @@ package io.logz.jmx2logzio.objects;
 public class LogzioJavaSender {
 
     private String url = "https://listener.logz.io:8071";
-    private String type = "javaSenderType";
+    private String type = "jmx2LogzioType";
     private String Token;
     private int threadPoolSize = 3;
 
@@ -19,9 +19,6 @@ public class LogzioJavaSender {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
 
     public String getToken() {
         return Token;
@@ -35,7 +32,4 @@ public class LogzioJavaSender {
         return threadPoolSize;
     }
 
-    public void setThreadPoolSize(int threadPoolSize) {
-        this.threadPoolSize = threadPoolSize;
-    }
 }
