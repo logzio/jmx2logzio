@@ -1,11 +1,10 @@
 package io.logz.jmx2logzio;
 
-import io.logz.jmx2logzio.clients.JavaAgentClient;
+import io.logz.jmx2logzio.objects.JavaAgentClient;
 import io.logz.jmx2logzio.clients.JolokiaClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import io.logz.jmx2logzio.objects.MBeanClient;
-import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
