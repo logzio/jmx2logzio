@@ -12,6 +12,8 @@ public class Jmx2LogzioJolokia {
     public static void main(String[] args) {
         Config config = ConfigFactory.load();
         Jmx2LogzioConfiguration jmx2LogzioConfiguration = new Jmx2LogzioConfiguration(config);
-
+        Jmx2Logzio main = new Jmx2Logzio(jmx2LogzioConfiguration);
+        logger.info("Starting jmx2Logzio using Jolokia-based poller");
+        main.run();
     }
 }
