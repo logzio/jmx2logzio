@@ -8,6 +8,7 @@ import io.logz.jmx2logzio.objects.LogzioJavaSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -111,7 +112,24 @@ public class Jmx2LogzioConfiguration {
 
         logzioJavaSender = new LogzioJavaSender();
         logzioJavaSender.setUrl(config.getString("logzioJavaSender.url"));
-        logzioJavaSender.setToken(config.getString("logzioJavaSender.token"));//        kafka = new Kafka();
+        logzioJavaSender.setToken(config.getString("logzioJavaSender.token"));
+
+        logzioJavaSender.setFromDisk(config.hasPath("logzioJavaSender.from-disk") ? config.getBoolean("logzioJavaSender.from-disk") : logzioJavaSender.isFromDisk());
+        logzioJavaSender.setInMemoryQueueCapacityInBytes(config.hasPath("logzioJavaSender.in-memory-queue-capacity") ?
+                config.getInt("logzioJavaSender.in-memory-queue-capacity") : logzioJavaSender.getInMemoryQueueCapacityInBytes());
+        logzioJavaSender.setLogsCountLimit(config.hasPath("logzioJavaSender.log-count-limit") ?
+                config.getInt("logzioJavaSender.log-count-limit") : logzioJavaSender.getLogsCountLimit());
+
+        if (config.hasPath("logzioJavaSender.queue-dir")) {
+            File queuePath = new File(config.getString("logzioJavaSender.queue-dir"));
+            logzioJavaSender.setQueueDir(queuePath);
+        }
+
+        logzioJavaSender.setFileSystemFullPercentThreshold(config.hasPath("logzioJavaSender.file-system-full-percent-threshold") ?
+                config.getInt("logzioJavaSender.file-system-full-percent-threshold") : logzioJavaSender.getFileSystemFullPercentThreshold());
+        logzioJavaSender.setGcPersistedQueueFilesIntervalSeconds(config.hasPath("logzioJavaSender.clean-sent-metrics-interval") ?
+                config.getInt("logzioJavaSender.clean-sent-metrics-interval") : logzioJavaSender.getGcPersistedQueueFilesIntervalSeconds());
+
 //        kafka.url = config.getString("kafka.url");
 //        kafka.topic = config.getString("kafka.topic");
 //        kafka.clientId = config.hasPath("kafka.clientId") ? config.getString("kafka.clientId") : kafka.clientId;
