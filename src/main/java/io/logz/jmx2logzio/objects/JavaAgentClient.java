@@ -112,7 +112,7 @@ public class JavaAgentClient extends MBeanClient {
                                 dimensions
                         ));
                     } catch (IllegalArgumentException e) {
-                        logger.info("Failed converting metric name to Graphite-friendly name: metricsBean.getName = {}, attrMetricName = {}", metricBean.getName(), attrMetricName, e);
+                        logger.info("Failed converting metric name to Logz.io-friendly name: metricsBean.getName = {}, attrMetricName = {}", metricBean.getName(), attrMetricName, e);
                     }
                 }
             } catch (MalformedObjectNameException | ReflectionException | InstanceNotFoundException | IllegalArgumentException e ) {
