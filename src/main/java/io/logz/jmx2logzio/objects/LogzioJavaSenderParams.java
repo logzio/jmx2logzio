@@ -4,7 +4,7 @@ import io.logz.sender.LogzioSender;
 
 import java.io.File;
 
-public class LogzioJavaSender {
+public class LogzioJavaSenderParams {
 
     private String url = "https://listener.logz.io:8071";
     private String type = "jmx2LogzioType";
@@ -24,7 +24,7 @@ public class LogzioJavaSender {
     private int fileSystemFullPercentThreshold = 98;
     private int gcPersistedQueueFilesIntervalSeconds = 30;
 
-    public LogzioJavaSender() {
+    public LogzioJavaSenderParams() {
         String queuePath = System.getProperty("user.dir");
         queuePath += queuePath.endsWith("/") ? "" : "/";
         queuePath += "logs";
