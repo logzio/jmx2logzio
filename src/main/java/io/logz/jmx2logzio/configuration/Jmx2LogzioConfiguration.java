@@ -149,7 +149,7 @@ public class Jmx2LogzioConfiguration {
         return jolokiaFullUrl;
     }
 
-    public LogzioJavaSenderParams getSender() {
+    public LogzioJavaSenderParams getSenderParams() {
         return this.logzioJavaSenderParams;
     }
 //    public String getKafkaUrl() {
