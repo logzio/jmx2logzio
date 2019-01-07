@@ -4,7 +4,7 @@ import com.typesafe.config.Config;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 //import org.apache.kafka.clients.producer.ProducerConfig;
 //import org.apache.kafka.common.serialization.StringSerializer;
-import io.logz.jmx2logzio.objects.LogzioJavaSender;
+import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,8 +13,6 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 public class Jmx2LogzioConfiguration {
@@ -25,7 +23,7 @@ public class Jmx2LogzioConfiguration {
     private String jolokiaFullUrl;
 
 //    private Kafka kafka;
-    private LogzioJavaSender logzioJavaSender;
+    private LogzioJavaSenderParams logzioJavaSenderParams;
 
     /* Short name of the sampled service, required = false */
     private String serviceName;
@@ -110,25 +108,25 @@ public class Jmx2LogzioConfiguration {
             blackListPattern = Pattern.compile("$a");
         }
 
-        logzioJavaSender = new LogzioJavaSender();
-        logzioJavaSender.setUrl(config.getString("logzioJavaSender.url"));
-        logzioJavaSender.setToken(config.getString("logzioJavaSender.token"));
+        logzioJavaSenderParams = new LogzioJavaSenderParams();
+        logzioJavaSenderParams.setUrl(config.getString("logzioJavaSenderParams.url"));
+        logzioJavaSenderParams.setToken(config.getString("logzioJavaSenderParams.token"));
 
-        logzioJavaSender.setFromDisk(config.hasPath("logzioJavaSender.from-disk") ? config.getBoolean("logzioJavaSender.from-disk") : logzioJavaSender.isFromDisk());
-        logzioJavaSender.setInMemoryQueueCapacityInBytes(config.hasPath("logzioJavaSender.in-memory-queue-capacity") ?
-                config.getInt("logzioJavaSender.in-memory-queue-capacity") : logzioJavaSender.getInMemoryQueueCapacityInBytes());
-        logzioJavaSender.setLogsCountLimit(config.hasPath("logzioJavaSender.log-count-limit") ?
-                config.getInt("logzioJavaSender.log-count-limit") : logzioJavaSender.getLogsCountLimit());
+        logzioJavaSenderParams.setFromDisk(config.hasPath("logzioJavaSenderParams.from-disk") ? config.getBoolean("logzioJavaSenderParams.from-disk") : logzioJavaSenderParams.isFromDisk());
+        logzioJavaSenderParams.setInMemoryQueueCapacityInBytes(config.hasPath("logzioJavaSenderParams.in-memory-queue-capacity") ?
+                config.getInt("logzioJavaSenderParams.in-memory-queue-capacity") : logzioJavaSenderParams.getInMemoryQueueCapacityInBytes());
+        logzioJavaSenderParams.setLogsCountLimit(config.hasPath("logzioJavaSenderParams.log-count-limit") ?
+                config.getInt("logzioJavaSenderParams.log-count-limit") : logzioJavaSenderParams.getLogsCountLimit());
 
-        if (config.hasPath("logzioJavaSender.queue-dir")) {
-            File queuePath = new File(config.getString("logzioJavaSender.queue-dir"));
-            logzioJavaSender.setQueueDir(queuePath);
+        if (config.hasPath("logzioJavaSenderParams.queue-dir")) {
+            File queuePath = new File(config.getString("logzioJavaSenderParams.queue-dir"));
+            logzioJavaSenderParams.setQueueDir(queuePath);
         }
 
-        logzioJavaSender.setFileSystemFullPercentThreshold(config.hasPath("logzioJavaSender.file-system-full-percent-threshold") ?
-                config.getInt("logzioJavaSender.file-system-full-percent-threshold") : logzioJavaSender.getFileSystemFullPercentThreshold());
-        logzioJavaSender.setGcPersistedQueueFilesIntervalSeconds(config.hasPath("logzioJavaSender.clean-sent-metrics-interval") ?
-                config.getInt("logzioJavaSender.clean-sent-metrics-interval") : logzioJavaSender.getGcPersistedQueueFilesIntervalSeconds());
+        logzioJavaSenderParams.setFileSystemFullPercentThreshold(config.hasPath("logzioJavaSenderParams.file-system-full-percent-threshold") ?
+                config.getInt("logzioJavaSenderParams.file-system-full-percent-threshold") : logzioJavaSenderParams.getFileSystemFullPercentThreshold());
+        logzioJavaSenderParams.setGcPersistedQueueFilesIntervalSeconds(config.hasPath("logzioJavaSenderParams.clean-sent-metrics-interval") ?
+                config.getInt("logzioJavaSenderParams.clean-sent-metrics-interval") : logzioJavaSenderParams.getGcPersistedQueueFilesIntervalSeconds());
 
 //        kafka.url = config.getString("kafka.url");
 //        kafka.topic = config.getString("kafka.topic");
@@ -151,8 +149,8 @@ public class Jmx2LogzioConfiguration {
         return jolokiaFullUrl;
     }
 
-    public LogzioJavaSender getSender() {
-        return this.logzioJavaSender;
+    public LogzioJavaSenderParams getSender() {
+        return this.logzioJavaSenderParams;
     }
 //    public String getKafkaUrl() {
 //        return kafka.url;
