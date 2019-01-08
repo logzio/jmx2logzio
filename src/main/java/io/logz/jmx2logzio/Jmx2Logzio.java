@@ -1,7 +1,7 @@
 package io.logz.jmx2logzio;
 
 import io.logz.jmx2logzio.Utils.MetricsPipeline;
-import io.logz.jmx2logzio.objects.JavaAgentClient;
+import io.logz.jmx2logzio.clients.JavaAgentClient;
 import io.logz.jmx2logzio.clients.JolokiaClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;

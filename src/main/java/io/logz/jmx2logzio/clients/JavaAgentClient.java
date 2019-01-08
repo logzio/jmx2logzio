@@ -1,4 +1,4 @@
-package io.logz.jmx2logzio.objects;
+package io.logz.jmx2logzio.clients;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -10,6 +10,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.logz.jmx2logzio.MetricBean;
 
+import io.logz.jmx2logzio.objects.Dimension;
+import io.logz.jmx2logzio.objects.MBeanClient;
+import io.logz.jmx2logzio.objects.Metric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
