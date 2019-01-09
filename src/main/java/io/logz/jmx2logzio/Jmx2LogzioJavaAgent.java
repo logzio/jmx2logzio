@@ -19,25 +19,11 @@ import java.util.Map;
 
     private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioJavaAgent.class);
 
-    public static void premain(String agentArgument, Instrumentation instrumentation) {
+    public static void premain(String agentArgument, Instrumentation inst) {
 
         logger.info("Loading with agentArgument: {}", agentArgument);
 
-        Map<String, String> configurationMap = parseArgumentsString(agentArgument);
-
-        if (configurationMap.get(getArgumentConfigurationRepresentation("SERVICE_NAME")) == null) {
-            throw new IllegalConfiguration("SERVICE_NAME must be one of the arguments");
-        }
-        if (configurationMap.get(getArgumentConfigurationRepresentation("LOGZIO_TOKEN")) == null) {
-            throw new IllegalConfiguration("LOGZIO_TOKEN must be one of the arguments");
-        }
-
-        Config userConfig = ConfigFactory.parseMap(configurationMap);
-        Config fileConfig = ConfigFactory.load("javaagent.conf");
-
-        // Merge the two configurations
-        Config finalConfig = userConfig.withFallback(fileConfig);
-
+        Config finalConfig = getIntegratedConfiguration(agentArgument);
         Jmx2LogzioConfiguration jmx2LogzioConfiguration = new Jmx2LogzioConfiguration(finalConfig);
 
         Jmx2Logzio main = new Jmx2Logzio(jmx2LogzioConfiguration);
@@ -52,12 +38,30 @@ import java.util.Map;
         }
     }
 
+    private static Config getIntegratedConfiguration(String agentArgument) {
+        Map<String, String> configurationMap = parseArgumentsString(agentArgument);
+
+        if (configurationMap.get(getArgumentConfigurationRepresentation("SERVICE_NAME")) == null) {
+            throw new IllegalConfiguration("SERVICE_NAME must be one of the arguments");
+        }
+        if (configurationMap.get(getArgumentConfigurationRepresentation("LOGZIO_TOKEN")) == null) {
+            throw new IllegalConfiguration("LOGZIO_TOKEN must be one of the arguments");
+        }
+
+        Config userConfig = ConfigFactory.parseMap(configurationMap);
+        Config fileConfig = ConfigFactory.load("javaagent.conf");
+
+        // Merge the two configurations
+        return userConfig.withFallback(fileConfig);
+    }
+
     private static Map<String, String> parseArgumentsString(String arguments) throws IllegalConfiguration {
         try {
             Map<String, String> argumentsMap = new HashMap<>();
             Map<String, String> keyValues = Splitter.on(';').omitEmptyStrings().withKeyValueSeparator('=').split(arguments);
 
-            keyValues.forEach((k,v) -> argumentsMap.put(getArgumentConfigurationRepresentation(k),v));
+            keyValues.forEach((k,v) ->
+                    argumentsMap.put(getArgumentConfigurationRepresentation(k),v));
 
             return argumentsMap;
 
@@ -70,7 +74,7 @@ import java.util.Map;
 
         switch (key) {
             case "LISTENER_URL":
-                return "logzioJavaSender.url";
+                return "logzio-java-sender.url";
             case "WHITE_LIST_REGEX":
                 return "service.poller.white-list-regex";
             case "BLACK_LIST_REGEX":
