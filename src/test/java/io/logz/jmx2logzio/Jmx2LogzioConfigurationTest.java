@@ -3,14 +3,15 @@ package io.logz.jmx2logzio;
 import com.google.common.base.Splitter;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class LogzioConfigurationTest {
+public class Jmx2LogzioConfigurationTest {
 
-    private Config getIntegratedConfiguration(String agentArgument) {
+    private static Config getIntegratedConfiguration(String agentArgument) {
         Map<String, String> configurationMap = parseArgumentsString(agentArgument);
 
         if (configurationMap.get(getArgumentConfigurationRepresentation("SERVICE_NAME")) == null) {
@@ -27,7 +28,7 @@ public class LogzioConfigurationTest {
         return userConfig.withFallback(fileConfig);
     }
 
-    private Map<String, String> parseArgumentsString(String arguments) throws IllegalConfiguration {
+    private static Map<String, String> parseArgumentsString(String arguments) throws IllegalConfiguration {
         try {
             Map<String, String> argumentsMap = new HashMap<>();
             Map<String, String> keyValues = Splitter.on(';').omitEmptyStrings().withKeyValueSeparator('=').split(arguments);
@@ -42,7 +43,7 @@ public class LogzioConfigurationTest {
         }
     }
 
-    private String getArgumentConfigurationRepresentation(String key) throws IllegalConfiguration {
+    private static String getArgumentConfigurationRepresentation(String key) throws IllegalConfiguration {
 
         switch (key) {
             case "LISTENER_URL":
@@ -78,7 +79,8 @@ public class LogzioConfigurationTest {
         }
     }
 
-    public static void getTestConfiguration() {
-
+    public static Jmx2LogzioConfiguration getTestConfiguration() {
+        String testArguments = "LISTENER_URL=https://listener.logz.io:8071;LOGZIO_TOKEN=oCwtQDtWjDOMcHXHGGNrnRgkEMxCDuiO;FROM_DISK=true;INTERVAL_IN_SEC=10;SERVICE_NAME=com.yog.examplerunningapp";
+        return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
     }
 }
