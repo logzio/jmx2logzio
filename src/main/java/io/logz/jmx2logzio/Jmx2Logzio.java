@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import static io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration.MetricClientType.JOLOKIA;
 import static io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration.MetricClientType.MBEAN_PLATFORM;
+import static java.lang.Thread.sleep;
 
 public class Jmx2Logzio {
 
