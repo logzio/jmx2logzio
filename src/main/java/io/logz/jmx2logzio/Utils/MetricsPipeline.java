@@ -2,6 +2,7 @@ package io.logz.jmx2logzio.Utils;
 
 import com.google.common.base.Stopwatch;
 //import io.logz.jmx2logzio.clients.KafkaWriter;
+import io.logz.jmx2logzio.clients.ListenerWriter;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.MBeanClient;
@@ -19,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.lang.Thread.sleep;
+
 
 public class MetricsPipeline {
     private static DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ").withZone(ZoneId.of("UTC"));
@@ -27,18 +30,19 @@ public class MetricsPipeline {
     private final Pattern beansBlackListPattern;
     private List<Dimension> metricsPrefix;
     private int pollingIntervalSeconds;
+    private final ListenerWriter listenerClient;
 //    private final KafkaWriter kafkaClient;
     private MBeanClient client;
 
     public MetricsPipeline(Jmx2LogzioConfiguration conf, MBeanClient client) {
         metricsPrefix = new ArrayList<>();
-//        kafkaClient = new KafkaWriter(conf);
+        listenerClient = new ListenerWriter(conf);
         this.client = client;
         this.pollingIntervalSeconds = conf.getMetricsPollingIntervalInSeconds();
         this.beansWhiteListPattern = conf.getWhiteListPattern();
         this.beansBlackListPattern = conf.getBlackListPattern();
+        listenerClient.start();
 
-//        kafkaClient.start();
         String serviceName = conf.getServiceName();
         String serviceHost = conf.getServiceHost();
 
@@ -66,7 +70,7 @@ public class MetricsPipeline {
                     .filter((bean -> beansBlackListPattern.matcher(bean.getName()).find()))
                     .collect(Collectors.toList()));
 
-            logger.info("Found {} metric beans and after white list work with {} . Time = {}ms, for {}", beans.size(), filteredBeans.size(),
+            logger.info("Found {} metric beans and after filtering list work with {} . Time = {}ms, for {}", beans.size(), filteredBeans.size(),
                     sw.stop().elapsed(TimeUnit.MILLISECONDS),
                     timestampFormatter.format(pollingWindowStart));
 
@@ -102,6 +106,7 @@ public class MetricsPipeline {
             logger.error("Unexpected error occured while polling and sending. Error = {}", t.getMessage(), t);
             // not throwing out since the scheduler will stop in any exception
         }
+
     }
 
     private Instant getPollingWindowStart() {
@@ -128,6 +133,7 @@ public class MetricsPipeline {
 
     private void sendToListener(List<Metric> metrics) {
 //        kafkaClient.writeMetrics(metrics);
+        listenerClient.writeMetrics(metrics);
     }
 
 }
