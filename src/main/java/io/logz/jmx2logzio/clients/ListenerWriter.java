@@ -62,31 +62,37 @@ public class ListenerWriter {
                 @Override
                 public void error(String s) {
                     logger.error(s);
+                    System.out.println(s);
                 }
 
                 @Override
                 public void error(String s, Throwable throwable) {
                     logger.error(s);
+                    System.out.println(s);
                 }
 
                 @Override
                 public void warning(String s) {
                     logger.warn(s);
+                    System.out.println(s);
                 }
 
                 @Override
                 public void warning(String s, Throwable throwable) {
                     logger.warn(s);
+                    System.out.println(s);
                 }
 
                 @Override
                 public void info(String s) {
                     logger.info(s);
+                    System.out.println(s);
                 }
 
                 @Override
                 public void info(String s, Throwable throwable) {
                     logger.info(s);
+                    System.out.println(s);
                 }
             };
         LogzioSender.Builder senderBuilder = LogzioSender
@@ -114,7 +120,7 @@ public class ListenerWriter {
         } catch (LogzioParameterErrorException e) {
             logger.error("promblem in one or more parameters with error {}", e.getMessage()); //todo: add parameters string
         }
-
+        this.logzioSender.start();
     }
 
 //    String params = String.format("listener url {}, logzio type {}, logzio token {}",this.listenerUrl,this.logzioType,this.token);
@@ -131,24 +137,10 @@ public class ListenerWriter {
             String jsonStringMetric = convertToJson(metric);
             byte[] metricAsBytes = java.nio.charset.StandardCharsets.UTF_8.encode(jsonStringMetric).array();
             logzioSender.send(metricAsBytes);
-//            ProducerRecord<String, String> record = new ProducerRecord<>(kafkaTopic, jsonMetric);
-//            kafkaProducer.send(record, (metadata, exception) -> onWriteFinish(metric, exception));
+            System.out.println("sending metric size: " + metricAsBytes.length);
         });
     }
 
-//    private void onWriteFinish(Metric metric, Exception exception) {
-//        if (exception != null) {
-//            logger.warn("failed to write metric to kafka topic {} with exception {} message queue size {}", kafkaTopic, exception.getMessage(), messageQueue.size());
-//            try {
-//                messageQueue.put(metric);
-//            } catch (InterruptedException e) {
-//                logger.error("failed to write metric {} to buffer queue with exception {}", convertToJson(metric), e.getMessage());
-//            }
-//        } else {
-//            // success
-//            logger.debug("successfully write metric to kafka topic {} ", kafkaTopic);
-//        }
-//    }
 
     private String convertToJson(Metric metric) {
         try {
@@ -167,8 +159,9 @@ public class ListenerWriter {
         try {
             Metric metric = messageQueue.take();
             writeMetrics(Arrays.asList(metric));
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 }
