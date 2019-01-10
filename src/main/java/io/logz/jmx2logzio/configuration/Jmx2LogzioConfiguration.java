@@ -42,20 +42,6 @@ public class Jmx2LogzioConfiguration {
         MBEAN_PLATFORM
     }
 
-//    private class Kafka {
-//        String url;
-//        String topic;
-//        String clientId = "jmx-metrics-producer";
-//        long batchSizeBytes = 10240;
-//        int bulkTimeoutInSeconds = 1;
-//        int requestRequiredAcks = 1;
-//        int reconnectBackOffMs = 10000;
-//        int maxBlockMs = 10000;
-//        int retryBackOffMs = 1000;
-//        int numberOfRetries = 0;
-//        int queueCapacity = 100000;
-//    }
-
     public Jmx2LogzioConfiguration(Config config) throws IllegalConfiguration {
         if (config.hasPath("service.host")) {
             serviceHost = config.getString("service.host");
@@ -110,6 +96,8 @@ public class Jmx2LogzioConfiguration {
             blackListPattern = Pattern.compile("$a");
         }
 
+        serviceName = config.getString("service.name");
+
         logzioJavaSenderParams = new LogzioJavaSenderParams();
         logzioJavaSenderParams.setUrl(config.hasPath("logzioJavaSender.url") ? config.getString("logzioJavaSender.url") : logzioJavaSenderParams.getUrl());
         logzioJavaSenderParams.setToken(config.getString("logzioJavaSender.token"));
@@ -131,22 +119,9 @@ public class Jmx2LogzioConfiguration {
         logzioJavaSenderParams.setGcPersistedQueueFilesIntervalSeconds(config.hasPath("logzioJavaSender.clean-sent-metrics-interval") ?
                 config.getInt("logzioJavaSender.clean-sent-metrics-interval") : logzioJavaSenderParams.getGcPersistedQueueFilesIntervalSeconds());
 
-//        kafka.url = config.getString("kafka.url");
-//        kafka.topic = config.getString("kafka.topic");
-//        kafka.clientId = config.hasPath("kafka.clientId") ? config.getString("kafka.clientId") : kafka.clientId;
-//        kafka.batchSizeBytes = config.hasPath("kafka.batchSizeBytes") ? config.getLong("kafka.batchSizeBytes") : kafka.batchSizeBytes;
-//        kafka.requestRequiredAcks = config.hasPath("kafka.requestRequiredAcks") ? config.getInt("kafka.requestRequiredAcks") : kafka.requestRequiredAcks;
-//        kafka.bulkTimeoutInSeconds = config.hasPath("kafka.bulkTimeoutInSeconds") ? config.getInt("kafka.bulkTimeoutInSeconds") : kafka.bulkTimeoutInSeconds;
-//        kafka.reconnectBackOffMs = config.hasPath("kafka.reconnectBackOffMs") ? config.getInt("kafka.reconnectBackOffMs") : kafka.reconnectBackOffMs;
-//        kafka.maxBlockMs = config.hasPath("kafka.maxBlockMs") ? config.getInt("kafka.maxBlockMs") : kafka.maxBlockMs;
-//        kafka.numberOfRetries = config.hasPath("kafka.numberOfRetries") ? config.getInt("kafka.numberOfRetries") : kafka.numberOfRetries;
-//        kafka.retryBackOffMs = config.hasPath("kafka.retryBackOffMs") ? config.getInt("kafka.retryBackOffMs") : kafka.retryBackOffMs;
-//        kafka.queueCapacity = config.hasPath("kafka.queueCapacity") ? config.getInt("kafka.queueCapacity") : kafka.queueCapacity;
-        if (config.hasPath("metricsPollingIntervalInSeconds")){
+if (config.hasPath("metricsPollingIntervalInSeconds")){
             metricsPollingIntervalInSeconds = config.getInt("metricsPollingIntervalInSeconds");
         }
-
-//        serviceName = config.getString("service.name");
     }
 
     public String getJolokiaFullUrl() {
