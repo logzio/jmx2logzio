@@ -2,8 +2,6 @@ package io.logz.jmx2logzio.configuration;
 
 import com.typesafe.config.Config;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
-//import org.apache.kafka.clients.producer.ProducerConfig;
-//import org.apache.kafka.common.serialization.StringSerializer;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +20,6 @@ public class Jmx2LogzioConfiguration {
     private Pattern blackListPattern;
     private String jolokiaFullUrl;
 
-//    private Kafka kafka;
     private LogzioJavaSenderParams logzioJavaSenderParams;
 
     /* Short name of the sampled service, required = false */
@@ -49,8 +46,7 @@ public class Jmx2LogzioConfiguration {
 
         if (config.hasPath("service.poller.jolokia")) {
             metricClientType = MetricClientType.JOLOKIA;
-        }
-        else if (config.hasPath("service.poller.mbean-direct")) {
+        } else if (config.hasPath("service.poller.mbean-direct")) {
             metricClientType = MetricClientType.MBEAN_PLATFORM;
         }
 
@@ -84,7 +80,7 @@ public class Jmx2LogzioConfiguration {
             whiteListPattern = Pattern.compile(config.hasPath("service.poller.white-list-regex") ?
                     config.getString("service.poller.white-list-regex") : ".*");
         } catch (Exception e) {
-            logger.error("Failed to parse regex {} with error {}",  config.getString("service.poller.white-list-regex"), e.getMessage());
+            logger.error("Failed to parse regex {} with error {}", config.getString("service.poller.white-list-regex"), e.getMessage());
             whiteListPattern = Pattern.compile(".*");
         }
 
@@ -92,7 +88,7 @@ public class Jmx2LogzioConfiguration {
             blackListPattern = Pattern.compile(config.hasPath("service.poller.black-list-regex") ?
                     config.getString("service.poller.black-list-regex") : "$a");
         } catch (Exception e) {
-            logger.error("Failed to parse regex {} with error {}",  config.getString("service.poller.black-list-regex"), e.getMessage());
+            logger.error("Failed to parse regex {} with error {}", config.getString("service.poller.black-list-regex"), e.getMessage());
             blackListPattern = Pattern.compile("$a");
         }
 
@@ -108,7 +104,8 @@ public class Jmx2LogzioConfiguration {
                 config.getInt("logzioJavaSender.in-memory-queue-capacity") : logzioJavaSenderParams.getInMemoryQueueCapacityInBytes());
         logzioJavaSenderParams.setLogsCountLimit(config.hasPath("logzioJavaSender.log-count-limit") ?
                 config.getInt("logzioJavaSender.log-count-limit") : logzioJavaSenderParams.getLogsCountLimit());
-
+        logzioJavaSenderParams.setDiskSpaceCheckInterval(config.hasPath("logzioJavaSender.disk-space-checks-interval") ?
+                config.getInt("logzioJavaSender.disk-space-checks-interval") : logzioJavaSenderParams.getDiskSpaceCheckInterval());
         if (config.hasPath("logzioJavaSender.queue-dir")) {
             File queuePath = new File(config.getString("logzioJavaSender.queue-dir"));
             logzioJavaSenderParams.setQueueDir(queuePath);
@@ -119,7 +116,7 @@ public class Jmx2LogzioConfiguration {
         logzioJavaSenderParams.setGcPersistedQueueFilesIntervalSeconds(config.hasPath("logzioJavaSender.clean-sent-metrics-interval") ?
                 config.getInt("logzioJavaSender.clean-sent-metrics-interval") : logzioJavaSenderParams.getGcPersistedQueueFilesIntervalSeconds());
 
-if (config.hasPath("metricsPollingIntervalInSeconds")){
+        if (config.hasPath("metricsPollingIntervalInSeconds")) {
             metricsPollingIntervalInSeconds = config.getInt("metricsPollingIntervalInSeconds");
         }
     }
@@ -131,17 +128,6 @@ if (config.hasPath("metricsPollingIntervalInSeconds")){
     public LogzioJavaSenderParams getSenderParams() {
         return this.logzioJavaSenderParams;
     }
-//    public String getKafkaUrl() {
-//        return kafka.url;
-//    }
-//
-//    public int getQueueCapacity() {
-//        return kafka.queueCapacity;
-//    }
-//
-//    public String getKafkaTopic() {
-//        return kafka.topic;
-//    }
 
     public String getServiceName() {
         return serviceName;
@@ -166,21 +152,5 @@ if (config.hasPath("metricsPollingIntervalInSeconds")){
     public MetricClientType getMetricClientType() {
         return metricClientType;
     }
-
-//    public Properties getProducerProperties() {
-//        Properties producerProperties = new Properties();
-//        producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.url);
-//        producerProperties.put(ProducerConfig.ACKS_CONFIG, String.valueOf(kafka.requestRequiredAcks));
-//        producerProperties.put(ProducerConfig.BATCH_SIZE_CONFIG, String.valueOf(Math.toIntExact(kafka.batchSizeBytes)));
-//        producerProperties.put(ProducerConfig.LINGER_MS_CONFIG, TimeUnit.SECONDS.toMillis(kafka.bulkTimeoutInSeconds));
-//        producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-//        producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-//        producerProperties.put(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG, kafka.reconnectBackOffMs);
-//        producerProperties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, kafka.maxBlockMs);
-//        producerProperties.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, kafka.retryBackOffMs);
-//        producerProperties.put(ProducerConfig.RETRIES_CONFIG, kafka.numberOfRetries);
-//        producerProperties.put(ProducerConfig.CLIENT_ID_CONFIG, kafka.clientId);
-//        return producerProperties;
-//    }
 
 }
