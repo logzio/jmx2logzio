@@ -1,16 +1,22 @@
 package io.logz.jmx2logzio;
 
-import com.oracle.tools.packager.Log;
+import io.logz.jmx2logzio.clients.ListenerWriter;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
+import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
+import io.logz.jmx2logzio.objects.Metric;
 import io.logz.sender.HttpsRequestConfiguration;
 import io.logz.sender.LogzioSender;
 import io.logz.sender.SenderStatusReporter;
 import io.logz.sender.com.google.gson.JsonObject;
 import io.logz.sender.exceptions.LogzioParameterErrorException;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 import static java.lang.Thread.sleep;
@@ -18,26 +24,46 @@ import static java.lang.Thread.sleep;
 public class LogzioSenderTest {
 
     Jmx2LogzioConfiguration config;
+    LogzioSender sender;
 
     @BeforeTest
     private void setup(){
-        config = Jmx2LogzioConfigurationTest.getTestConfiguration();
+        config = Jmx2LogzioConfigurationTest.getMinimalTestConfiguration();
+        sender = initLogzioSender();
+
+    }
+
+    @AfterTest
+    private void waitToSend() {
+        try {
+            sleep(20000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("End.");
     }
 
     @Test
-    public void sendDemoLog(){
+    public void sendDemoLogTest(){
         JsonObject temp = new JsonObject();
         temp.addProperty("msg","hello logz.io");
 
         byte[] messageAsBytes = java.nio.charset.StandardCharsets.UTF_8.encode(temp.toString()).array();
-        LogzioSender sender = initLogzioSender();
         sender.start();
         sender.send(messageAsBytes);
-        try {
-            sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    }
+
+    @Test
+    public void sendAListOfMetrics() {
+        List<Dimension> dimensions = new ArrayList<>();
+        dimensions.add(0,new Dimension("type","myType"));
+        List<Metric> metrics = new ArrayList<>();
+        metrics.add(new Metric("Sample Metric", 2, Instant.EPOCH,dimensions));
+        metrics.add(new Metric("The-Answer-To-Life-The-Universe-And-Everything",42,Instant.now(),dimensions));
+
+        ListenerWriter writer = new ListenerWriter(config);
+        writer.writeMetrics(metrics);
+
     }
 
     private LogzioSender initLogzioSender() {

@@ -1,38 +1,42 @@
 package io.logz.jmx2logzio.Utils;
 
-import com.google.common.base.Splitter;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import io.logz.jmx2logzio.Jmx2LogzioConfigurationTest;
 import io.logz.jmx2logzio.clients.JavaAgentClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
-import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import static java.lang.Thread.sleep;
-import static org.testng.Assert.*;
 
 public class MetricsPipelineTest {
 
 
-    Config config;
     Jmx2LogzioConfiguration jmx2LogzioConfiguration;
 
     @BeforeTest
     private void setup(){
-        jmx2LogzioConfiguration = Jmx2LogzioConfigurationTest.getTestConfiguration();
     }
 
     @Test
-    public void testPollAndSend() {
+    public void testPollAndSendMinimalConfiguration(){
+        testPollAndSend(Jmx2LogzioConfigurationTest.getMinimalTestConfiguration());
+    }
+    @Test
+    public void testPollAndSendFromDiskConfiguration(){
+        testPollAndSend(Jmx2LogzioConfigurationTest.getFromDiskTestConfigurationWithListenerURL());
+    }
+    @Test
+    public void testPollAndSendInMemoryConfiguration(){
+        testPollAndSend(Jmx2LogzioConfigurationTest.getInMemoryTestConfiguration());
+    }
+
+    @Test
+    public void testPollAndSendRapidMetricsPollConfiguration(){
+        testPollAndSend(Jmx2LogzioConfigurationTest.getCustomHostRapidMetricsPollingInterval());
+    }
+
+    public void testPollAndSend(Jmx2LogzioConfiguration configuration) {
+        jmx2LogzioConfiguration =configuration;
         JavaAgentClient client = new JavaAgentClient();
         MetricsPipeline metricsPipeline = new MetricsPipeline(jmx2LogzioConfiguration,client);
         metricsPipeline.pollAndSend();
