@@ -32,7 +32,7 @@ public class Jmx2LogzioConfiguration {
     private String serviceHost = null;
 
     /* Metrics polling interval in seconds */
-    private int metricsPollingIntervalInSeconds;
+    private int metricsPollingIntervalInSeconds = 30;
 
     // Which client should we use
     private MetricClientType metricClientType;
@@ -111,7 +111,7 @@ public class Jmx2LogzioConfiguration {
         }
 
         logzioJavaSenderParams = new LogzioJavaSenderParams();
-        logzioJavaSenderParams.setUrl(config.getString("logzioJavaSender.url"));
+        logzioJavaSenderParams.setUrl(config.hasPath("logzioJavaSender.url") ? config.getString("logzioJavaSender.url") : logzioJavaSenderParams.getUrl());
         logzioJavaSenderParams.setToken(config.getString("logzioJavaSender.token"));
 
         logzioJavaSenderParams.setFromDisk(config.hasPath("logzioJavaSender.from-disk") ?
@@ -142,8 +142,9 @@ public class Jmx2LogzioConfiguration {
 //        kafka.numberOfRetries = config.hasPath("kafka.numberOfRetries") ? config.getInt("kafka.numberOfRetries") : kafka.numberOfRetries;
 //        kafka.retryBackOffMs = config.hasPath("kafka.retryBackOffMs") ? config.getInt("kafka.retryBackOffMs") : kafka.retryBackOffMs;
 //        kafka.queueCapacity = config.hasPath("kafka.queueCapacity") ? config.getInt("kafka.queueCapacity") : kafka.queueCapacity;
-
-        metricsPollingIntervalInSeconds = config.getInt("metricsPollingIntervalInSeconds");
+        if (config.hasPath("metricsPollingIntervalInSeconds")){
+            metricsPollingIntervalInSeconds = config.getInt("metricsPollingIntervalInSeconds");
+        }
 
 //        serviceName = config.getString("service.name");
     }
