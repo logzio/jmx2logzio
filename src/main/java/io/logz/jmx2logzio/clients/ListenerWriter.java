@@ -18,13 +18,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
-//import org.apache.kafka.clients.producer.KafkaProducer;
-//import org.apache.kafka.clients.producer.ProducerRecord;
-
 public class ListenerWriter {
     private static final Logger logger = LoggerFactory.getLogger(ListenerWriter.class);
 
-//    private final KafkaProducer<String, String> kafkaProducer;
     private final static ObjectMapper mapper = new ObjectMapper();
     private final BlockingQueue<Metric> messageQueue;
     private ScheduledExecutorService scheduledExecutorService;
@@ -35,13 +31,10 @@ public class ListenerWriter {
     public ListenerWriter(Jmx2LogzioConfiguration requestConf) {
 
         this.logzioSenderParams = requestConf.getSenderParams();
-//        this.kafkaProducer = createKafkaProducer(requestConf.getProducerProperties());
         initLogzioSender();
-
-//        int queueCapacity = requestConf.getQueueCapacity();
         messageQueue = new LinkedBlockingQueue<>();
 
-        scheduledExecutorService = Executors.newScheduledThreadPool (1,
+        scheduledExecutorService = Executors.newScheduledThreadPool(1,
                 new ThreadFactoryBuilder().setNameFormat("Jmx2ListenerWriter-%d").build());
     }
 
@@ -59,42 +52,36 @@ public class ListenerWriter {
             logger.error("promblem in one or more parameters with error {}", e.getMessage()); //todo: add parameters string
         }
         SenderStatusReporter statusReporter = new SenderStatusReporter() {
-                @Override
-                public void error(String s) {
-                    logger.error(s);
-                    System.out.println(s);
-                }
+            @Override
+            public void error(String s) {
+                logger.error(s);
+            }
 
-                @Override
-                public void error(String s, Throwable throwable) {
-                    logger.error(s);
-                    System.out.println(s);
-                }
+            @Override
+            public void error(String s, Throwable throwable) {
+                logger.error(s);
+            }
 
-                @Override
-                public void warning(String s) {
-                    logger.warn(s);
-                    System.out.println(s);
-                }
+            @Override
+            public void warning(String s) {
+                logger.warn(s);
+            }
 
-                @Override
-                public void warning(String s, Throwable throwable) {
-                    logger.warn(s);
-                    System.out.println(s);
-                }
+            @Override
+            public void warning(String s, Throwable throwable) {
+                logger.warn(s);
+            }
 
-                @Override
-                public void info(String s) {
-                    logger.info(s);
-                    System.out.println(s);
-                }
+            @Override
+            public void info(String s) {
+                logger.info(s);
+            }
 
-                @Override
-                public void info(String s, Throwable throwable) {
-                    logger.info(s);
-                    System.out.println(s);
-                }
-            };
+            @Override
+            public void info(String s, Throwable throwable) {
+                logger.info(s);
+            }
+        };
         LogzioSender.Builder senderBuilder = LogzioSender
                 .builder()
                 .setTasksExecutor(Executors.newScheduledThreadPool(logzioSenderParams.getThreadPoolSize()))
@@ -118,26 +105,16 @@ public class ListenerWriter {
         try {
             this.logzioSender = senderBuilder.build();
         } catch (LogzioParameterErrorException e) {
-            logger.error("promblem in one or more parameters with error {}", e.getMessage()); //todo: add parameters string
+            logger.error("promblem in one or more parameters with error {}", e.getMessage());
         }
         this.logzioSender.start();
     }
 
-//    String params = String.format("listener url {}, logzio type {}, logzio token {}",this.listenerUrl,this.logzioType,this.token);
-//            throw new LogzioParameterErrorException(params, "one or more incorrect parameters");
-
-//    private KafkaProducer<String, String> createKafkaProducer(Properties producerProperties) {
-//        Properties properties = new Properties();
-//        properties.putAll(producerProperties);
-//        return new KafkaProducer<>(properties);
-//    }
-
-    public void writeMetrics(List<Metric> metrics){
+    public void writeMetrics(List<Metric> metrics) {
         metrics.stream().forEach(metric -> {
             String jsonStringMetric = convertToJson(metric);
             byte[] metricAsBytes = java.nio.charset.StandardCharsets.UTF_8.encode(jsonStringMetric).array();
             logzioSender.send(metricAsBytes);
-            System.out.println("sending metric size: " + metricAsBytes.length);
         });
     }
 
@@ -151,7 +128,7 @@ public class ListenerWriter {
     }
 
     @PostConstruct
-    public void start(){
+    public void start() {
         scheduledExecutorService.scheduleWithFixedDelay(this::trySendQueueToListener, 0, 5, TimeUnit.SECONDS);
     }
 

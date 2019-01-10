@@ -1,7 +1,6 @@
 package io.logz.jmx2logzio.Utils;
 
 import com.google.common.base.Stopwatch;
-//import io.logz.jmx2logzio.clients.KafkaWriter;
 import io.logz.jmx2logzio.clients.ListenerWriter;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
@@ -20,8 +19,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static java.lang.Thread.sleep;
-
 
 public class MetricsPipeline {
     private static DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ").withZone(ZoneId.of("UTC"));
@@ -31,7 +28,6 @@ public class MetricsPipeline {
     private List<Dimension> metricsPrefix;
     private int pollingIntervalSeconds;
     private final ListenerWriter listenerClient;
-//    private final KafkaWriter kafkaClient;
     private MBeanClient client;
 
     public MetricsPipeline(Jmx2LogzioConfiguration conf, MBeanClient client) {
@@ -90,7 +86,7 @@ public class MetricsPipeline {
         }
     }
 
-    public void pollAndSend()  {
+    public void pollAndSend() {
 
         try {
             List<Metric> metrics = poll();
@@ -132,7 +128,6 @@ public class MetricsPipeline {
     }
 
     private void sendToListener(List<Metric> metrics) {
-//        kafkaClient.writeMetrics(metrics);
         listenerClient.writeMetrics(metrics);
     }
 

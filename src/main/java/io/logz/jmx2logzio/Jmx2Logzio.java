@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 
 import static io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration.MetricClientType.JOLOKIA;
 import static io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration.MetricClientType.MBEAN_PLATFORM;
-import static java.lang.Thread.sleep;
 
 public class Jmx2Logzio {
 
@@ -36,8 +35,7 @@ public class Jmx2Logzio {
         } else if (conf.getMetricClientType() == MBEAN_PLATFORM) {
             this.client = new JavaAgentClient();
             logger.info("Running with Mbean client");
-        }
-        else {
+        } else {
             throw new IllegalConfiguration("Unsupported client type: " + conf.getMetricClientType());
         }
     }

@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * Created by roiravhon on 6/6/16.
  */
-    public class Jmx2LogzioJavaAgent {
+public class Jmx2LogzioJavaAgent {
 
     private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioJavaAgent.class);
 
@@ -32,9 +32,9 @@ import java.util.Map;
         try {
             main.run();
 
-          // Catching anything, because if we throw exception here, it will stop the main thread as well.
+            // Catching anything, because if we throw exception here, it will stop the main thread as well.
         } catch (Throwable e) {
-            logger.error("Stopping jmx2logzio Java Agent due to unexpected exception: "+e.getMessage(), e);
+            logger.error("Stopping jmx2logzio Java Agent due to unexpected exception: " + e.getMessage(), e);
         }
     }
 
@@ -60,8 +60,8 @@ import java.util.Map;
             Map<String, String> argumentsMap = new HashMap<>();
             Map<String, String> keyValues = Splitter.on(';').omitEmptyStrings().withKeyValueSeparator('=').split(arguments);
 
-            keyValues.forEach((k,v) ->
-                    argumentsMap.put(getArgumentConfigurationRepresentation(k),v));
+            keyValues.forEach((k, v) ->
+                    argumentsMap.put(getArgumentConfigurationRepresentation(k), v));
 
             return argumentsMap;
 
@@ -88,7 +88,7 @@ import java.util.Map;
             case "INTERVAL_IN_SEC":
                 return "metricsPollingIntervalInSeconds";
             case "FROM_DISK":
-                return  "logzioJavaSender.from-disk";
+                return "logzioJavaSender.from-disk";
             case "IN_MEMORY_QUEUE_CAPACITY":
                 return "logzioJavaSender.in-memory-queue-capacity";
             case "LOGS_COUNT_LIMIT":

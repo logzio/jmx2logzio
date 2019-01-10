@@ -1,7 +1,5 @@
 package io.logz.jmx2logzio.objects;
 
-import io.logz.sender.LogzioSender;
-
 import java.io.File;
 
 public class LogzioJavaSenderParams {
@@ -15,7 +13,7 @@ public class LogzioJavaSenderParams {
     private boolean fromDisk = true;
 
     // In-memory queue parameters
-    private int  inMemoryQueueCapacityInBytes = 1024*1024*100;
+    private int inMemoryQueueCapacityInBytes = 1024 * 1024 * 100;
     private int logsCountLimit = -1;
     private int diskSpaceCheckInterval = 1000;
 
