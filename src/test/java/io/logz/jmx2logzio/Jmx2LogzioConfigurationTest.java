@@ -47,7 +47,7 @@ public class Jmx2LogzioConfigurationTest {
 
         switch (key) {
             case "LISTENER_URL":
-                return "logzio-java-sender.url";
+                return "logzioJavaSender.url";
             case "WHITE_LIST_REGEX":
                 return "service.poller.white-list-regex";
             case "BLACK_LIST_REGEX":
