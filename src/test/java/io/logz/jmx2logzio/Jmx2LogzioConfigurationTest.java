@@ -6,6 +6,8 @@ import com.typesafe.config.ConfigFactory;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -100,6 +102,28 @@ public class Jmx2LogzioConfigurationTest {
         return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
     }
 
+    @Test
+    public void ConfigurationArgumentsParsingTest() {
+        String testArguments = "LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=CustomServiceName;SERVICE_HOST=CustomServiceHost;FROM_DISK=false;LISTENER_URL=http://listener.url:port;" +
+                "WHITE_LIST_REGEX=anything.with(a|b);BLACK_LIST_REGEX=except.you$;INTERVAL_IN_SEC=12;IN_MEMORY_QUEUE_CAPACITY=128000000;LOGS_COUNT_LIMIT=150;" +
+                "DISK_SPACE_CHECKS_INTERVAL=13;QUEUE_DIR=Custom/Metrics/Directory;FILE_SYSTEM_SPACE_LIMIT=80;CLEAN_SENT_METRICS_INTERVAL=14;";
+        Jmx2LogzioConfiguration configuration = new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
+        LogzioJavaSenderParams senderParams = configuration.getSenderParams();
 
+        Assert.assertEquals(senderParams.getToken(),"LogzioToken");
+        Assert.assertEquals(configuration.getServiceName(),"CustomServiceName");
+        Assert.assertEquals(configuration.getServiceHost(),"CustomServiceHost");
+        Assert.assertFalse(senderParams.isFromDisk());
+        Assert.assertEquals(senderParams.getUrl(),"http://listener.url:port");
+        Assert.assertEquals(configuration.getWhiteListPattern().pattern(),"anything.with(a|b)");
+        Assert.assertEquals(configuration.getBlackListPattern().pattern(),"except.you$");
+        Assert.assertEquals(configuration.getMetricsPollingIntervalInSeconds(),12);
+        Assert.assertEquals(senderParams.getInMemoryQueueCapacityInBytes(),128000000);
+        Assert.assertEquals(senderParams.getLogsCountLimit(),150);
+        Assert.assertEquals(senderParams.getDiskSpaceCheckInterval(),13);
+        Assert.assertEquals(senderParams.getQueueDir().getParent() + "/" + senderParams.getQueueDir().getName(),"Custom/Metrics/Directory");
+        Assert.assertEquals(senderParams.getFileSystemFullPercentThreshold(),80);
+        Assert.assertEquals(senderParams.getGcPersistedQueueFilesIntervalSeconds(),14);
+    }
 
 }
