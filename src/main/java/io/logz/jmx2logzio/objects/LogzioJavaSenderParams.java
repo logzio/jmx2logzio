@@ -26,17 +26,17 @@ public class LogzioJavaSenderParams {
     // In-memory queue parameters
     private int inMemoryQueueCapacityInBytes = 1024 * 1024 * 100;
     private int logsCountLimit = -1;
-    private int diskSpaceCheckInterval = 1000;
 
     // Disk queue parameters
     private File queueDir;
     private int fileSystemFullPercentThreshold = 98;
     private int gcPersistedQueueFilesIntervalSeconds = 30;
+    private int diskSpaceCheckInterval = 1000;
 
     public LogzioJavaSenderParams() {
         String queuePath = System.getProperty("user.dir");
         queuePath += queuePath.endsWith("/") ? "" : "/";
-        queuePath += "logs";
+        queuePath += "metrics";
         this.queueDir = new File(queuePath);
     }
 
