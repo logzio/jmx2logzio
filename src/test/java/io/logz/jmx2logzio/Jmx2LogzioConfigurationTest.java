@@ -5,6 +5,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
+import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,34 +47,34 @@ public class Jmx2LogzioConfigurationTest {
     private static String getArgumentConfigurationRepresentation(String key) throws IllegalConfiguration {
 
         switch (key) {
-            case "LISTENER_URL":
-                return "logzioJavaSender.url";
-            case "WHITE_LIST_REGEX":
-                return "service.poller.white-list-regex";
-            case "BLACK_LIST_REGEX":
-                return "service.poller.black-list-regex";
-            case "LOGZIO_TOKEN":
-                return "logzioJavaSender.token";
-            case "SERVICE_NAME":
-                return "service.name";
-            case "SERVICE_HOST":
-                return "service.host";
-            case "INTERVAL_IN_SEC":
-                return "metricsPollingIntervalInSeconds";
-            case "FROM_DISK":
-                return  "logzioJavaSender.from-disk";
-            case "IN_MEMORY_QUEUE_CAPACITY":
-                return "logzioJavaSender.in-memory-queue-capacity";
-            case "LOGS_COUNT_LIMIT":
-                return "logzioJavaSender.log-count-limit";
-            case "DISK_SPACE_CHECKS_INTERVAL":
-                return "logzioJavaSender.disk-space-checks-interval";
-            case "QUEUE_DIR":
-                return "logzioJavaSender.queue-dir";
-            case "FILE_SYSTEM_SPACE_LIMIT":
-                return "logzioJavaSender.file-system-full-percent-threshold";
-            case "CLEAN_SENT_METRICS_INTERVAL":
-                return "logzioJavaSender.clean-sent-metrics-interval";
+            case Jmx2LogzioConfiguration.LISTENER_URL:
+                return LogzioJavaSenderParams.LISTENER_URL;
+            case Jmx2LogzioConfiguration.WHITE_LIST_REGEX:
+                return Jmx2LogzioJavaAgent.WHITE_LIST_REGEX;
+            case Jmx2LogzioConfiguration.BLACK_LIST_REGEX:
+                return Jmx2LogzioJavaAgent.BLACK_LIST_REGEX;
+            case Jmx2LogzioConfiguration.LOGZIO_TOKEN:
+                return LogzioJavaSenderParams.LOGZIO_TOKEN;
+            case Jmx2LogzioConfiguration.SERVICE_NAME:
+                return Jmx2LogzioJavaAgent.SERVICE_NAME;
+            case Jmx2LogzioConfiguration.SERVICE_HOST:
+                return Jmx2LogzioJavaAgent.SERVICE_HOST;
+            case Jmx2LogzioConfiguration.INTERVAL_IN_SEC:
+                return Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL;
+            case Jmx2LogzioConfiguration.FROM_DISK:
+                return  LogzioJavaSenderParams.FROM_DISK;
+            case Jmx2LogzioConfiguration.IN_MEMORY_QUEUE_CAPACITY:
+                return LogzioJavaSenderParams.IN_MEMORY_QUEUE_CAPACITY;
+            case Jmx2LogzioConfiguration.LOGS_COUNT_LIMIT:
+                return LogzioJavaSenderParams.LOGS_COUNT_LIMIT;
+            case Jmx2LogzioConfiguration.DISK_SPACE_CHECKS_INTERVAL:
+                return LogzioJavaSenderParams.DISK_SPACE_CHECK_INTERVAL;
+            case Jmx2LogzioConfiguration.QUEUE_DIR:
+                return LogzioJavaSenderParams.QUEUE_DIR;
+            case Jmx2LogzioConfiguration.FILE_SYSTEM_SPACE_LIMIT:
+                return LogzioJavaSenderParams.FILE_SYSTEM_SPACE_LIMIT;
+            case Jmx2LogzioConfiguration.CLEAN_SENT_METRICS_INTERVAL:
+                return LogzioJavaSenderParams.CLEAN_SENT_METRICS_INTERVAL;
             default:
                 throw new IllegalConfiguration("Unknown configuration option: " + key);
         }

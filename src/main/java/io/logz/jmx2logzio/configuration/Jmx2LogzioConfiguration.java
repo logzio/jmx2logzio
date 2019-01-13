@@ -1,6 +1,7 @@
 package io.logz.jmx2logzio.configuration;
 
 import com.typesafe.config.Config;
+import io.logz.jmx2logzio.Jmx2LogzioJavaAgent;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
 import org.slf4j.Logger;
@@ -15,6 +16,21 @@ import java.util.regex.Pattern;
 
 public class Jmx2LogzioConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioConfiguration.class);
+
+    public static final String LISTENER_URL = "LISTENER_URL";
+    public static final String WHITE_LIST_REGEX = "WHITE_LIST_REGEX";
+    public static final String BLACK_LIST_REGEX = "BLACK_LIST_REGEX";
+    public static final String LOGZIO_TOKEN = "LOGZIO_TOKEN";
+    public static final String SERVICE_NAME = "SERVICE_NAME";
+    public static final String SERVICE_HOST = "SERVICE_HOST";
+    public static final String INTERVAL_IN_SEC = "INTERVAL_IN_SEC";
+    public static final String FROM_DISK = "FROM_DISK";
+    public static final String IN_MEMORY_QUEUE_CAPACITY = "IN_MEMORY_QUEUE_CAPACITY";
+    public static final String LOGS_COUNT_LIMIT = "LOGS_COUNT_LIMIT";
+    public static final String DISK_SPACE_CHECKS_INTERVAL = "DISK_SPACE_CHECKS_INTERVAL";
+    public static final String QUEUE_DIR = "QUEUE_DIR";
+    public static final String FILE_SYSTEM_SPACE_LIMIT = "FILE_SYSTEM_SPACE_LIMIT";
+    public static final String CLEAN_SENT_METRICS_INTERVAL = "CLEAN_SENT_METRICS_INTERVAL";
 
     private Pattern whiteListPattern;
     private Pattern blackListPattern;
@@ -40,18 +56,18 @@ public class Jmx2LogzioConfiguration {
     }
 
     public Jmx2LogzioConfiguration(Config config) throws IllegalConfiguration {
-        if (config.hasPath("service.host")) {
-            serviceHost = config.getString("service.host");
+        if (config.hasPath(Jmx2LogzioJavaAgent.SERVICE_HOST)) {
+            serviceHost = config.getString(Jmx2LogzioJavaAgent.SERVICE_HOST);
         }
 
-        if (config.hasPath("service.poller.jolokia")) {
+        if (config.hasPath(Jmx2LogzioJavaAgent.POLLER_JOLOKIA)) {
             metricClientType = MetricClientType.JOLOKIA;
-        } else if (config.hasPath("service.poller.mbean-direct")) {
+        } else if (config.hasPath(Jmx2LogzioJavaAgent.POLLER_MBEAN_DIRECT)) {
             metricClientType = MetricClientType.MBEAN_PLATFORM;
         }
 
         if (this.metricClientType == MetricClientType.JOLOKIA) {
-            jolokiaFullUrl = config.getString("service.poller.jolokia.jolokiaFullUrl");
+            jolokiaFullUrl = config.getString(Jmx2LogzioJavaAgent.JOLOKIA_FULL_URL);
             String jolokiaHost;
             try {
                 URL jolokia = new URL(jolokiaFullUrl);
@@ -77,47 +93,47 @@ public class Jmx2LogzioConfiguration {
             }
         }
         try {
-            whiteListPattern = Pattern.compile(config.hasPath("service.poller.white-list-regex") ?
-                    config.getString("service.poller.white-list-regex") : ".*");
+            whiteListPattern = Pattern.compile(config.hasPath(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX) ?
+                    config.getString(Jmx2LogzioJavaAgent.BLACK_LIST_REGEX) : ".*");
         } catch (Exception e) {
-            logger.error("Failed to parse regex {} with error {}", config.getString("service.poller.white-list-regex"), e.getMessage());
+            logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX), e.getMessage());
             whiteListPattern = Pattern.compile(".*");
         }
 
         try { // $a is a regexp that will never match anything (will match an "a" character after the end of the string
-            blackListPattern = Pattern.compile(config.hasPath("service.poller.black-list-regex") ?
-                    config.getString("service.poller.black-list-regex") : "$a");
+            blackListPattern = Pattern.compile(config.hasPath(Jmx2LogzioJavaAgent.BLACK_LIST_REGEX) ?
+                    config.getString(Jmx2LogzioJavaAgent.BLACK_LIST_REGEX) : "$a");
         } catch (Exception e) {
-            logger.error("Failed to parse regex {} with error {}", config.getString("service.poller.black-list-regex"), e.getMessage());
+            logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX), e.getMessage());
             blackListPattern = Pattern.compile("$a");
         }
 
-        serviceName = config.getString("service.name");
+        serviceName = config.getString(Jmx2LogzioJavaAgent.SERVICE_NAME);
 
         logzioJavaSenderParams = new LogzioJavaSenderParams();
-        logzioJavaSenderParams.setUrl(config.hasPath("logzioJavaSender.url") ? config.getString("logzioJavaSender.url") : logzioJavaSenderParams.getUrl());
-        logzioJavaSenderParams.setToken(config.getString("logzioJavaSender.token"));
+        logzioJavaSenderParams.setUrl(config.hasPath(LogzioJavaSenderParams.LISTENER_URL) ? config.getString(LogzioJavaSenderParams.LISTENER_URL) : logzioJavaSenderParams.getUrl());
+        logzioJavaSenderParams.setToken(config.getString(LogzioJavaSenderParams.LOGZIO_TOKEN));
 
-        logzioJavaSenderParams.setFromDisk(config.hasPath("logzioJavaSender.from-disk") ?
-                config.getBoolean("logzioJavaSender.from-disk") : logzioJavaSenderParams.isFromDisk());
-        logzioJavaSenderParams.setInMemoryQueueCapacityInBytes(config.hasPath("logzioJavaSender.in-memory-queue-capacity") ?
-                config.getInt("logzioJavaSender.in-memory-queue-capacity") : logzioJavaSenderParams.getInMemoryQueueCapacityInBytes());
-        logzioJavaSenderParams.setLogsCountLimit(config.hasPath("logzioJavaSender.log-count-limit") ?
-                config.getInt("logzioJavaSender.log-count-limit") : logzioJavaSenderParams.getLogsCountLimit());
-        logzioJavaSenderParams.setDiskSpaceCheckInterval(config.hasPath("logzioJavaSender.disk-space-checks-interval") ?
-                config.getInt("logzioJavaSender.disk-space-checks-interval") : logzioJavaSenderParams.getDiskSpaceCheckInterval());
-        if (config.hasPath("logzioJavaSender.queue-dir")) {
-            File queuePath = new File(config.getString("logzioJavaSender.queue-dir"));
+        logzioJavaSenderParams.setFromDisk(config.hasPath(LogzioJavaSenderParams.FROM_DISK) ?
+                config.getBoolean(LogzioJavaSenderParams.FROM_DISK) : logzioJavaSenderParams.isFromDisk());
+        logzioJavaSenderParams.setInMemoryQueueCapacityInBytes(config.hasPath(LogzioJavaSenderParams.IN_MEMORY_QUEUE_CAPACITY) ?
+                config.getInt(LogzioJavaSenderParams.IN_MEMORY_QUEUE_CAPACITY) : logzioJavaSenderParams.getInMemoryQueueCapacityInBytes());
+        logzioJavaSenderParams.setLogsCountLimit(config.hasPath(LogzioJavaSenderParams.LOGS_COUNT_LIMIT) ?
+                config.getInt(LogzioJavaSenderParams.LOGS_COUNT_LIMIT) : logzioJavaSenderParams.getLogsCountLimit());
+        logzioJavaSenderParams.setDiskSpaceCheckInterval(config.hasPath(LogzioJavaSenderParams.DISK_SPACE_CHECK_INTERVAL) ?
+                config.getInt(LogzioJavaSenderParams.DISK_SPACE_CHECK_INTERVAL) : logzioJavaSenderParams.getDiskSpaceCheckInterval());
+        if (config.hasPath(LogzioJavaSenderParams.QUEUE_DIR)) {
+            File queuePath = new File(config.getString(LogzioJavaSenderParams.QUEUE_DIR));
             logzioJavaSenderParams.setQueueDir(queuePath);
         }
 
-        logzioJavaSenderParams.setFileSystemFullPercentThreshold(config.hasPath("logzioJavaSender.file-system-full-percent-threshold") ?
-                config.getInt("logzioJavaSender.file-system-full-percent-threshold") : logzioJavaSenderParams.getFileSystemFullPercentThreshold());
-        logzioJavaSenderParams.setGcPersistedQueueFilesIntervalSeconds(config.hasPath("logzioJavaSender.clean-sent-metrics-interval") ?
-                config.getInt("logzioJavaSender.clean-sent-metrics-interval") : logzioJavaSenderParams.getGcPersistedQueueFilesIntervalSeconds());
+        logzioJavaSenderParams.setFileSystemFullPercentThreshold(config.hasPath(LogzioJavaSenderParams.FILE_SYSTEM_SPACE_LIMIT) ?
+                config.getInt(LogzioJavaSenderParams.FILE_SYSTEM_SPACE_LIMIT) : logzioJavaSenderParams.getFileSystemFullPercentThreshold());
+        logzioJavaSenderParams.setGcPersistedQueueFilesIntervalSeconds(config.hasPath(LogzioJavaSenderParams.CLEAN_SENT_METRICS_INTERVAL) ?
+                config.getInt(LogzioJavaSenderParams.CLEAN_SENT_METRICS_INTERVAL) : logzioJavaSenderParams.getGcPersistedQueueFilesIntervalSeconds());
 
-        if (config.hasPath("metricsPollingIntervalInSeconds")) {
-            metricsPollingIntervalInSeconds = config.getInt("metricsPollingIntervalInSeconds");
+        if (config.hasPath(Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL)) {
+            metricsPollingIntervalInSeconds = config.getInt(Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL);
         }
     }
 
