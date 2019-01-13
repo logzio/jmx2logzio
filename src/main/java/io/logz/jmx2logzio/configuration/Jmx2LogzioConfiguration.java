@@ -94,7 +94,7 @@ public class Jmx2LogzioConfiguration {
         }
         try {
             whiteListPattern = Pattern.compile(config.hasPath(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX) ?
-                    config.getString(Jmx2LogzioJavaAgent.BLACK_LIST_REGEX) : ".*");
+                    config.getString(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX) : ".*");
         } catch (Exception e) {
             logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX), e.getMessage());
             whiteListPattern = Pattern.compile(".*");
