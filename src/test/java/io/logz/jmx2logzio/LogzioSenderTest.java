@@ -10,9 +10,9 @@ import io.logz.sender.LogzioSender;
 import io.logz.sender.SenderStatusReporter;
 import io.logz.sender.com.google.gson.JsonObject;
 import io.logz.sender.exceptions.LogzioParameterErrorException;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.mockserver.client.MockServerClient;
+import org.mockserver.integration.ClientAndServer;
+import org.testng.annotations.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -20,27 +20,46 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 import static java.lang.Thread.sleep;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 public class LogzioSenderTest {
 
     Jmx2LogzioConfiguration config;
     LogzioSender sender;
 
+    private ClientAndServer mockServer;
+
     @BeforeTest
+    private void startMock(){
+        mockServer = startClientAndServer(8070);
+        new MockServerClient("localhost", 8070)
+                .when(
+                        request()
+                                .withMethod("POST")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                );
+    }
+
+    @BeforeMethod
     private void setup(){
         config = Jmx2LogzioConfigurationTest.getMinimalTestConfiguration();
         sender = initLogzioSender();
 
     }
 
-    @AfterTest
+    @AfterMethod
     private void waitToSend() {
         try {
-            sleep(20000);
+            sleep(10000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("End.");
+        System.out.println("End Test.");
     }
 
     @Test

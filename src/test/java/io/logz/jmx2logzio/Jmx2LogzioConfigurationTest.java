@@ -83,22 +83,22 @@ public class Jmx2LogzioConfigurationTest {
     }
 
     public static Jmx2LogzioConfiguration getMinimalTestConfiguration() {
-        String testArguments = "LOGZIO_TOKEN=oCwtQDtWjDOMcHXHGGNrnRgkEMxCDuiO;SERVICE_NAME=com.yog.examplerunningapp";
+        String testArguments = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp";
         return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
     }
 
     public static Jmx2LogzioConfiguration getFromDiskTestConfigurationWithListenerURL() {
-        String testArguments = "LISTENER_URL=https://listener.logz.io:8071;LOGZIO_TOKEN=oCwtQDtWjDOMcHXHGGNrnRgkEMxCDuiO;FROM_DISK=true;SERVICE_NAME=com.yog.examplerunningapp";
+        String testArguments = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;FROM_DISK=true;SERVICE_NAME=com.yog.examplerunningapp";
         return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
     }
 
     public static Jmx2LogzioConfiguration getInMemoryTestConfiguration() {
-        String testArguments = "LOGZIO_TOKEN=oCwtQDtWjDOMcHXHGGNrnRgkEMxCDuiO;SERVICE_NAME=com.yog.examplerunningapp;FROM_DISK=false;LOGS_COUNT_LIMIT=50;";
+        String testArguments = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;FROM_DISK=false;LOGS_COUNT_LIMIT=50;";
         return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
     }
 
     public static Jmx2LogzioConfiguration getCustomHostRapidMetricsPollingInterval() {
-        String testArguments = "LOGZIO_TOKEN=oCwtQDtWjDOMcHXHGGNrnRgkEMxCDuiO;SERVICE_NAME=com.yog.examplerunningapp;SERVICE_HOST=A.PC.IN.NOWHERE;INTERVAL_IN_SEC=5";
+        String testArguments = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;SERVICE_HOST=A.PC.IN.NOWHERE;INTERVAL_IN_SEC=5";
         return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
     }
 
