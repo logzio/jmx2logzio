@@ -51,37 +51,7 @@ public class ListenerWriter {
         } catch (LogzioParameterErrorException e) {
             logger.error("promblem in one or more parameters with error {}", e.getMessage()); //todo: add parameters string
         }
-        SenderStatusReporter statusReporter = new SenderStatusReporter() {
-            @Override
-            public void error(String s) {
-                logger.error(s);
-            }
-
-            @Override
-            public void error(String s, Throwable throwable) {
-                logger.error(s);
-            }
-
-            @Override
-            public void warning(String s) {
-                logger.warn(s);
-            }
-
-            @Override
-            public void warning(String s, Throwable throwable) {
-                logger.warn(s);
-            }
-
-            @Override
-            public void info(String s) {
-                logger.info(s);
-            }
-
-            @Override
-            public void info(String s, Throwable throwable) {
-                logger.info(s);
-            }
-        };
+        SenderStatusReporter statusReporter = getStatusReporter();
         LogzioSender.Builder senderBuilder = LogzioSender
                 .builder()
                 .setTasksExecutor(Executors.newScheduledThreadPool(logzioSenderParams.getThreadPoolSize()))
@@ -110,7 +80,48 @@ public class ListenerWriter {
         this.logzioSender.start();
     }
 
+    private SenderStatusReporter getStatusReporter() {
+        return new SenderStatusReporter() {
+            @Override
+            public void error(String s) {
+                logger.error(s);
+                System.out.println(s);
+            }
+
+            @Override
+            public void error(String s, Throwable throwable) {
+                logger.error(s);
+                System.out.println(s);
+            }
+
+            @Override
+            public void warning(String s) {
+                logger.warn(s);
+                System.out.println(s);
+            }
+
+            @Override
+            public void warning(String s, Throwable throwable) {
+                logger.warn(s);
+                System.out.println(s);
+            }
+
+            @Override
+            public void info(String s) {
+                logger.info(s);
+                System.out.println(s);
+            }
+
+            @Override
+            public void info(String s, Throwable throwable) {
+                logger.info(s);
+                System.out.println(s);
+            }
+        };
+    }
+
     public void writeMetrics(List<Metric> metrics) {
+        System.out.println("sending " + metrics.size() + " metrics");
         metrics.stream().forEach(metric -> {
             String jsonStringMetric = convertToJson(metric);
             byte[] metricAsBytes = java.nio.charset.StandardCharsets.UTF_8.encode(jsonStringMetric).array();
