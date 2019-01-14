@@ -102,6 +102,17 @@ public class Jmx2LogzioConfigurationTest {
         return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
     }
 
+    //TotalSwapSpaceSize
+    public static Jmx2LogzioConfiguration getWhiteListTestConfiguration() {
+        String testArguments = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;WHITE_LIST_REGEX=.*java.lang.*";
+        return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
+    }
+
+    public static Jmx2LogzioConfiguration getBlackListTestConfiguration() {
+        String testArguments = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;BLACK_LIST_REGEX=.*java.lang.*";
+        return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
+    }
+
     @Test
     public void ConfigurationArgumentsParsingTest() {
         String testArguments = "LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=CustomServiceName;SERVICE_HOST=CustomServiceHost;FROM_DISK=false;LISTENER_URL=http://listener.url:port;" +

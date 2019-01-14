@@ -24,13 +24,8 @@ public class MetricsPipelineTest {
     private void setup(){
         mockServer = startClientAndServer(8070);
         new MockServerClient("localhost", 8070)
-                .when(
-                        request()
-                                .withMethod("POST")
-                )
-                .respond(
-                        response()
-                                .withStatusCode(200)
+                .when(request().withMethod("POST"))
+                .respond(response().withStatusCode(200)
                 );
     }
 
@@ -52,6 +47,15 @@ public class MetricsPipelineTest {
         testPollAndSend(Jmx2LogzioConfigurationTest.getCustomHostRapidMetricsPollingInterval());
     }
 
+    @Test
+    public void testPollAndSendWhiteListConfiguration(){
+        testPollAndSend(Jmx2LogzioConfigurationTest.getWhiteListTestConfiguration());
+    }
+    @Test
+    public void testPollAndSendBlackListConfiguration(){
+        testPollAndSend(Jmx2LogzioConfigurationTest.getBlackListTestConfiguration());
+    }
+
     public void testPollAndSend(Jmx2LogzioConfiguration configuration) {
         jmx2LogzioConfiguration =configuration;
         JavaAgentClient client = new JavaAgentClient();
@@ -59,7 +63,7 @@ public class MetricsPipelineTest {
         metricsPipeline.pollAndSend();
 
         try {
-            sleep(10000);
+            sleep(20000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
