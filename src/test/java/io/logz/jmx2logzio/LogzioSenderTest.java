@@ -10,9 +10,17 @@ import io.logz.sender.LogzioSender;
 import io.logz.sender.SenderStatusReporter;
 import io.logz.sender.com.google.gson.JsonObject;
 import io.logz.sender.exceptions.LogzioParameterErrorException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.mockserver.MockServer;
+import org.mockserver.model.HttpRequest;
+import org.testng.Assert;
 import org.testng.annotations.*;
+import com.google.gson.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -26,23 +34,19 @@ import static org.mockserver.model.HttpResponse.response;
 
 public class LogzioSenderTest {
 
-    Jmx2LogzioConfiguration config;
-    LogzioSender sender;
-
+    private Jmx2LogzioConfiguration config;
+    private LogzioSender sender;
     private ClientAndServer mockServer;
-
+    private HttpRequest[] recordedRequests;
+    MockServerClient mockServerClient = null;
     @BeforeTest
     private void startMock(){
         mockServer = startClientAndServer(8070);
-        new MockServerClient("localhost", 8070)
-                .when(
-                        request()
-                                .withMethod("POST")
-                )
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                );
+
+        mockServerClient = new MockServerClient("localhost", 8070);
+        mockServerClient
+                .when(request().withMethod("POST"))
+                .respond(response().withStatusCode(200));
     }
 
     @BeforeMethod
@@ -52,14 +56,14 @@ public class LogzioSenderTest {
 
     }
 
-    @AfterMethod
+
     private void waitToSend() {
+        System.out.println("waiting...");
         try {
             sleep(10000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("End Test.");
     }
 
     @Test
@@ -70,18 +74,26 @@ public class LogzioSenderTest {
         byte[] messageAsBytes = java.nio.charset.StandardCharsets.UTF_8.encode(temp.toString()).array();
         sender.start();
         sender.send(messageAsBytes);
+        waitToSend();
     }
 
     @Test
-    public void sendAListOfMetrics() {
+    public void sendMetricTest() {
+        String key = "The-Answer-To-Life-The-Universe-And-Everything";
+        Number value = 42;
         List<Dimension> dimensions = new ArrayList<>();
         dimensions.add(0,new Dimension("type","myType"));
         List<Metric> metrics = new ArrayList<>();
-        metrics.add(new Metric("Sample Metric", 2, Instant.EPOCH,dimensions));
-        metrics.add(new Metric("The-Answer-To-Life-The-Universe-And-Everything",42,Instant.now(),dimensions));
+        metrics.add(new Metric(key,value,Instant.now(),dimensions));
 
         ListenerWriter writer = new ListenerWriter(config);
         writer.writeMetrics(metrics);
+        waitToSend();
+
+        recordedRequests = mockServerClient.retrieveRecordedRequests(request().withMethod("POST"));
+        Assert.assertEquals(recordedRequests.length,1);
+        String message = recordedRequests[0].getBodyAsString();
+        Assert.assertTrue(message.contains("\"" + key + "\":" + value));
 
     }
 
