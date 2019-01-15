@@ -8,6 +8,7 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpRequest;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -66,4 +67,8 @@ public class LogzioSenderTest {
         Assert.assertTrue(message.contains("\"" + key + "\":" + value));
     }
 
+    @AfterTest
+    public void stopMockServer() {
+        mockServer.stop();
+    }
 }
