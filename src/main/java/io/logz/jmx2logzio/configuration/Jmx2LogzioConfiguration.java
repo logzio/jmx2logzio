@@ -117,7 +117,8 @@ public class Jmx2LogzioConfiguration {
                 url = new URL(config.getString(LogzioJavaSenderParams.LISTENER_URL));
                 logzioJavaSenderParams.setUrl(url.toString());
             } catch (MalformedURLException e) {
-                logger.error("malformed listener URL {} got error {}. Using default listener URL: {}",url.toString(),e.getMessage(),logzioJavaSenderParams.getUrl());
+                logger.error("malformed listener URL {} got error {}. Using default listener URL: {}",
+                        config.getString(LogzioJavaSenderParams.LISTENER_URL),e.getMessage(),logzioJavaSenderParams.getUrl());
             }
         }
         logzioJavaSenderParams.setToken(config.getString(LogzioJavaSenderParams.LOGZIO_TOKEN));

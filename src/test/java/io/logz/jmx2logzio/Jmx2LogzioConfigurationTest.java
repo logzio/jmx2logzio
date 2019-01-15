@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class Jmx2LogzioConfigurationTest {
 
-    private static final String TEST_ARGUMENTS = "LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=CustomServiceName;SERVICE_HOST=CustomServiceHost;FROM_DISK=false;LISTENER_URL=http://listener.url:port;" +
+    private static final String TEST_ARGUMENTS = "LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=CustomServiceName;SERVICE_HOST=CustomServiceHost;FROM_DISK=false;LISTENER_URL=http://listener.url:2222;" +
             "WHITE_LIST_REGEX=anything.with(a|b);BLACK_LIST_REGEX=except.you$;POLLING_INTERVAL_IN_SEC=12;IN_MEMORY_QUEUE_CAPACITY=128000000;LOGS_COUNT_LIMIT=150;" +
             "DISK_SPACE_CHECKS_INTERVAL=13;QUEUE_DIR=Custom/Metrics/Directory;FILE_SYSTEM_SPACE_LIMIT=80;CLEAN_SENT_METRICS_INTERVAL=14;";
     private static final String MINIMAL_TEST_CONFIGURATION_ARGUMENTS = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;";
@@ -27,13 +27,16 @@ public class Jmx2LogzioConfigurationTest {
     private static final String BLACK_LIST_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;BLACK_LIST_REGEX=.*Max.*;";
 
     private static Config getIntegratedConfiguration(String agentArgument) {
-        Path rootDirectory = FileSystems.getDefault().getPath(".");
-        try {
-           File tempDir = Files.createTempDirectory(rootDirectory, "").toFile();
-           tempDir.deleteOnExit();
-           agentArgument += "QUEUE_DIR=" + tempDir.getName();
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        if (!agentArgument.contains("QUEUE_DIR")) {
+            Path rootDirectory = FileSystems.getDefault().getPath(".");
+            try {
+                File tempDir = Files.createTempDirectory(rootDirectory, "").toFile();
+                tempDir.deleteOnExit();
+                agentArgument += "QUEUE_DIR=" + tempDir.getName();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         Map<String, String> configurationMap = parseArgumentsString(agentArgument);
@@ -63,7 +66,7 @@ public class Jmx2LogzioConfigurationTest {
             return argumentsMap;
 
         } catch (IllegalArgumentException e) {
-            throw new IllegalConfiguration("Java agent arguments must be in form of: key=value;key=value");
+            throw new IllegalConfiguration("error parsing arguments " + e.getMessage());
         }
     }
 
@@ -128,7 +131,7 @@ public class Jmx2LogzioConfigurationTest {
         Assert.assertEquals(configuration.getServiceName(),"CustomServiceName");
         Assert.assertEquals(configuration.getServiceHost(),"CustomServiceHost");
         Assert.assertFalse(senderParams.isFromDisk());
-        Assert.assertEquals(senderParams.getUrl(),"http://listener.url:port");
+        Assert.assertEquals(senderParams.getUrl(),"http://listener.url:2222");
         Assert.assertEquals(configuration.getWhiteListPattern().pattern(),"anything.with(a|b)");
         Assert.assertEquals(configuration.getBlackListPattern().pattern(),"except.you$");
         Assert.assertEquals(configuration.getMetricsPollingIntervalInSeconds(),12);
