@@ -1,78 +1,45 @@
 package io.logz.jmx2logzio.Utils;
 
 import io.logz.jmx2logzio.Jmx2LogzioConfigurationTest;
+import io.logz.jmx2logzio.MetricBean;
 import io.logz.jmx2logzio.clients.JavaAgentClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.integration.ClientAndServer;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
+import org.testng.Assert;
 import org.testng.annotations.Test;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
-import static java.lang.Thread.sleep;
-import static org.mockserver.model.HttpResponse.response;
-import static org.mockserver.model.HttpRequest.request;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MetricsPipelineTest {
 
 
     Jmx2LogzioConfiguration jmx2LogzioConfiguration;
-    private ClientAndServer mockServer;
 
-    @BeforeTest
-    private void setup(){
-        mockServer = startClientAndServer(8070);
-        new MockServerClient("localhost", 8070)
-                .when(request().withMethod("POST"))
-                .respond(response().withStatusCode(200)
-                );
+    @Test
+    public void whiteListConfigurationTest() {
+        jmx2LogzioConfiguration = Jmx2LogzioConfigurationTest.getWhiteListTestConfiguration();
+        List<MetricBean> filteredBeans = createAndFilterBeans();  //Only metrics containing MemoryUsagePercent will be returned
+        Assert.assertEquals(filteredBeans.size(), 2);
     }
 
     @Test
-    public void testPollAndSendMinimalConfiguration(){
-        testPollAndSend(Jmx2LogzioConfigurationTest.getMinimalTestConfiguration());
-    }
-    @Test
-    public void testPollAndSendFromDiskConfiguration(){
-        testPollAndSend(Jmx2LogzioConfigurationTest.getFromDiskTestConfigurationWithListenerURL());
-    }
-    @Test
-    public void testPollAndSendInMemoryConfiguration(){
-        testPollAndSend(Jmx2LogzioConfigurationTest.getInMemoryTestConfiguration());
+    public void blackListConfigurationTest() {
+        jmx2LogzioConfiguration = Jmx2LogzioConfigurationTest.getBlackListTestConfiguration();
+        List<MetricBean> filteredBeans = createAndFilterBeans();  //metrics containing Max will be filtered
+        Assert.assertEquals(filteredBeans.size(), 1);
     }
 
-    @Test
-    public void testPollAndSendRapidMetricsPollConfiguration(){
-        testPollAndSend(Jmx2LogzioConfigurationTest.getCustomHostRapidMetricsPollingInterval());
-    }
-
-    @Test
-    public void testPollAndSendWhiteListConfiguration(){
-        testPollAndSend(Jmx2LogzioConfigurationTest.getWhiteListTestConfiguration());
-    }
-    @Test
-    public void testPollAndSendBlackListConfiguration(){
-        testPollAndSend(Jmx2LogzioConfigurationTest.getBlackListTestConfiguration());
-    }
-
-    public void testPollAndSend(Jmx2LogzioConfiguration configuration) {
-        jmx2LogzioConfiguration =configuration;
+    private List<MetricBean> createAndFilterBeans() {
         JavaAgentClient client = new JavaAgentClient();
-        MetricsPipeline metricsPipeline = new MetricsPipeline(jmx2LogzioConfiguration,client);
-        metricsPipeline.pollAndSend();
-
-        try {
-            sleep(20000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("End Test.");
+        MetricsPipeline metricsPipeline = new MetricsPipeline(jmx2LogzioConfiguration, client);
+        List<MetricBean> beans = new ArrayList<>();
+        List<String> attr = new ArrayList<>();
+        attr.add("First measure");
+        attr.add(("Second measure"));
+        beans.add(new MetricBean("minMemoryUsagePercent", attr));
+        beans.add(new MetricBean("MaxCPUUsage", attr));
+        beans.add(new MetricBean("MaxMemoryUsagePercent", attr));
+        return metricsPipeline.getFilteredBeans(beans);
     }
 
-    @AfterTest
-    private void stopMock() {
-        mockServer.stop();
-    }
 }
