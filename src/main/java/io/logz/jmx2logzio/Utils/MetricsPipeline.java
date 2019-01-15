@@ -59,12 +59,7 @@ public class MetricsPipeline {
             Instant pollingWindowStart = getPollingWindowStart();
             Stopwatch sw = Stopwatch.createStarted();
             List<MetricBean> beans = client.getBeans();
-            List<MetricBean> filteredBeans = beans.stream()
-                    .filter(bean -> beansWhiteListPattern.matcher(bean.getName()).find())
-                    .collect(Collectors.toList());
-            filteredBeans.removeAll(beans.stream()
-                    .filter((bean -> beansBlackListPattern.matcher(bean.getName()).find()))
-                    .collect(Collectors.toList()));
+            List<MetricBean> filteredBeans = getFilteredBeans(beans);
 
             logger.info("Found {} metric beans and after filtering list work with {} . Time = {}ms, for {}", beans.size(), filteredBeans.size(),
                     sw.stop().elapsed(TimeUnit.MILLISECONDS),
@@ -84,6 +79,16 @@ public class MetricsPipeline {
             }
             return null;
         }
+    }
+
+    public List<MetricBean> getFilteredBeans(List<MetricBean> beans) {
+        List<MetricBean> filteredBeans = beans.stream()
+                .filter(bean -> beansWhiteListPattern.matcher(bean.getName()).find())
+                .collect(Collectors.toList());
+        filteredBeans.removeAll(beans.stream()
+                .filter((bean -> beansBlackListPattern.matcher(bean.getName()).find()))
+                .collect(Collectors.toList()));
+        return filteredBeans;
     }
 
     public void pollAndSend() {
