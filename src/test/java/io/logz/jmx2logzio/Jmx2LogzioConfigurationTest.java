@@ -14,6 +14,13 @@ import java.util.Map;
 
 public class Jmx2LogzioConfigurationTest {
 
+    private static final String TEST_ARGUMENTS = "LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=CustomServiceName;SERVICE_HOST=CustomServiceHost;FROM_DISK=false;LISTENER_URL=http://listener.url:port;" +
+            "WHITE_LIST_REGEX=anything.with(a|b);BLACK_LIST_REGEX=except.you$;INTERVAL_IN_SEC=12;IN_MEMORY_QUEUE_CAPACITY=128000000;LOGS_COUNT_LIMIT=150;" +
+            "DISK_SPACE_CHECKS_INTERVAL=13;QUEUE_DIR=Custom/Metrics/Directory;FILE_SYSTEM_SPACE_LIMIT=80;CLEAN_SENT_METRICS_INTERVAL=14;";
+    private static final String MINIMAL_TEST_CONFIGURATION_ARGUMENTS = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp";
+    private static final String WHITE_LIST_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;WHITE_LIST_REGEX=.*MemoryUsagePercent.*";
+    private static final String BLACK_LIST_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;BLACK_LIST_REGEX=.*Max.*";
+
     private static Config getIntegratedConfiguration(String agentArgument) {
         Map<String, String> configurationMap = parseArgumentsString(agentArgument);
 
@@ -83,7 +90,7 @@ public class Jmx2LogzioConfigurationTest {
     }
 
     public static Jmx2LogzioConfiguration getMinimalTestConfiguration() {
-        String testArguments = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp";
+        String testArguments = MINIMAL_TEST_CONFIGURATION_ARGUMENTS;
         return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
     }
 
@@ -102,22 +109,19 @@ public class Jmx2LogzioConfigurationTest {
         return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
     }
 
-    //TotalSwapSpaceSize
     public static Jmx2LogzioConfiguration getWhiteListTestConfiguration() {
-        String testArguments = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;WHITE_LIST_REGEX=.*java.lang.*";
+        String testArguments = WHITE_LIST_ARGUMENT_CONFIGURATION;
         return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
     }
 
     public static Jmx2LogzioConfiguration getBlackListTestConfiguration() {
-        String testArguments = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;BLACK_LIST_REGEX=.*java.lang.*";
+        String testArguments = BLACK_LIST_ARGUMENT_CONFIGURATION;
         return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
     }
 
     @Test
     public void ConfigurationArgumentsParsingTest() {
-        String testArguments = "LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=CustomServiceName;SERVICE_HOST=CustomServiceHost;FROM_DISK=false;LISTENER_URL=http://listener.url:port;" +
-                "WHITE_LIST_REGEX=anything.with(a|b);BLACK_LIST_REGEX=except.you$;INTERVAL_IN_SEC=12;IN_MEMORY_QUEUE_CAPACITY=128000000;LOGS_COUNT_LIMIT=150;" +
-                "DISK_SPACE_CHECKS_INTERVAL=13;QUEUE_DIR=Custom/Metrics/Directory;FILE_SYSTEM_SPACE_LIMIT=80;CLEAN_SENT_METRICS_INTERVAL=14;";
+        String testArguments = TEST_ARGUMENTS;
         Jmx2LogzioConfiguration configuration = new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
         LogzioJavaSenderParams senderParams = configuration.getSenderParams();
 
