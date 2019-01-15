@@ -23,7 +23,7 @@ public class Jmx2LogzioConfiguration {
     public static final String LOGZIO_TOKEN = "LOGZIO_TOKEN";
     public static final String SERVICE_NAME = "SERVICE_NAME";
     public static final String SERVICE_HOST = "SERVICE_HOST";
-    public static final String INTERVAL_IN_SEC = "INTERVAL_IN_SEC";
+    public static final String POLLING_INTERVAL_IN_SEC = "POLLING_INTERVAL_IN_SEC";
     public static final String FROM_DISK = "FROM_DISK";
     public static final String IN_MEMORY_QUEUE_CAPACITY = "IN_MEMORY_QUEUE_CAPACITY";
     public static final String LOGS_COUNT_LIMIT = "LOGS_COUNT_LIMIT";
@@ -111,29 +111,77 @@ public class Jmx2LogzioConfiguration {
         serviceName = config.getString(Jmx2LogzioJavaAgent.SERVICE_NAME);
 
         logzioJavaSenderParams = new LogzioJavaSenderParams();
-        logzioJavaSenderParams.setUrl(config.hasPath(LogzioJavaSenderParams.LISTENER_URL) ? config.getString(LogzioJavaSenderParams.LISTENER_URL) : logzioJavaSenderParams.getUrl());
+        if (config.hasPath(LogzioJavaSenderParams.LISTENER_URL)) {
+            URL url = null;
+            try {
+                url = new URL(config.getString(LogzioJavaSenderParams.LISTENER_URL));
+                logzioJavaSenderParams.setUrl(url.toString());
+            } catch (MalformedURLException e) {
+                logger.error("malformed listener URL {} got error {}. Using default listener URL: {}",url.toString(),e.getMessage(),logzioJavaSenderParams.getUrl());
+            }
+        }
         logzioJavaSenderParams.setToken(config.getString(LogzioJavaSenderParams.LOGZIO_TOKEN));
 
         logzioJavaSenderParams.setFromDisk(config.hasPath(LogzioJavaSenderParams.FROM_DISK) ?
                 config.getBoolean(LogzioJavaSenderParams.FROM_DISK) : logzioJavaSenderParams.isFromDisk());
-        logzioJavaSenderParams.setInMemoryQueueCapacityInBytes(config.hasPath(LogzioJavaSenderParams.IN_MEMORY_QUEUE_CAPACITY) ?
-                config.getInt(LogzioJavaSenderParams.IN_MEMORY_QUEUE_CAPACITY) : logzioJavaSenderParams.getInMemoryQueueCapacityInBytes());
-        logzioJavaSenderParams.setLogsCountLimit(config.hasPath(LogzioJavaSenderParams.LOGS_COUNT_LIMIT) ?
-                config.getInt(LogzioJavaSenderParams.LOGS_COUNT_LIMIT) : logzioJavaSenderParams.getLogsCountLimit());
-        logzioJavaSenderParams.setDiskSpaceCheckInterval(config.hasPath(LogzioJavaSenderParams.DISK_SPACE_CHECK_INTERVAL) ?
-                config.getInt(LogzioJavaSenderParams.DISK_SPACE_CHECK_INTERVAL) : logzioJavaSenderParams.getDiskSpaceCheckInterval());
+
+        if (config.hasPath(LogzioJavaSenderParams.IN_MEMORY_QUEUE_CAPACITY)) {
+            int capacity = config.getInt(LogzioJavaSenderParams.IN_MEMORY_QUEUE_CAPACITY);
+            if (capacity > 0) {
+                logzioJavaSenderParams.setInMemoryQueueCapacityInBytes(capacity);
+            } else {
+                logger.error("argument IN_MEMORY_QUEUE_CAPACITY has to be a natural number, using default instead: {}",logzioJavaSenderParams.getInMemoryQueueCapacityInBytes());
+            }
+        }
+
+        if (config.hasPath(LogzioJavaSenderParams.LOGS_COUNT_LIMIT)) {
+            int logCountLimit = config.getInt(LogzioJavaSenderParams.LOGS_COUNT_LIMIT);
+            if (logCountLimit > 0) {
+                logzioJavaSenderParams.setLogsCountLimit(logCountLimit);
+            } else {
+                logger.error("argument LOGS_COUNT_LIMIT has to be a natural number, using default instead: {}", logzioJavaSenderParams.getLogsCountLimit());
+            }
+        }
+
+        if (config.hasPath(LogzioJavaSenderParams.DISK_SPACE_CHECK_INTERVAL)) {
+            int interval = config.getInt(LogzioJavaSenderParams.DISK_SPACE_CHECK_INTERVAL);
+            if (interval > 0) {
+                logzioJavaSenderParams.setDiskSpaceCheckInterval(interval);
+            } else {
+                logger.error("argument DISK_SPACE_CHECKS_INTERVAL has to be a natural number, using default instead: {}", logzioJavaSenderParams.getDiskSpaceCheckInterval());
+            }
+        }
+
         if (config.hasPath(LogzioJavaSenderParams.QUEUE_DIR)) {
             File queuePath = new File(config.getString(LogzioJavaSenderParams.QUEUE_DIR));
             logzioJavaSenderParams.setQueueDir(queuePath);
         }
 
-        logzioJavaSenderParams.setFileSystemFullPercentThreshold(config.hasPath(LogzioJavaSenderParams.FILE_SYSTEM_SPACE_LIMIT) ?
-                config.getInt(LogzioJavaSenderParams.FILE_SYSTEM_SPACE_LIMIT) : logzioJavaSenderParams.getFileSystemFullPercentThreshold());
-        logzioJavaSenderParams.setGcPersistedQueueFilesIntervalSeconds(config.hasPath(LogzioJavaSenderParams.CLEAN_SENT_METRICS_INTERVAL) ?
-                config.getInt(LogzioJavaSenderParams.CLEAN_SENT_METRICS_INTERVAL) : logzioJavaSenderParams.getGcPersistedQueueFilesIntervalSeconds());
+        if (config.hasPath(LogzioJavaSenderParams.FILE_SYSTEM_SPACE_LIMIT)) {
+            int spaceLimit = config.getInt(LogzioJavaSenderParams.FILE_SYSTEM_SPACE_LIMIT);
+            if (spaceLimit > 0) {
+                logzioJavaSenderParams.setFileSystemFullPercentThreshold(spaceLimit);
+            } else {
+                logger.error("argument FILE_SYSTEM_SPACE_LIMIT has to be a natural number, using default instead: {}", logzioJavaSenderParams.getFileSystemFullPercentThreshold());
+            }
+        }
+
+        if (config.hasPath(LogzioJavaSenderParams.CLEAN_SENT_METRICS_INTERVAL)) {
+            int interval = config.getInt(LogzioJavaSenderParams.CLEAN_SENT_METRICS_INTERVAL);
+            if (interval > 0) {
+                logzioJavaSenderParams.setGcPersistedQueueFilesIntervalSeconds(interval);
+            } else {
+                logger.error("argument CLEAN_SENT_METRICS_INTERVAL has to be a natural number, using default instead: {}", logzioJavaSenderParams.getGcPersistedQueueFilesIntervalSeconds());
+            }
+        }
 
         if (config.hasPath(Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL)) {
-            metricsPollingIntervalInSeconds = config.getInt(Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL);
+            int interval = config.getInt(Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL);
+            if (interval > 0) {
+                metricsPollingIntervalInSeconds = interval;
+            } else {
+                logger.error("argument POLLING_INTERVAL_IN_SEC has to be a natural number, using default instead: {}", metricsPollingIntervalInSeconds);
+            }
         }
     }
 
