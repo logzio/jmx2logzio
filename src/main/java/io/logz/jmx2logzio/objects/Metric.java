@@ -68,17 +68,33 @@ public class Metric {
                 '}';
     }
 
+//    @JsonIgnore
+//    public String getFullName(){
+//        StringBuilder sb = new StringBuilder();
+//        dimensions.stream().forEach(dimension -> {
+//            String key = dimension.getKey();
+//            if(!Arrays.asList(SERVICE_NAME, SERVICE_HOST, DOMAIN_NAME).contains(key)){
+//                sb.append(key);
+//                sb.append("_");
+//            }
+//            sb.append(dimension.getValue());
+//            sb.append(".");
+//        });
+//        sb.append(getName());
+//        return sb.toString();
+//    }
+
     public Map<String, Object> getDimensionsMap() {
         Map<String, Object> jsonDimensions = new HashMap<>();
         for (Dimension dimension : dimensions) {
-            jsonDimensions.put(dimension.getKey(), dimension.getValue());
+            jsonDimensions.put(dimension.getKey(),dimension.getValue());
         }
         return jsonDimensions;
     }
 
     public Map<String, Number> getMetricMap() {
         Map<String, Number> metric = new HashMap<>();
-        metric.put(this.name, this.value);
+        metric.put(this.name,this.value);
         return metric;
     }
 
