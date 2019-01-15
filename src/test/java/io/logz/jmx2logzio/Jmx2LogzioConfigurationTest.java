@@ -20,7 +20,7 @@ import java.util.Map;
 public class Jmx2LogzioConfigurationTest {
 
     private static final String TEST_ARGUMENTS = "LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=CustomServiceName;SERVICE_HOST=CustomServiceHost;FROM_DISK=false;LISTENER_URL=http://listener.url:port;" +
-            "WHITE_LIST_REGEX=anything.with(a|b);BLACK_LIST_REGEX=except.you$;INTERVAL_IN_SEC=12;IN_MEMORY_QUEUE_CAPACITY=128000000;LOGS_COUNT_LIMIT=150;" +
+            "WHITE_LIST_REGEX=anything.with(a|b);BLACK_LIST_REGEX=except.you$;POLLING_INTERVAL_IN_SEC=12;IN_MEMORY_QUEUE_CAPACITY=128000000;LOGS_COUNT_LIMIT=150;" +
             "DISK_SPACE_CHECKS_INTERVAL=13;QUEUE_DIR=Custom/Metrics/Directory;FILE_SYSTEM_SPACE_LIMIT=80;CLEAN_SENT_METRICS_INTERVAL=14;";
     private static final String MINIMAL_TEST_CONFIGURATION_ARGUMENTS = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;";
     private static final String WHITE_LIST_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;WHITE_LIST_REGEX=.*MemoryUsagePercent.*;";
@@ -82,7 +82,7 @@ public class Jmx2LogzioConfigurationTest {
                 return Jmx2LogzioJavaAgent.SERVICE_NAME;
             case Jmx2LogzioConfiguration.SERVICE_HOST:
                 return Jmx2LogzioJavaAgent.SERVICE_HOST;
-            case Jmx2LogzioConfiguration.INTERVAL_IN_SEC:
+            case Jmx2LogzioConfiguration.POLLING_INTERVAL_IN_SEC:
                 return Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL;
             case Jmx2LogzioConfiguration.FROM_DISK:
                 return  LogzioJavaSenderParams.FROM_DISK;

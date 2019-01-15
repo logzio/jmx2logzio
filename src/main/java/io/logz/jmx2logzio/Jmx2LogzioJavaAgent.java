@@ -29,7 +29,7 @@ public class Jmx2LogzioJavaAgent {
 
     private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioJavaAgent.class);
 
-    public static void premain(String agentArgument, Instrumentation inst) {
+    public static void premain(String agentArgument, Instrumentation instrument) {
 
         logger.info("Loading with agentArgument: {}", agentArgument);
 
@@ -95,7 +95,7 @@ public class Jmx2LogzioJavaAgent {
                 return Jmx2LogzioJavaAgent.SERVICE_NAME;
             case Jmx2LogzioConfiguration.SERVICE_HOST:
                 return Jmx2LogzioJavaAgent.SERVICE_HOST;
-            case Jmx2LogzioConfiguration.INTERVAL_IN_SEC:
+            case Jmx2LogzioConfiguration.POLLING_INTERVAL_IN_SEC:
                 return Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL;
             case Jmx2LogzioConfiguration.FROM_DISK:
                 return  LogzioJavaSenderParams.FROM_DISK;
