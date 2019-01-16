@@ -6,38 +6,30 @@ import com.typesafe.config.ConfigFactory;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Jmx2LogzioConfigurationTest {
 
-    private static final String TEST_ARGUMENTS = "LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=CustomServiceName;SERVICE_HOST=CustomServiceHost;FROM_DISK=false;LISTENER_URL=http://listener.url:2222;" +
-            "WHITE_LIST_REGEX=anything.with(a|b);BLACK_LIST_REGEX=except.you$;POLLING_INTERVAL_IN_SEC=12;IN_MEMORY_QUEUE_CAPACITY=128000000;LOGS_COUNT_LIMIT=150;" +
-            "DISK_SPACE_CHECKS_INTERVAL=13;QUEUE_DIR=Custom/Metrics/Directory;FILE_SYSTEM_SPACE_LIMIT=80;CLEAN_SENT_METRICS_INTERVAL=14;";
-    private static final String MINIMAL_TEST_CONFIGURATION_ARGUMENTS = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;";
-    private static final String WHITE_LIST_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;WHITE_LIST_REGEX=.*MemoryUsagePercent.*;";
-    private static final String BLACK_LIST_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070;LOGZIO_TOKEN=LogzioToken;SERVICE_NAME=com.yog.examplerunningapp;BLACK_LIST_REGEX=.*Max.*;";
+    public static final String METRICS_TEST_DIR = "testMetrics";
+    private static final String TEST_ARGUMENTS = "LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=CustomServiceName,SERVICE_HOST=CustomServiceHost,FROM_DISK=false,LISTENER_URL=http://listener.url:2222," +
+            "WHITE_LIST_REGEX=anything.with(a|b),BLACK_LIST_REGEX=except.you$,POLLING_INTERVAL_IN_SEC=12,IN_MEMORY_QUEUE_CAPACITY=128000000,LOGS_COUNT_LIMIT=150," +
+            "DISK_SPACE_CHECKS_INTERVAL=13,QUEUE_DIR=testMetrics,FILE_SYSTEM_SPACE_LIMIT=80,CLEAN_SENT_METRICS_INTERVAL=14";
+    private static final String MINIMAL_TEST_CONFIGURATION_ARGUMENTS = "LISTENER_URL=http://127.0.0.1:8070,LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=com.yog.examplerunningapp,QUEUE_DIR=" + METRICS_TEST_DIR;
+    private static final String WHITE_LIST_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070,LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=com.yog.examplerunningapp,WHITE_LIST_REGEX=.*MemoryUsagePercent.*,QUEUE_DIR="+ METRICS_TEST_DIR;
+    private static final String BLACK_LIST_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070,LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=com.yog.examplerunningapp,BLACK_LIST_REGEX=.*Max.*,QUEUE_DIR=" + METRICS_TEST_DIR;
+    private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioConfigurationTest.class);
 
     private static Config getIntegratedConfiguration(String agentArgument) {
-
-        if (!agentArgument.contains("QUEUE_DIR")) {
-            Path rootDirectory = FileSystems.getDefault().getPath(".");
-            try {
-                File tempDir = Files.createTempDirectory(rootDirectory, "").toFile();
-                tempDir.deleteOnExit();
-                agentArgument += "QUEUE_DIR=" + tempDir.getName();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
         Map<String, String> configurationMap = parseArgumentsString(agentArgument);
 
@@ -58,7 +50,7 @@ public class Jmx2LogzioConfigurationTest {
     private static Map<String, String> parseArgumentsString(String arguments) throws IllegalConfiguration {
         try {
             Map<String, String> argumentsMap = new HashMap<>();
-            Map<String, String> keyValues = Splitter.on(';').omitEmptyStrings().withKeyValueSeparator('=').split(arguments);
+            Map<String, String> keyValues = Splitter.on(',').omitEmptyStrings().withKeyValueSeparator('=').split(arguments);
 
             keyValues.forEach((k,v) ->
                     argumentsMap.put(getArgumentConfigurationRepresentation(k),v));
@@ -138,9 +130,19 @@ public class Jmx2LogzioConfigurationTest {
         Assert.assertEquals(senderParams.getInMemoryQueueCapacityInBytes(),128000000);
         Assert.assertEquals(senderParams.getLogsCountLimit(),150);
         Assert.assertEquals(senderParams.getDiskSpaceCheckInterval(),13);
-        Assert.assertEquals(senderParams.getQueueDir().getParent() + "/" + senderParams.getQueueDir().getName(),"Custom/Metrics/Directory");
+        String parent = senderParams.getQueueDir().getParent() == null ? "" : senderParams.getQueueDir().getParent() + "/";
+        Assert.assertEquals(parent + senderParams.getQueueDir().getName(),METRICS_TEST_DIR);
         Assert.assertEquals(senderParams.getFileSystemFullPercentThreshold(),80);
         Assert.assertEquals(senderParams.getGcPersistedQueueFilesIntervalSeconds(),14);
+    }
+
+    @AfterTest
+    private void clean() {
+        try {
+            FileUtils.deleteDirectory(new File(Jmx2LogzioConfigurationTest.METRICS_TEST_DIR));
+        } catch (IOException e) {
+            logger.error("couldn't remove temp metrics directory " + Jmx2LogzioConfigurationTest.METRICS_TEST_DIR);
+        }
     }
 
 }

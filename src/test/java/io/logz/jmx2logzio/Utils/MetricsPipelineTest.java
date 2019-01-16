@@ -4,16 +4,24 @@ import io.logz.jmx2logzio.Jmx2LogzioConfigurationTest;
 import io.logz.jmx2logzio.MetricBean;
 import io.logz.jmx2logzio.clients.JavaAgentClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MetricsPipelineTest {
 
 
-    Jmx2LogzioConfiguration jmx2LogzioConfiguration;
+    private Jmx2LogzioConfiguration jmx2LogzioConfiguration;
+    private static final Logger logger = LoggerFactory.getLogger(MetricsPipeline.class);
+
 
     @Test
     public void whiteListConfigurationTest() {
@@ -42,4 +50,12 @@ public class MetricsPipelineTest {
         return metricsPipeline.getFilteredBeans(beans);
     }
 
+    @AfterTest
+    private void clean() {
+        try {
+            FileUtils.deleteDirectory(new File(Jmx2LogzioConfigurationTest.METRICS_TEST_DIR));
+        } catch (IOException e) {
+            logger.error("couldn't remove temp metrics directory " + Jmx2LogzioConfigurationTest.METRICS_TEST_DIR);
+        }
+    }
 }

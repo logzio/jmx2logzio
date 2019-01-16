@@ -4,14 +4,19 @@ import io.logz.jmx2logzio.clients.ListenerWriter;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.Metric;
+import org.apache.commons.io.FileUtils;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +28,11 @@ import static org.mockserver.model.HttpResponse.response;
 
 public class LogzioSenderTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(LogzioSenderTest.class);
     private Jmx2LogzioConfiguration config;
     private ClientAndServer mockServer;
     private HttpRequest[] recordedRequests;
-    MockServerClient mockServerClient = null;
+    private MockServerClient mockServerClient = null;
 
     @BeforeTest
     private void startMock() {
@@ -71,4 +77,15 @@ public class LogzioSenderTest {
     public void stopMockServer() {
         mockServer.stop();
     }
+
+
+    @AfterTest
+    private void clean() {
+        try {
+            FileUtils.deleteDirectory(new File(Jmx2LogzioConfigurationTest.METRICS_TEST_DIR));
+        } catch (IOException e) {
+            logger.error("couldn't remove temp metrics directory " + Jmx2LogzioConfigurationTest.METRICS_TEST_DIR);
+        }
+    }
+
 }
