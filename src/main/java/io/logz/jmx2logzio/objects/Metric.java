@@ -49,6 +49,7 @@ public class Metric {
         return value;
     }
 
+    @JsonProperty("@timestamp")
     public String getTimestamp() {
         return timestamp;
     }
@@ -68,21 +69,6 @@ public class Metric {
                 '}';
     }
 
-//    @JsonIgnore
-//    public String getFullName(){
-//        StringBuilder sb = new StringBuilder();
-//        dimensions.stream().forEach(dimension -> {
-//            String key = dimension.getKey();
-//            if(!Arrays.asList(SERVICE_NAME, SERVICE_HOST, DOMAIN_NAME).contains(key)){
-//                sb.append(key);
-//                sb.append("_");
-//            }
-//            sb.append(dimension.getValue());
-//            sb.append(".");
-//        });
-//        sb.append(getName());
-//        return sb.toString();
-//    }
 
     public Map<String, Object> getDimensionsMap() {
         Map<String, Object> jsonDimensions = new HashMap<>();
