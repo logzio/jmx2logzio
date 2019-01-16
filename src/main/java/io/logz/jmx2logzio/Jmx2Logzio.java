@@ -1,6 +1,8 @@
 package io.logz.jmx2logzio;
 
+import io.logz.jmx2logzio.Utils.HangupInterceptor;
 import io.logz.jmx2logzio.Utils.MetricsPipeline;
+import io.logz.jmx2logzio.Utils.Shutdownable;
 import io.logz.jmx2logzio.clients.JavaAgentClient;
 import io.logz.jmx2logzio.clients.JolokiaClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
@@ -15,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import static io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration.MetricClientType.JOLOKIA;
 import static io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration.MetricClientType.MBEAN_PLATFORM;
 
-public class Jmx2Logzio {
+public class Jmx2Logzio implements Shutdownable {
 
     private static final Logger logger = LoggerFactory.getLogger(Jmx2Logzio.class);
 
@@ -53,7 +55,8 @@ public class Jmx2Logzio {
         return conf.getMetricsPollingIntervalInSeconds() - (now % conf.getMetricsPollingIntervalInSeconds()) + 1;
     }
 
-    private void shutdown() {
+    @Override
+    public void shutdown() {
         logger.info("Shutting down...");
         try {
             taskScheduler.shutdown();
@@ -73,27 +76,5 @@ public class Jmx2Logzio {
     private void enableHangupSupport() {
         HangupInterceptor interceptor = new HangupInterceptor(this);
         Runtime.getRuntime().addShutdownHook(interceptor);
-    }
-
-    /**
-     * A class for intercepting the hang up signal and do a graceful shutdown of the Camel.
-     */
-    private static final class HangupInterceptor extends Thread {
-        private Logger logger = LoggerFactory.getLogger(HangupInterceptor.class);
-        private Jmx2Logzio main;
-
-        public HangupInterceptor(Jmx2Logzio main) {
-            this.main = main;
-        }
-
-        @Override
-        public void run() {
-            logger.info("Received hang up - stopping...");
-            try {
-                main.shutdown();
-            } catch (Exception ex) {
-                logger.warn("Error during stopping main", ex);
-            }
-        }
     }
 }

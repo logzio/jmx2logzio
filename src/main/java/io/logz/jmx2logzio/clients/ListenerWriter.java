@@ -3,6 +3,8 @@ package io.logz.jmx2logzio.clients;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.logz.jmx2logzio.Utils.HangupInterceptor;
+import io.logz.jmx2logzio.Utils.Shutdownable;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
 import io.logz.jmx2logzio.objects.Metric;
@@ -18,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
-public class ListenerWriter {
+public class ListenerWriter implements Shutdownable {
     private static final Logger logger = LoggerFactory.getLogger(ListenerWriter.class);
 
     private final static ObjectMapper mapper = new ObjectMapper();
@@ -141,6 +143,7 @@ public class ListenerWriter {
     @PostConstruct
     public void start() {
         scheduledExecutorService.scheduleWithFixedDelay(this::trySendQueueToListener, 0, 5, TimeUnit.SECONDS);
+        enableHangupSupport();
     }
 
     private void trySendQueueToListener() {
@@ -151,5 +154,25 @@ public class ListenerWriter {
             e.printStackTrace();
             System.out.println(e.getMessage());
         }
+    }
+
+    @Override
+    public void shutdown() {
+        logger.info("Closing Listener Writer...");
+        try {
+            scheduledExecutorService.shutdown();
+            scheduledExecutorService.awaitTermination(20, TimeUnit.SECONDS);
+            scheduledExecutorService.shutdownNow();
+        } catch (InterruptedException e) {
+
+            Thread.interrupted();
+            scheduledExecutorService.shutdownNow();
+        }
+        logzioSender.stop();
+    }
+
+    private void enableHangupSupport() {
+        HangupInterceptor interceptor = new HangupInterceptor(this);
+        Runtime.getRuntime().addShutdownHook(interceptor);
     }
 }

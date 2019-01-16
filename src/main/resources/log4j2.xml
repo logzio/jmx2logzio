@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration monitorInterval="30">
 <Appenders>
-    <RollingFile name="default.file" fileName="/var/log/jmx2kafka/jmx2kafka.log" append="true"
-                 filePattern="/var/log/jmx2kafka/jmx2kafka.%i.log.gz">
+    <RollingFile name="default.file" fileName="/var/log/jmx2logzio/jmx2logzio.log" append="true"
+                 filePattern="/var/log/jmx2logzio/jmx2logzio.%i.log.gz">
         <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
         <Policies>
             <SizeBasedTriggeringPolicy size="10 MB"/>
@@ -17,8 +17,8 @@
 
 <Loggers>
 
-    <!-- Enable this line to get a list of metric sent to kafka -->
-    <!--<Logger name="io.logz.jmx2kafka" level="trace">
+    <!-- Enable this line to get a list of metric sent to logz.io -->
+    <!--<Logger name="io.logz.jmx2Logzio" level="trace">
         <AppenderRef ref="default.console"/>
     </Logger>-->
 
