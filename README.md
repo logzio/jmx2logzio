@@ -2,9 +2,7 @@
 
 jmx2logzio is a one liner tool for polling JMX and send it to logz.io (every 30 seconds by default). You can install & run it on every machine you want to poll its JMX.
 
-Currently it has two flavors:
-1. Docker image which reads JMX from a jolokia agent running on a JVM, since exposing JMX is the simplest and easiest through Jolokia agent (1 liner - see below).
-2. Run as a java agent, and get metrics directly from MBean Platform
+jmx2logzio run as a java agent, and get metrics directly from MBean Platform
 
 The metrics reported have the following names template:
 
