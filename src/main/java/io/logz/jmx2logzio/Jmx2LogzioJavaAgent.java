@@ -68,7 +68,7 @@ public class Jmx2LogzioJavaAgent {
     private static Map<String, String> parseArgumentsString(String arguments) throws IllegalConfiguration {
         try {
             Map<String, String> argumentsMap = new HashMap<>();
-            Map<String, String> keyValues = Splitter.on(';').omitEmptyStrings().withKeyValueSeparator('=').split(arguments);
+            Map<String, String> keyValues = Splitter.on(',').omitEmptyStrings().withKeyValueSeparator('=').split(arguments);
 
             keyValues.forEach((k, v) ->
                     argumentsMap.put(getArgumentConfigurationRepresentation(k), v));
