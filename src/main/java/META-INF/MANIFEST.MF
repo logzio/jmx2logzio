@@ -1,4 +1,2 @@
 Manifest-Version: 1.0
-Main-Class: io.logz.jmx2logzio.Jmx2LogzioJolokia
 Premain-Class: io.logz.jmx2logzio.Jmx2LogzioJavaAgent
-
