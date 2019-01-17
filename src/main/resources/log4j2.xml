@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration monitorInterval="30">
 <Appenders>
-    <RollingFile name="default.file" fileName="/var/log/jmx2logzio/jmx2logzio.log" append="true"
-                 filePattern="/var/log/jmx2logzio/jmx2logzio.%i.log.gz">
-        <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
-        <Policies>
-            <SizeBasedTriggeringPolicy size="10 MB"/>
-        </Policies>
-        <DefaultRolloverStrategy max="7"/>
-    </RollingFile>
 
     <Console name="default.console" target="SYSTEM_OUT">
         <PatternLayout pattern="%d{yy/MM/dd HH:mm:ss} %p %c{2}: %m%n"/>
