@@ -87,43 +87,37 @@ public class ListenerWriter implements Shutdownable {
             @Override
             public void error(String s) {
                 logger.error(s);
-                System.out.println(s);
             }
 
             @Override
             public void error(String s, Throwable throwable) {
                 logger.error(s);
-                System.out.println(s);
             }
 
             @Override
             public void warning(String s) {
                 logger.warn(s);
-                System.out.println(s);
             }
 
             @Override
             public void warning(String s, Throwable throwable) {
                 logger.warn(s);
-                System.out.println(s);
             }
 
             @Override
             public void info(String s) {
                 logger.info(s);
-                System.out.println(s);
             }
 
             @Override
             public void info(String s, Throwable throwable) {
                 logger.info(s);
-                System.out.println(s);
             }
         };
     }
 
     public void writeMetrics(List<Metric> metrics) {
-        System.out.println("sending " + metrics.size() + " metrics");
+        logger.info("sending {} metrics", metrics.size());
         metrics.stream().forEach(metric -> {
             String jsonStringMetric = convertToJson(metric);
             byte[] metricAsBytes = java.nio.charset.StandardCharsets.UTF_8.encode(jsonStringMetric).array();
@@ -151,8 +145,7 @@ public class ListenerWriter implements Shutdownable {
             Metric metric = messageQueue.take();
             writeMetrics(Arrays.asList(metric));
         } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
+            logger.error("error enqueueing metrics: {}", e.getMessage());
         }
     }
 
@@ -164,7 +157,7 @@ public class ListenerWriter implements Shutdownable {
             scheduledExecutorService.awaitTermination(20, TimeUnit.SECONDS);
             scheduledExecutorService.shutdownNow();
         } catch (InterruptedException e) {
-
+            logger.error("couldn't shutdown the writer properly: {}", e.getMessage());
             Thread.interrupted();
             scheduledExecutorService.shutdownNow();
         }

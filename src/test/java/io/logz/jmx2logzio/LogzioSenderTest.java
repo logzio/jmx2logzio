@@ -45,11 +45,11 @@ public class LogzioSenderTest {
     }
 
     private void waitToSend() {
-        System.out.println("waiting...");
+        logger.debug("waiting for the listener writer to send...");
         try {
             sleep(10000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+           logger.info("error in wait: {}", e.getMessage());
         }
     }
 
@@ -66,11 +66,11 @@ public class LogzioSenderTest {
         ListenerWriter writer = new ListenerWriter(config);
         writer.writeMetrics(metrics);
         waitToSend();
-
         recordedRequests = mockServerClient.retrieveRecordedRequests(request().withMethod("POST"));
         Assert.assertEquals(recordedRequests.length, 1);
         String message = recordedRequests[0].getBodyAsString();
         Assert.assertTrue(message.contains("\"" + key + "\":" + value));
+        writer.shutdown();
     }
 
     @AfterTest

@@ -63,7 +63,7 @@ public class Jmx2Logzio implements Shutdownable {
             taskScheduler.awaitTermination(20, TimeUnit.SECONDS);
             taskScheduler.shutdownNow();
         } catch (InterruptedException e) {
-
+            logger.error("error shutting down: {}", e.getMessage());
             Thread.interrupted();
             taskScheduler.shutdownNow();
         }

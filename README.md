@@ -23,7 +23,7 @@ mvn clean compile assembly:single
 
 This lib can get metrics from MBean Platform as well as from Jolokia. In order to use MBean Platform, we need to run inside the JVM.
 - First, build the project with Maven in order to get the java agent jar (see Build above).
-- Modify your app JVM arguments and add the following:  java -javaagent:/path/to/jmx2logzio.jar=LOGZIO_TOKEN=<your_logzio_token>,SERVICE_NAME=myService ... (full parameter list below)
+- Modify your app JVM arguments and add the following:  java -javaagent:/path/to/jmx2logzio-1.0-SNAPSHOT.jar=LOGZIO_TOKEN=<your_logzio_token>,SERVICE_NAME=myService ... (full parameter list below)
 - The parameters are key-value pairs, in the format of key=value,key=value...
 - The parameters names and functions are exactly as described in parameters section.
 - For example: java -javaagent:/path/to/jmx2logzio-1.0-SNAPSHOT.jar=LOGZIO_TOKEN=<your_logzio_token>,SERVICE_NAME=myService myApp
@@ -32,14 +32,14 @@ This lib can get metrics from MBean Platform as well as from Jolokia. In order t
 
 # How to expose JMX Metrics using Jolokia Agent
 
-1. Download Jolokia JVM Agent JAR file [here](http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/1.3.2/jolokia-jvm-1.3.2-agent.jar).
+1. Download Jolokia JVM Agent JAR file [here](http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/1.6.0/jolokia-jvm-1.6.0-agent.jar).
 2. Add the following command line option to your line running java:
  ```
  -javaagent:path-to-jolokia-jar-file.jar
  ```
  For example:
  ```
- -javaagent:/opt/jolokia/jolokia-jvm-1.3.2-agent.jar
+ -javaagent:/opt/jolokia/jolokia-jvm-1.6.0-agent.jar
  ```
 
 By default it exposes an HTTP REST interface on port 8778. See [here](https://jolokia.org/reference/html/agents.html#jvm-agent) if you want to change it and configure it more.
