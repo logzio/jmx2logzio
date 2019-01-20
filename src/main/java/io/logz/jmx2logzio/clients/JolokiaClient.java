@@ -33,6 +33,8 @@ import static org.apache.http.client.fluent.Request.Post;
 
 public class JolokiaClient extends MBeanClient {
 
+    public static final String POLLER_JOLOKIA = "service.poller.jolokia";
+    public static final String JOLOKIA_FULL_URL = "service.poller.jolokia.jolokiaFullUrl";
     private static final Logger logger = LoggerFactory.getLogger(JolokiaClient.class);
 
     private String jolokiaFullURL;
@@ -116,7 +118,7 @@ public class JolokiaClient extends MBeanClient {
                     }
                     continue;
                 }
-                Instant metricTime =  Instant.ofEpochMilli((long) response.get("timestamp"));
+                Instant metricTime =  Instant.ofEpochMilli((int) response.get("timestamp"));
                 String[] serviceNameAndArgs = mBeanName.split(":");
                 if (serviceNameAndArgs.length != 2 ){
                     logger.debug("metric name {} not valid", mBeanName);

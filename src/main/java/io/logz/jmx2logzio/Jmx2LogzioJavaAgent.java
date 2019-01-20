@@ -18,9 +18,7 @@ import java.util.Map;
  */
 public class Jmx2LogzioJavaAgent {
 
-    public static final String POLLER_JOLOKIA = "service.poller.jolokia";
     public static final String POLLER_MBEAN_DIRECT = "service.poller.mbean-direct";
-    public static final String JOLOKIA_FULL_URL = "service.poller.jolokia.jolokiaFullUrl";
     public static String WHITE_LIST_REGEX = "service.poller.white-list-regex";
     public static String BLACK_LIST_REGEX = "service.poller.black-list-regex";
     public static String SERVICE_NAME = "service.name";

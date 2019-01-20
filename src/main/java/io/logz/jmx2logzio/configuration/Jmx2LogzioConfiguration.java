@@ -2,6 +2,7 @@ package io.logz.jmx2logzio.configuration;
 
 import com.typesafe.config.Config;
 import io.logz.jmx2logzio.Jmx2LogzioJavaAgent;
+import io.logz.jmx2logzio.clients.JolokiaClient;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
 import org.slf4j.Logger;
@@ -60,20 +61,23 @@ public class Jmx2LogzioConfiguration {
             serviceHost = config.getString(Jmx2LogzioJavaAgent.SERVICE_HOST);
         }
 
-        if (config.hasPath(Jmx2LogzioJavaAgent.POLLER_JOLOKIA)) {
+        if (config.hasPath(JolokiaClient.POLLER_JOLOKIA)) {
             metricClientType = MetricClientType.JOLOKIA;
         } else if (config.hasPath(Jmx2LogzioJavaAgent.POLLER_MBEAN_DIRECT)) {
             metricClientType = MetricClientType.MBEAN_PLATFORM;
         }
 
         if (this.metricClientType == MetricClientType.JOLOKIA) {
-            jolokiaFullUrl = config.getString(Jmx2LogzioJavaAgent.JOLOKIA_FULL_URL);
+            if (!config.hasPath(JolokiaClient.JOLOKIA_FULL_URL)) {
+                throw new IllegalConfiguration("service.poller.jolokiaFullUrl has to be in the configuration file (application.conf)");
+            }
+            jolokiaFullUrl = config.getString(JolokiaClient.JOLOKIA_FULL_URL);
             String jolokiaHost;
             try {
                 URL jolokia = new URL(jolokiaFullUrl);
                 jolokiaHost = jolokia.getHost();
             } catch (MalformedURLException e) {
-                throw new IllegalConfiguration("service.jolokiaFullUrl must be a valid URL. Error = " + e.getMessage());
+                throw new IllegalConfiguration("service.poller.jolokiaFullUrl must be a valid URL. Error = " + e.getMessage());
             }
 
             // Setting jolokia url as default
