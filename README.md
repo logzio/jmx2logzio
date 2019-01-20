@@ -33,21 +33,23 @@ First clone or download the repository.
     - logzioJavaSender.token - enter your logz.io token, can be located in your account.
     - service.name - service name as you see fit
     - service.poller.jolokia.jolokiaFullUrl - the full Address of your Jolokia agent configured above.
-- Compile and run the project either as a java app or as a jar file (the main class is Jmx2LogzioJolokia).
+- Build and run the jmx2logzio jar
+```
+   mvn clean compile assembly:single 
+```
+- By default, the Jar file will be located under /target after you build it using Maven.
+
 By default the Jolokia agent exposes an HTTP REST interface on port 8778. See [here](https://jolokia.org/reference/html/agents.html#jvm-agent) if you want to change it and configure it more.
 
 ## As a Java agent
 
 In order to use MBean Platform, we need to run inside the JVM.
-- First, build the project with Maven in order to get the java agent jar
-```
-mvn clean compile assembly:single 
-```
+- First, build the project with Maven in order to get the java agent jar (see above)
 - Modify your app JVM arguments and add the following:  java -javaagent:/path/to/jmx2logzio-1.0-SNAPSHOT.jar=LOGZIO_TOKEN=<your_logzio_token>,SERVICE_NAME=myService ... (full parameter list below)
 - The parameters are key-value pairs, in the format of key=value,key=value...
 - The parameters names and functions are exactly as described in parameters section.
 - For example: java -javaagent:/path/to/jmx2logzio-1.0-SNAPSHOT.jar=LOGZIO_TOKEN=<your_logzio_token>,SERVICE_NAME=myService myApp
-- By default, the Jar file will be located under /target after you build it using Maven.
+
 
 ### Required parameters
 | Parameter          |  Explained  |
