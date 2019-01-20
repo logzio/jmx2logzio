@@ -125,6 +125,9 @@ public class Jmx2LogzioConfiguration {
                         config.getString(LogzioJavaSenderParams.LISTENER_URL),e.getMessage(),logzioJavaSenderParams.getUrl());
             }
         }
+        if (config.getString(LogzioJavaSenderParams.LOGZIO_TOKEN).equals("<your_logz.io_token>")) {
+            throw new IllegalConfiguration("please enter a valid logz.io token (can be located at apps.logz.io >> settings >> general)");
+        }
         logzioJavaSenderParams.setToken(config.getString(LogzioJavaSenderParams.LOGZIO_TOKEN));
 
         logzioJavaSenderParams.setFromDisk(config.hasPath(LogzioJavaSenderParams.FROM_DISK) ?
