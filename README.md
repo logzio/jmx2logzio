@@ -17,7 +17,7 @@ The metrics reported have the following names template:
 
 First clone or download the repository.
 
-## As an independent app
+## As an independent app with a Jolokia agent
 ### Expose JMX Metrics using Jolokia Agent
 
 - Download Jolokia JVM Agent JAR file [here](http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/1.6.0/jolokia-jvm-1.6.0-agent.jar).
@@ -33,6 +33,7 @@ First clone or download the repository.
     - logzioJavaSender.token - enter your logz.io token, can be located in your account.
     - service.name - service name as you see fit
     - service.poller.jolokia.jolokiaFullUrl - the full Address of your Jolokia agent configured above.
+    - you can edit the other parameters as you see fit
 - Build and run the jmx2logzio jar
 ```
    mvn clean compile assembly:single 
