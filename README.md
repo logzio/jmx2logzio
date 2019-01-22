@@ -36,7 +36,7 @@ First clone or download the repository.
     - you can edit the other parameters as you see fit
 - Build and run the jmx2logzio jar
 ```
-   mvn clean compile assembly:single 
+   mvn clean install 
 ```
 - By default, the Jar file will be located under /target after you build it using Maven.
 
@@ -46,10 +46,10 @@ By default the Jolokia agent exposes an HTTP REST interface on port 8778. See [h
 
 In order to use MBean Platform, we need to run inside the JVM.
 - First, build the project with Maven in order to get the java agent jar (see above)
-- Modify your app JVM arguments and add the following:  java -javaagent:/path/to/jmx2logzio-1.0-SNAPSHOT.jar=LOGZIO_TOKEN=<your_logzio_token>,SERVICE_NAME=myService ... (full parameter list below)
+- Modify your app JVM arguments and add the following: -javaagent:/path/to/jmx2logzio-1.0.1.jar=LOGZIO_TOKEN=<your_logzio_token>,SERVICE_NAME=myService ... (full parameter list below)
 - The parameters are key-value pairs, in the format of key=value,key=value...
 - The parameters names and functions are exactly as described in parameters section.
-- For example: java -javaagent:/path/to/jmx2logzio-1.0-SNAPSHOT.jar=LOGZIO_TOKEN=<your_logzio_token>,SERVICE_NAME=myService myApp
+- For example: java -javaagent:/path/to/jmx2logzio-1.0.1.jar=LOGZIO_TOKEN=<your_logzio_token>,SERVICE_NAME=myService myApp
 
 
 ### Required parameters
