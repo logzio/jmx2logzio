@@ -8,6 +8,7 @@ import io.logz.jmx2logzio.Utils.Shutdownable;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
 import io.logz.jmx2logzio.objects.Metric;
+import io.logz.jmx2logzio.objects.StatusReporterFactory;
 import io.logz.sender.HttpsRequestConfiguration;
 import io.logz.sender.LogzioSender;
 import io.logz.sender.SenderStatusReporter;
@@ -20,30 +21,30 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
+import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
+
 public class ListenerWriter implements Shutdownable {
     private static final Logger logger = LoggerFactory.getLogger(ListenerWriter.class);
 
     private final static ObjectMapper mapper = new ObjectMapper();
     private final BlockingQueue<Metric> messageQueue;
-    private ScheduledExecutorService scheduledExecutorService;
+    private final ScheduledExecutorService scheduledExecutorService;
     private HttpsRequestConfiguration requestConf;
-    private LogzioJavaSenderParams logzioSenderParams;
-    private LogzioSender logzioSender;
+    private final LogzioJavaSenderParams logzioSenderParams;
+    private final LogzioSender logzioSender;
 
     public ListenerWriter(Jmx2LogzioConfiguration requestConf) {
 
         this.logzioSenderParams = requestConf.getSenderParams();
-        initLogzioSender();
-        messageQueue = new LinkedBlockingQueue<>();
-
-        scheduledExecutorService = Executors.newScheduledThreadPool(1,
-                new ThreadFactoryBuilder().setNameFormat("Jmx2ListenerWriter-%d").build());
+        this.logzioSender = initLogzioSender();
+        this.messageQueue = new LinkedBlockingQueue<>();
+        this.scheduledExecutorService = newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Jmx2ListenerWriter-%d").build());
     }
 
-    private void initLogzioSender() {
+    private LogzioSender initLogzioSender() {
 
         try {
-            this.requestConf = HttpsRequestConfiguration
+            requestConf = HttpsRequestConfiguration
                     .builder()
                     .setLogzioListenerUrl(logzioSenderParams.getUrl())
                     .setLogzioType(logzioSenderParams.getType())
@@ -51,9 +52,9 @@ public class ListenerWriter implements Shutdownable {
                     .setCompressRequests(logzioSenderParams.isCompressRequests())
                     .build();
         } catch (LogzioParameterErrorException e) {
-            logger.error("promblem in one or more parameters with error {}", e.getMessage()); //todo: add parameters string
+            logger.error("problem in one or more parameters with error {}", e.getMessage());
         }
-        SenderStatusReporter statusReporter = getStatusReporter();
+        SenderStatusReporter statusReporter = StatusReporterFactory.newSenderStatusReporter(logger);
         LogzioSender.Builder senderBuilder = LogzioSender
                 .builder()
                 .setTasksExecutor(Executors.newScheduledThreadPool(logzioSenderParams.getThreadPoolSize()))
@@ -75,45 +76,11 @@ public class ListenerWriter implements Shutdownable {
                     .endInMemoryQueue();
         }
         try {
-            this.logzioSender = senderBuilder.build();
+            return senderBuilder.build();
         } catch (LogzioParameterErrorException e) {
-            logger.error("promblem in one or more parameters with error {}", e.getMessage());
+            logger.error("problem in one or more parameters with error {}", e.getMessage());
         }
-        this.logzioSender.start();
-    }
-
-    private SenderStatusReporter getStatusReporter() {
-        return new SenderStatusReporter() {
-            @Override
-            public void error(String s) {
-                logger.error(s);
-            }
-
-            @Override
-            public void error(String s, Throwable throwable) {
-                logger.error(s);
-            }
-
-            @Override
-            public void warning(String s) {
-                logger.warn(s);
-            }
-
-            @Override
-            public void warning(String s, Throwable throwable) {
-                logger.warn(s);
-            }
-
-            @Override
-            public void info(String s) {
-                logger.info(s);
-            }
-
-            @Override
-            public void info(String s, Throwable throwable) {
-                logger.info(s);
-            }
-        };
+        return null;
     }
 
     public void writeMetrics(List<Metric> metrics) {
@@ -152,16 +119,8 @@ public class ListenerWriter implements Shutdownable {
     @Override
     public void shutdown() {
         logger.info("Closing Listener Writer...");
-        try {
-            scheduledExecutorService.shutdown();
-            scheduledExecutorService.awaitTermination(20, TimeUnit.SECONDS);
-            scheduledExecutorService.shutdownNow();
-        } catch (InterruptedException e) {
-            logger.error("couldn't shutdown the writer properly: {}", e.getMessage());
-            Thread.interrupted();
-            scheduledExecutorService.shutdownNow();
-        }
         logzioSender.stop();
+        scheduledExecutorService.shutdownNow();
     }
 
     private void enableHangupSupport() {
