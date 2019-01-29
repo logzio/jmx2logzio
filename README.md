@@ -6,7 +6,7 @@ This doc shows you how to set up jmx2logzio.
 You have two options here:
 
 * Run as a [Java agent](#jmx2logzio-as-java-agent-setup) (to get metrics directly from the MBean platform)
-* Run as an [independent app that to a Jolokia agent](#jmx2logzio-jolokia-setup)
+* Run as an [app that connects to a Jolokia agent](#jmx2logzio-jolokia-setup)
 
 #### How are metrics reported?
 
