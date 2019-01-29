@@ -2,7 +2,11 @@
 
 jmx2logzio is a lightweight tool for polling JMX metrics and sending them to Logz.io.
 
-You can set up jmx2logzio to run either as a [Java agent](#jmx2logzio-as-java-agent-setup) (to get metrics directly from the MBean platform) or as an [independent app that to a Jolokia agent](#jmx2logzio-jolokia-setup).
+This doc shows you how to set up jmx2logzio.
+You have two options here:
+
+* Run as a [Java agent](#jmx2logzio-as-java-agent-setup) (to get metrics directly from the MBean platform)
+* Run as an [independent app that to a Jolokia agent](#jmx2logzio-jolokia-setup)
 
 #### How are metrics reported?
 
@@ -10,7 +14,8 @@ Metrics reported by jmx2logzio follow this format:
 
 [SERVICE-NAME].[SERVICE-HOST].[METRIC-NAME]
 
-## jmx2logzio as Java agent setup {#jmx2logzio-as-java-agent-setup}
+
+<h2 #id="jmx2logzio-as-java-agent-setup">jmx2logzio as Java agent setup</h2>
 
 In most cases, you can configure jmx2logzio to run as an agent.
 In this configuration, jmx2logzio forwards metrics directly to Logz.io.
@@ -40,12 +45,11 @@ You'll find the jmx2logzio jar file in the jmx2logzio/target/ folder.
 Run your Java app, adding `-javaagent:path/to/jmx2logzio/jar/file.jar` and configuration arguments to the command.
 Include extra configuration arguments as KEY=VALUE, with a comma between each argument.
 
+This code block shows a sample command to run jmx2logzio with runtime configuration.
 For a complete list of options, see the configuration parameters below the code block.👇
 
-For example:
-
- ```shell
- java -javaagent:~/jmx2logzio/target/jmx2logzio-1.0.1.jar=LOGZIO_TOKEN=<ACCOUNT-TOKEN>,SERVICE_NAME=myService /path/to/your/app
+```shell
+java -javaagent:~/jmx2logzio/target/jmx2logzio-1.0.1.jar=LOGZIO_TOKEN=<ACCOUNT-TOKEN>,SERVICE_NAME=myService /path/to/your/app
  ```
 
 #### Parameters
@@ -61,7 +65,7 @@ For example:
 | **BLACK_LIST_REGEX** | Metrics matching this regex will not be sent. <br /> **Default**: `$a` (match nothing) |
 | **FROM_DISK** | If `true`, metrics are stored on disk until they're shipped (see [If FROM_DISK=true](#agent-if-fromdisk-true)). If `false`, metrics persist in memory until they're shipped (see see [If FROM_DISK=false](#agent-if-fromdisk-false)). <br /> **Default**: `true` |
 
-#### If FROM_DISK=true {#agent-if-fromdisk-true}
+<h4 id="agent-if-fromdisk-true">If FROM_DISK=true</h4>
 
 | Parameter | Description |
 |---|---|
@@ -70,15 +74,14 @@ For example:
 | **DISK_SPACE_CHECKS_INTERVAL** | Time interval, in milliseconds, to check for disk space <br /> **Default**: `1000` |
 | **CLEAN_SENT_METRICS_INTERVAL** | Time interval, in seconds, to clean sent metrics from the disk <br /> **Default**: `30` |
 
-#### If FROM_DISK=false {#agent-if-fromdisk-false}
+<h4 id="agent-if-fromdisk-false">If FROM_DISK=false</h4>
 
 | Parameter | Description |
 |---|---|
 | **IN_MEMORY_QUEUE_CAPACITY** | The amount of memory, in bytes, jmx2logzio can use for the memory queue. Set to `-1` for unlimited bytes. <br /> **Default**: `1024 * 1024 * 100` |
 | **LOGS_COUNT_LIMIT** | The number of logs in the memory queue before dropping new logs. Default value is -1 (the sender will not limit the queue by logs count) <br /> **Default:** `-1` |
 
-
-## jmx2logzio + Jolokia setup _(recommended)_ {#jmx2logzio-jolokia-setup}
+<h2 id="jmx2logzio-jolokia-setup">jmx2logzio + Jolokia setup</h2>
 
 If you experience issues such as port conflicts for Docker containers, you can run a Jolokia agent to act as a go-between for sending metrics from your app to Logz.io.
 In this configuration, jmx2logzio forwards metrics to Jolokia, which sends those metrics to Logz.io.
@@ -90,12 +93,11 @@ In this configuration, jmx2logzio forwards metrics to Jolokia, which sends those
 Download the [Jolokia JVM Agent JAR file](http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/1.6.0/jolokia-jvm-1.6.0-agent.jar).
 
 Run your Java app, adding `-javaagent:path/to/jolokia/jar/file.jar` to the command.
-
 For example:
 
- ```shell
- java -javaagent:/opt/jolokia/jolokia-jvm-1.6.0-agent.jar /path/to/your/app
- ```
+```shell
+java -javaagent:/opt/jolokia/jolokia-jvm-1.6.0-agent.jar /path/to/your/app
+```
 
 **Note**: You can specify a custom configuration for Jolokia agent at runtime. For more information, see [Jolokia as JVM Agent](https://jolokia.org/reference/html/agents.html#jvm-agent) from Jolokia.
 
@@ -126,7 +128,7 @@ Open jmx2logzio/src/main/resources/application.config in a text editor, and set 
 | **logzioJavaSender.token** | **Required**. Your Logz.io [account token](https://app.logz.io/#/dashboard/settings/manage-accounts) |
 | **logzioJavaSender.from-disk** | If `true`, metrics are stored on disk until they're shipped (see [If from-disk=true](#jolokia-if-fromdisk-true)). If `false`, metrics persist in memory until they're shipped (see see [If from-disk=false](#jolokia-if-fromdisk-false)). <br /> **Default**: `true` |
 
-#### If from-disk=true {#jolokia-if-fromdisk-true}
+<h4 id="jolokia-if-fromdisk-true">If from-disk=true</h4>
 
 | Parameter | Description |
 |---|---|
@@ -135,7 +137,7 @@ Open jmx2logzio/src/main/resources/application.config in a text editor, and set 
 | **logzioJavaSender.clean-sent-metrics-interval** | Time interval, in seconds, to clean sent metrics from the disk <br /> **Default**: `30` |
 | **logzioJavaSender.disk-space-checks-interval** | Time interval, in milliseconds, to check for disk space <br /> **Default**: `1000` |
 
-#### If from-disk=false {#jolokia-if-fromdisk-false}
+<h4 id="jolokia-if-fromdisk-false">If from-disk=false</h4>
 
 | Parameter | Description |
 |---|---|
