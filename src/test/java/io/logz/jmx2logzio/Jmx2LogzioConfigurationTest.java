@@ -3,6 +3,8 @@ package io.logz.jmx2logzio;
 import com.google.common.base.Splitter;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import io.logz.jmx2logzio.clients.JavaAgentClient;
+import io.logz.jmx2logzio.clients.JolokiaClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
@@ -65,34 +67,34 @@ public class Jmx2LogzioConfigurationTest {
     private static String getArgumentConfigurationRepresentation(String key) throws IllegalConfiguration {
 
         switch (key) {
-            case Jmx2LogzioConfiguration.LISTENER_URL:
-                return LogzioJavaSenderParams.LISTENER_URL;
-            case Jmx2LogzioConfiguration.WHITE_LIST_REGEX:
+            case JolokiaClient.LISTENER_URL:
+                return JavaAgentClient.LISTENER_URL;
+            case JolokiaClient.WHITE_LIST_REGEX:
                 return Jmx2LogzioJavaAgent.WHITE_LIST_REGEX;
-            case Jmx2LogzioConfiguration.BLACK_LIST_REGEX:
+            case JolokiaClient.BLACK_LIST_REGEX:
                 return Jmx2LogzioJavaAgent.BLACK_LIST_REGEX;
-            case Jmx2LogzioConfiguration.LOGZIO_TOKEN:
-                return LogzioJavaSenderParams.LOGZIO_TOKEN;
-            case Jmx2LogzioConfiguration.SERVICE_NAME:
+            case JolokiaClient.LOGZIO_TOKEN:
+                return JavaAgentClient.LOGZIO_TOKEN;
+            case JolokiaClient.SERVICE_NAME:
                 return Jmx2LogzioJavaAgent.SERVICE_NAME;
-            case Jmx2LogzioConfiguration.SERVICE_HOST:
+            case JolokiaClient.SERVICE_HOST:
                 return Jmx2LogzioJavaAgent.SERVICE_HOST;
-            case Jmx2LogzioConfiguration.POLLING_INTERVAL_IN_SEC:
+            case JolokiaClient.POLLING_INTERVAL_IN_SEC:
                 return Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL;
-            case Jmx2LogzioConfiguration.FROM_DISK:
-                return  LogzioJavaSenderParams.FROM_DISK;
-            case Jmx2LogzioConfiguration.IN_MEMORY_QUEUE_CAPACITY:
-                return LogzioJavaSenderParams.IN_MEMORY_QUEUE_CAPACITY;
-            case Jmx2LogzioConfiguration.LOGS_COUNT_LIMIT:
-                return LogzioJavaSenderParams.LOGS_COUNT_LIMIT;
-            case Jmx2LogzioConfiguration.DISK_SPACE_CHECKS_INTERVAL:
-                return LogzioJavaSenderParams.DISK_SPACE_CHECK_INTERVAL;
-            case Jmx2LogzioConfiguration.QUEUE_DIR:
-                return LogzioJavaSenderParams.QUEUE_DIR;
-            case Jmx2LogzioConfiguration.FILE_SYSTEM_SPACE_LIMIT:
-                return LogzioJavaSenderParams.FILE_SYSTEM_SPACE_LIMIT;
-            case Jmx2LogzioConfiguration.CLEAN_SENT_METRICS_INTERVAL:
-                return LogzioJavaSenderParams.CLEAN_SENT_METRICS_INTERVAL;
+            case JolokiaClient.FROM_DISK:
+                return  JavaAgentClient.FROM_DISK;
+            case JolokiaClient.IN_MEMORY_QUEUE_CAPACITY:
+                return JavaAgentClient.IN_MEMORY_QUEUE_CAPACITY;
+            case JolokiaClient.LOGS_COUNT_LIMIT:
+                return JavaAgentClient.LOGS_COUNT_LIMIT;
+            case JolokiaClient.DISK_SPACE_CHECKS_INTERVAL:
+                return JavaAgentClient.DISK_SPACE_CHECK_INTERVAL;
+            case JolokiaClient.QUEUE_DIR:
+                return JavaAgentClient.QUEUE_DIR;
+            case JolokiaClient.FILE_SYSTEM_SPACE_LIMIT:
+                return JavaAgentClient.FILE_SYSTEM_SPACE_LIMIT;
+            case JolokiaClient.CLEAN_SENT_METRICS_INTERVAL:
+                return JavaAgentClient.CLEAN_SENT_METRICS_INTERVAL;
             default:
                 throw new IllegalConfiguration("Unknown configuration option: " + key);
         }
@@ -111,6 +113,15 @@ public class Jmx2LogzioConfigurationTest {
     public static Jmx2LogzioConfiguration getBlackListTestConfiguration() {
         String testArguments = BLACK_LIST_ARGUMENT_CONFIGURATION;
         return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
+    }
+
+    @AfterTest
+    private void clean() {
+        try {
+            FileUtils.deleteDirectory(new File(Jmx2LogzioConfigurationTest.METRICS_TEST_DIR));
+        } catch (IOException e) {
+            logger.error("couldn't remove temp metrics directory " + Jmx2LogzioConfigurationTest.METRICS_TEST_DIR);
+        }
     }
 
     @Test
@@ -136,13 +147,5 @@ public class Jmx2LogzioConfigurationTest {
         Assert.assertEquals(senderParams.getGcPersistedQueueFilesIntervalSeconds(),14);
     }
 
-    @AfterTest
-    private void clean() {
-        try {
-            FileUtils.deleteDirectory(new File(Jmx2LogzioConfigurationTest.METRICS_TEST_DIR));
-        } catch (IOException e) {
-            logger.error("couldn't remove temp metrics directory " + Jmx2LogzioConfigurationTest.METRICS_TEST_DIR);
-        }
-    }
 
 }

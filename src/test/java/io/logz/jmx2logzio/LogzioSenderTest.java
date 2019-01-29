@@ -44,6 +44,21 @@ public class LogzioSenderTest {
                 .respond(response().withStatusCode(200));
     }
 
+    @AfterTest
+    public void stopMockServer() {
+        mockServer.stop();
+    }
+
+
+    @AfterTest
+    private void clean() {
+        try {
+            FileUtils.deleteDirectory(new File(Jmx2LogzioConfigurationTest.METRICS_TEST_DIR));
+        } catch (IOException e) {
+            logger.error("couldn't remove temp metrics directory " + Jmx2LogzioConfigurationTest.METRICS_TEST_DIR);
+        }
+    }
+
     private void waitToSend() {
         logger.debug("waiting for the listener writer to send...");
         try {
@@ -71,21 +86,6 @@ public class LogzioSenderTest {
         String message = recordedRequests[0].getBodyAsString();
         Assert.assertTrue(message.contains("\"" + key + "\":" + value));
         writer.shutdown();
-    }
-
-    @AfterTest
-    public void stopMockServer() {
-        mockServer.stop();
-    }
-
-
-    @AfterTest
-    private void clean() {
-        try {
-            FileUtils.deleteDirectory(new File(Jmx2LogzioConfigurationTest.METRICS_TEST_DIR));
-        } catch (IOException e) {
-            logger.error("couldn't remove temp metrics directory " + Jmx2LogzioConfigurationTest.METRICS_TEST_DIR);
-        }
     }
 
 }

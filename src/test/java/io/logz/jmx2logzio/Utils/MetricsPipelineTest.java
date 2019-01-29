@@ -23,6 +23,15 @@ public class MetricsPipelineTest {
     private Jmx2LogzioConfiguration jmx2LogzioConfiguration;
     private static final Logger logger = LoggerFactory.getLogger(MetricsPipeline.class);
 
+    @AfterTest
+    private void clean() {
+        try {
+            logger.info("removing test metrics directory");
+            FileUtils.deleteDirectory(new File(Jmx2LogzioConfigurationTest.METRICS_TEST_DIR));
+        } catch (IOException e) {
+            logger.error("couldn't remove temp metrics directory " + Jmx2LogzioConfigurationTest.METRICS_TEST_DIR);
+        }
+    }
 
     @Test
     public void whiteListConfigurationTest() {
@@ -49,15 +58,5 @@ public class MetricsPipelineTest {
         beans.add(new MetricBean("MaxCPUUsage", attr));
         beans.add(new MetricBean("MaxMemoryUsagePercent", attr));
         return metricsPipeline.getFilteredBeans(beans);
-    }
-
-    @AfterTest
-    private void clean() {
-        try {
-            logger.info("removing test metrics directory");
-            FileUtils.deleteDirectory(new File(Jmx2LogzioConfigurationTest.METRICS_TEST_DIR));
-        } catch (IOException e) {
-            logger.error("couldn't remove temp metrics directory " + Jmx2LogzioConfigurationTest.METRICS_TEST_DIR);
-        }
     }
 }
