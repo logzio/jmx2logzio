@@ -2,9 +2,11 @@ package io.logz.jmx2logzio.configuration;
 
 import com.typesafe.config.Config;
 import io.logz.jmx2logzio.Jmx2LogzioJavaAgent;
+import io.logz.jmx2logzio.clients.JavaAgentClient;
 import io.logz.jmx2logzio.clients.JolokiaClient;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,23 +17,11 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.regex.Pattern;
 
+
 public class Jmx2LogzioConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioConfiguration.class);
 
-    public static final String LISTENER_URL = "LISTENER_URL";
-    public static final String WHITE_LIST_REGEX = "WHITE_LIST_REGEX";
-    public static final String BLACK_LIST_REGEX = "BLACK_LIST_REGEX";
-    public static final String LOGZIO_TOKEN = "LOGZIO_TOKEN";
-    public static final String SERVICE_NAME = "SERVICE_NAME";
-    public static final String SERVICE_HOST = "SERVICE_HOST";
-    public static final String POLLING_INTERVAL_IN_SEC = "POLLING_INTERVAL_IN_SEC";
-    public static final String FROM_DISK = "FROM_DISK";
-    public static final String IN_MEMORY_QUEUE_CAPACITY = "IN_MEMORY_QUEUE_CAPACITY";
-    public static final String LOGS_COUNT_LIMIT = "LOGS_COUNT_LIMIT";
-    public static final String DISK_SPACE_CHECKS_INTERVAL = "DISK_SPACE_CHECKS_INTERVAL";
-    public static final String QUEUE_DIR = "QUEUE_DIR";
-    public static final String FILE_SYSTEM_SPACE_LIMIT = "FILE_SYSTEM_SPACE_LIMIT";
-    public static final String CLEAN_SENT_METRICS_INTERVAL = "CLEAN_SENT_METRICS_INTERVAL";
+    private static final String POLLER_MBEAN_DIRECT = "service.poller.mbean-direct";
 
     private Pattern whiteListPattern;
     private Pattern blackListPattern;
@@ -60,14 +50,91 @@ public class Jmx2LogzioConfiguration {
         if (config.hasPath(Jmx2LogzioJavaAgent.SERVICE_HOST)) {
             serviceHost = config.getString(Jmx2LogzioJavaAgent.SERVICE_HOST);
         }
+        setClient(config);
+        setFilterPatterns(config);
+        serviceName = config.getString(Jmx2LogzioJavaAgent.SERVICE_NAME);
+        logzioJavaSenderParams = new LogzioJavaSenderParams();
+        setListenerURL(config);
+
+        if (config.getString(JavaAgentClient.LOGZIO_TOKEN).equals("<your_logz.io_token>")) {
+            throw new IllegalConfiguration("please enter a valid logz.io token (can be located at https://app.logz.io/#/dashboard/settings/manage-accounts)");
+        }
+        logzioJavaSenderParams.setToken(config.getString(JavaAgentClient.LOGZIO_TOKEN));
+
+        ConfigSetter configSetter = (fromDisk) -> logzioJavaSenderParams.setFromDisk((boolean) fromDisk);
+        setSingleConfig(config, JavaAgentClient.FROM_DISK, null, configSetter, new ConfigValidator() {
+        });
+
+        if (logzioJavaSenderParams.isFromDisk()) {
+            setDiskStorageParams(config);
+        } else {
+            setInMemoryParams(config);
+        }
+
+        configSetter = (interval) -> metricsPollingIntervalInSeconds = (int) interval;
+        validateAndSetNatural(config, Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL, metricsPollingIntervalInSeconds, configSetter);
+
+    }
+
+    private void setDiskStorageParams(Config config) {
+        ConfigSetter configSetter = (interval) -> logzioJavaSenderParams.setDiskSpaceCheckInterval((int) interval);
+        validateAndSetNatural(config, JavaAgentClient.DISK_SPACE_CHECK_INTERVAL, logzioJavaSenderParams.getDiskSpaceCheckInterval(), configSetter);
+
+        configSetter = (queuePath) -> logzioJavaSenderParams.setQueueDir((File) queuePath);
+        setSingleConfig(config, JavaAgentClient.QUEUE_DIR, null, configSetter, new ConfigValidator() {
+        });
+
+        configSetter = (limit) -> logzioJavaSenderParams.setFileSystemFullPercentThreshold((int) limit);
+        validateAndSetNatural(config, JavaAgentClient.FILE_SYSTEM_SPACE_LIMIT, logzioJavaSenderParams.getFileSystemFullPercentThreshold(), configSetter);
+
+        configSetter = (interval) -> logzioJavaSenderParams.setGcPersistedQueueFilesIntervalSeconds((int) interval);
+        validateAndSetNatural(config, JavaAgentClient.CLEAN_SENT_METRICS_INTERVAL, logzioJavaSenderParams.getGcPersistedQueueFilesIntervalSeconds(), configSetter);
+    }
+
+
+    private void setInMemoryParams(Config config) {
+        ConfigSetter configSetter = (capacity) -> logzioJavaSenderParams.setInMemoryQueueCapacityInBytes((int) capacity);
+        validateAndSetNatural(config, JavaAgentClient.IN_MEMORY_QUEUE_CAPACITY, logzioJavaSenderParams.getInMemoryQueueCapacityInBytes(), configSetter);
+
+        configSetter = (limit) -> logzioJavaSenderParams.setLogsCountLimit((int) limit);
+        validateAndSetNatural(config, JavaAgentClient.IN_MEMORY_QUEUE_CAPACITY, logzioJavaSenderParams.getInMemoryQueueCapacityInBytes(), configSetter);
+    }
+
+    private void setListenerURL(Config config) {
+
+        ConfigValidator urlValidator = new ConfigValidator() {
+            @Override
+            public boolean validatePredicate(Object result) {
+                return UrlValidator.getInstance().isValid((String) result);
+            }
+        };
+        String malformedURLMsg = "malformed listener URL {}. Using default listener URL: " + logzioJavaSenderParams.getUrl();
+        ConfigSetter configSetter = (url) -> logzioJavaSenderParams.setUrl((String) url);
+        setSingleConfig(config, JavaAgentClient.QUEUE_DIR, malformedURLMsg, configSetter, urlValidator);
+    }
+
+    private void setFilterPatterns(Config config) {
+        try {
+            whiteListPattern = Pattern.compile(config.hasPath(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX) ?
+                    config.getString(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX) : ".*");
+        } catch (Exception e) {
+            logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX), e.getMessage());
+            whiteListPattern = Pattern.compile(".*");
+        }
+
+        try {
+            blackListPattern = Pattern.compile(config.hasPath(Jmx2LogzioJavaAgent.BLACK_LIST_REGEX) ?
+                    config.getString(Jmx2LogzioJavaAgent.BLACK_LIST_REGEX) : "$a"); // $a is a regexp that will never match anything (will match an "a" character after the end of the string
+        } catch (Exception e) {
+            logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX), e.getMessage());
+            blackListPattern = Pattern.compile("$a");
+        }
+    }
+
+    private void setClient(Config config) {
 
         if (config.hasPath(JolokiaClient.POLLER_JOLOKIA)) {
             metricClientType = MetricClientType.JOLOKIA;
-        } else if (config.hasPath(Jmx2LogzioJavaAgent.POLLER_MBEAN_DIRECT)) {
-            metricClientType = MetricClientType.MBEAN_PLATFORM;
-        }
-
-        if (this.metricClientType == MetricClientType.JOLOKIA) {
             if (!config.hasPath(JolokiaClient.JOLOKIA_FULL_URL)) {
                 throw new IllegalConfiguration("service.poller.jolokiaFullUrl has to be in the configuration file (application.conf)");
             }
@@ -84,9 +151,8 @@ public class Jmx2LogzioConfiguration {
             if (serviceHost == null) {
                 serviceHost = jolokiaHost;
             }
-
-        } else if (this.metricClientType == MetricClientType.MBEAN_PLATFORM) {
-
+        } else if (config.hasPath(POLLER_MBEAN_DIRECT)) {
+            metricClientType = MetricClientType.MBEAN_PLATFORM;
             // Try to find hostname as default to serviceHost in case it was not provided
             if (serviceHost == null) {
                 try {
@@ -95,102 +161,30 @@ public class Jmx2LogzioConfiguration {
                     throw new IllegalConfiguration("service.host was not defined, and could not determine it from the servers hostname");
                 }
             }
+        } else {
+            throw new IllegalConfiguration("Client type has to be either Jolokia or MBean");
         }
-        try {
-            whiteListPattern = Pattern.compile(config.hasPath(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX) ?
-                    config.getString(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX) : ".*");
-        } catch (Exception e) {
-            logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX), e.getMessage());
-            whiteListPattern = Pattern.compile(".*");
-        }
+    }
 
-        try { // $a is a regexp that will never match anything (will match an "a" character after the end of the string
-            blackListPattern = Pattern.compile(config.hasPath(Jmx2LogzioJavaAgent.BLACK_LIST_REGEX) ?
-                    config.getString(Jmx2LogzioJavaAgent.BLACK_LIST_REGEX) : "$a");
-        } catch (Exception e) {
-            logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX), e.getMessage());
-            blackListPattern = Pattern.compile("$a");
-        }
-
-        serviceName = config.getString(Jmx2LogzioJavaAgent.SERVICE_NAME);
-
-        logzioJavaSenderParams = new LogzioJavaSenderParams();
-        if (config.hasPath(LogzioJavaSenderParams.LISTENER_URL)) {
-            URL url = null;
-            try {
-                url = new URL(config.getString(LogzioJavaSenderParams.LISTENER_URL));
-                logzioJavaSenderParams.setUrl(url.toString());
-            } catch (MalformedURLException e) {
-                logger.error("malformed listener URL {} got error {}. Using default listener URL: {}",
-                        config.getString(LogzioJavaSenderParams.LISTENER_URL),e.getMessage(),logzioJavaSenderParams.getUrl());
-            }
-        }
-        if (config.getString(LogzioJavaSenderParams.LOGZIO_TOKEN).equals("<your_logz.io_token>")) {
-            throw new IllegalConfiguration("please enter a valid logz.io token (can be located at apps.logz.io >> settings >> general)");
-        }
-        logzioJavaSenderParams.setToken(config.getString(LogzioJavaSenderParams.LOGZIO_TOKEN));
-
-        logzioJavaSenderParams.setFromDisk(config.hasPath(LogzioJavaSenderParams.FROM_DISK) ?
-                config.getBoolean(LogzioJavaSenderParams.FROM_DISK) : logzioJavaSenderParams.isFromDisk());
-
-        if (config.hasPath(LogzioJavaSenderParams.IN_MEMORY_QUEUE_CAPACITY)) {
-            int capacity = config.getInt(LogzioJavaSenderParams.IN_MEMORY_QUEUE_CAPACITY);
-            if (capacity > 0) {
-                logzioJavaSenderParams.setInMemoryQueueCapacityInBytes(capacity);
+    private void setSingleConfig(Config config, String paramString, String errMsg, ConfigSetter setter, ConfigValidator validator) {
+        if (config.hasPath(paramString)) {
+            Object value = config.getObject(paramString);
+            if (validator.validatePredicate(value)) {
+                setter.setOperation(value);
             } else {
-                logger.error("argument IN_MEMORY_QUEUE_CAPACITY has to be a natural number, using default instead: {}",logzioJavaSenderParams.getInMemoryQueueCapacityInBytes());
+                logger.error(errMsg, value);
             }
         }
+    }
 
-        if (config.hasPath(LogzioJavaSenderParams.LOGS_COUNT_LIMIT)) {
-            int logCountLimit = config.getInt(LogzioJavaSenderParams.LOGS_COUNT_LIMIT);
-            if (logCountLimit > 0) {
-                logzioJavaSenderParams.setLogsCountLimit(logCountLimit);
-            } else {
-                logger.error("argument LOGS_COUNT_LIMIT has to be a natural number, using default instead: {}", logzioJavaSenderParams.getLogsCountLimit());
+    private void validateAndSetNatural(Config config, String arg, int defaultValue, ConfigSetter setter) {
+        ConfigValidator validator = new ConfigValidator() {
+            @Override
+            public boolean validatePredicate(Object result) {
+                return (int) result > 0;
             }
-        }
-
-        if (config.hasPath(LogzioJavaSenderParams.DISK_SPACE_CHECK_INTERVAL)) {
-            int interval = config.getInt(LogzioJavaSenderParams.DISK_SPACE_CHECK_INTERVAL);
-            if (interval > 0) {
-                logzioJavaSenderParams.setDiskSpaceCheckInterval(interval);
-            } else {
-                logger.error("argument DISK_SPACE_CHECKS_INTERVAL has to be a natural number, using default instead: {}", logzioJavaSenderParams.getDiskSpaceCheckInterval());
-            }
-        }
-
-        if (config.hasPath(LogzioJavaSenderParams.QUEUE_DIR)) {
-            File queuePath = new File(config.getString(LogzioJavaSenderParams.QUEUE_DIR));
-            logzioJavaSenderParams.setQueueDir(queuePath);
-        }
-
-        if (config.hasPath(LogzioJavaSenderParams.FILE_SYSTEM_SPACE_LIMIT)) {
-            int spaceLimit = config.getInt(LogzioJavaSenderParams.FILE_SYSTEM_SPACE_LIMIT);
-            if (spaceLimit > 0) {
-                logzioJavaSenderParams.setFileSystemFullPercentThreshold(spaceLimit);
-            } else {
-                logger.error("argument FILE_SYSTEM_SPACE_LIMIT has to be a natural number, using default instead: {}", logzioJavaSenderParams.getFileSystemFullPercentThreshold());
-            }
-        }
-
-        if (config.hasPath(LogzioJavaSenderParams.CLEAN_SENT_METRICS_INTERVAL)) {
-            int interval = config.getInt(LogzioJavaSenderParams.CLEAN_SENT_METRICS_INTERVAL);
-            if (interval > 0) {
-                logzioJavaSenderParams.setGcPersistedQueueFilesIntervalSeconds(interval);
-            } else {
-                logger.error("argument CLEAN_SENT_METRICS_INTERVAL has to be a natural number, using default instead: {}", logzioJavaSenderParams.getGcPersistedQueueFilesIntervalSeconds());
-            }
-        }
-
-        if (config.hasPath(Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL)) {
-            int interval = config.getInt(Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL);
-            if (interval > 0) {
-                metricsPollingIntervalInSeconds = interval;
-            } else {
-                logger.error("argument POLLING_INTERVAL_IN_SEC has to be a natural number, using default instead: {}", metricsPollingIntervalInSeconds);
-            }
-        }
+        };
+        setSingleConfig(config, arg, "argument " + arg + " has to be a natural number, using default instead: " + defaultValue, setter, validator);
     }
 
     public String getJolokiaFullUrl() {
