@@ -15,6 +15,8 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 
@@ -63,7 +65,7 @@ public class Jmx2LogzioConfiguration {
 
         ConfigSetter configSetter = (fromDisk) -> logzioJavaSenderParams.setFromDisk((boolean) fromDisk);
         setSingleConfig(config, JavaAgentClient.FROM_DISK, null, configSetter, new ConfigValidator() {
-        });
+        }, String.class);
 
         if (logzioJavaSenderParams.isFromDisk()) {
             setDiskStorageParams(config);
@@ -80,9 +82,9 @@ public class Jmx2LogzioConfiguration {
         ConfigSetter configSetter = (interval) -> logzioJavaSenderParams.setDiskSpaceCheckInterval((int) interval);
         validateAndSetNatural(config, JavaAgentClient.DISK_SPACE_CHECK_INTERVAL, logzioJavaSenderParams.getDiskSpaceCheckInterval(), configSetter);
 
-        configSetter = (queuePath) -> logzioJavaSenderParams.setQueueDir((File) queuePath);
+        configSetter = (queuePath) -> logzioJavaSenderParams.setQueueDir(new File((String) queuePath));
         setSingleConfig(config, JavaAgentClient.QUEUE_DIR, null, configSetter, new ConfigValidator() {
-        });
+        }, String.class);
 
         configSetter = (limit) -> logzioJavaSenderParams.setFileSystemFullPercentThreshold((int) limit);
         validateAndSetNatural(config, JavaAgentClient.FILE_SYSTEM_SPACE_LIMIT, logzioJavaSenderParams.getFileSystemFullPercentThreshold(), configSetter);
@@ -105,12 +107,14 @@ public class Jmx2LogzioConfiguration {
         ConfigValidator urlValidator = new ConfigValidator() {
             @Override
             public boolean validatePredicate(Object result) {
-                return UrlValidator.getInstance().isValid((String) result);
+                String urlString = (String) result;
+                urlString = urlString.substring(0,(urlString.indexOf(":")));
+                return UrlValidator.getInstance().isValid(urlString);
             }
         };
         String malformedURLMsg = "malformed listener URL {}. Using default listener URL: " + logzioJavaSenderParams.getUrl();
         ConfigSetter configSetter = (url) -> logzioJavaSenderParams.setUrl((String) url);
-        setSingleConfig(config, JavaAgentClient.QUEUE_DIR, malformedURLMsg, configSetter, urlValidator);
+        setSingleConfig(config, JavaAgentClient.LISTENER_URL, malformedURLMsg, configSetter, urlValidator, String.class);
     }
 
     private void setFilterPatterns(Config config) {
@@ -166,9 +170,14 @@ public class Jmx2LogzioConfiguration {
         }
     }
 
-    private void setSingleConfig(Config config, String paramString, String errMsg, ConfigSetter setter, ConfigValidator validator) {
+    private void setSingleConfig(Config config, String paramString, String errMsg, ConfigSetter setter, ConfigValidator validator, Class<?> configClass) {
         if (config.hasPath(paramString)) {
-            Object value = config.getObject(paramString);
+            Map<Class<?>, ConfigGetter> getValueByType = new HashMap<>();
+            getValueByType.put(String.class, config::getString);
+            getValueByType.put(Integer.class, config::getInt);
+            getValueByType.put(Boolean.class, config::getBoolean);
+            Object value = getValueByType.get(configClass).getConfig(paramString);
+
             if (validator.validatePredicate(value)) {
                 setter.setOperation(value);
             } else {
@@ -184,7 +193,7 @@ public class Jmx2LogzioConfiguration {
                 return (int) result > 0;
             }
         };
-        setSingleConfig(config, arg, "argument " + arg + " has to be a natural number, using default instead: " + defaultValue, setter, validator);
+        setSingleConfig(config, arg, "argument " + arg + " has to be a natural number, using default instead: " + defaultValue, setter, validator, int.class);
     }
 
     public String getJolokiaFullUrl() {
