@@ -21,14 +21,14 @@ import java.util.stream.Collectors;
 
 
 public class MetricsPipeline {
-    private static DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ").withZone(ZoneId.of("UTC"));
+    private static final DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ").withZone(ZoneId.of("UTC"));
     private static final Logger logger = LoggerFactory.getLogger(MetricsPipeline.class);
     private final Pattern beansWhiteListPattern;
     private final Pattern beansBlackListPattern;
-    private List<Dimension> metricsPrefix;
-    private int pollingIntervalSeconds;
+    private final List<Dimension> metricsPrefix;
+    private final int pollingIntervalSeconds;
     private final ListenerWriter listenerClient;
-    private MBeanClient client;
+    private final MBeanClient client;
 
     public MetricsPipeline(Jmx2LogzioConfiguration conf, MBeanClient client) {
         metricsPrefix = new ArrayList<>();
@@ -61,22 +61,18 @@ public class MetricsPipeline {
             List<MetricBean> beans = client.getBeans();
             List<MetricBean> filteredBeans = getFilteredBeans(beans);
 
-            logger.info("Found {} metric beans and after filtering list work with {} . Time = {}ms, for {}", beans.size(), filteredBeans.size(),
+            logger.debug("Found {} metric beans and after filtering list work with {} . Time = {}ms, for {}", beans.size(), filteredBeans.size(),
                     sw.stop().elapsed(TimeUnit.MILLISECONDS),
                     timestampFormatter.format(pollingWindowStart));
 
             sw.reset().start();
             List<Metric> metrics = client.getMetrics(filteredBeans);
-            logger.info("metrics fetched. Time: {} ms; Metrics: {}", sw.stop().elapsed(TimeUnit.MILLISECONDS), metrics.size());
+            logger.debug("metrics fetched. Time: {} ms; Metrics: {}", sw.stop().elapsed(TimeUnit.MILLISECONDS), metrics.size());
             if (logger.isTraceEnabled()) printToFile(metrics);
             return changeTimeTo(pollingWindowStart, metrics);
 
         } catch (MBeanClient.MBeanClientPollingFailure e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed polling metrics from client ({}): {}", client.getClass().toString(), e.getMessage(), e);
-            } else {
-                logger.warn("Failed polling metrics from client ({}): {}", client.getClass().toString(), e.getMessage());
-            }
+            logger.warn("Failed polling metrics from client ({}): {}", client.getClass().toString(), e.getMessage());
             return null;
         }
     }

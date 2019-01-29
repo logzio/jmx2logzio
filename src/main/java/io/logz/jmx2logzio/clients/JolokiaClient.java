@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
@@ -35,20 +36,48 @@ public class JolokiaClient extends MBeanClient {
 
     public static final String POLLER_JOLOKIA = "service.poller.jolokia";
     public static final String JOLOKIA_FULL_URL = "service.poller.jolokia.jolokiaFullUrl";
+
+    public static final String LISTENER_URL = "LISTENER_URL";
+    public static final String WHITE_LIST_REGEX = "WHITE_LIST_REGEX";
+    public static final String BLACK_LIST_REGEX = "BLACK_LIST_REGEX";
+    public static final String LOGZIO_TOKEN = "LOGZIO_TOKEN";
+    public static final String SERVICE_NAME = "SERVICE_NAME";
+    public static final String SERVICE_HOST = "SERVICE_HOST";
+    public static final String POLLING_INTERVAL_IN_SEC = "POLLING_INTERVAL_IN_SEC";
+    public static final String FROM_DISK = "FROM_DISK";
+    public static final String IN_MEMORY_QUEUE_CAPACITY = "IN_MEMORY_QUEUE_CAPACITY";
+    public static final String LOGS_COUNT_LIMIT = "LOGS_COUNT_LIMIT";
+    public static final String DISK_SPACE_CHECKS_INTERVAL = "DISK_SPACE_CHECKS_INTERVAL";
+    public static final String QUEUE_DIR = "QUEUE_DIR";
+    public static final String FILE_SYSTEM_SPACE_LIMIT = "FILE_SYSTEM_SPACE_LIMIT";
+    public static final String CLEAN_SENT_METRICS_INTERVAL = "CLEAN_SENT_METRICS_INTERVAL";
     private static final Logger logger = LoggerFactory.getLogger(JolokiaClient.class);
 
-    private String jolokiaFullURL;
-    private int connectTimeout = (int) TimeUnit.SECONDS.toMillis(30);
-    private int socketTimeout = (int) TimeUnit.SECONDS.toMillis(30);
+    private static final String REQUEST_MBEAN_KEY = "mbean";
+    private static final String RESPONSE_REQUEST_KEY = "request";
+    private static final String RESPONSE_STATUS_KEY = "status";
+    private static final String RESPONSE_ERROR_KEY = "error";
+    private static final String RESPONSE_STACKTRACE_KEY = "stacktrace";
+    private static final String RESPONSE_TIMESTAMP_KEY = "timestamp";
+    private static final String RESPONSE_VALUE_KEY = "value";
+    private static final String MBEAN_ATTR_KEY = "attr";
+    private static final int SERVICE_NAME_INDEX = 0;
+    private static final int ARGUMENTS_INDEX = 1;
+    private static final int ARGUMENT_KEY_INDEX = 0;
+    private static final int ARGUMENT_VALUE_INDEX = 1;
 
-    private ObjectMapper objectMapper;
-    private Stopwatch stopwatch = Stopwatch.createUnstarted();
+    private String jolokiaFullURL;
+    private final int connectTimeout = (int) TimeUnit.SECONDS.toMillis(30);
+    private final int socketTimeout = (int) TimeUnit.SECONDS.toMillis(30);
+
+    private final ObjectMapper objectMapper;
+    private final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
     public JolokiaClient(String jolokiaFullURL) {
 
         this.jolokiaFullURL = jolokiaFullURL;
         if (!jolokiaFullURL.endsWith("/")) {
-            this.jolokiaFullURL = jolokiaFullURL +"/";
+            this.jolokiaFullURL = jolokiaFullURL + "/";
         }
         objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -64,17 +93,17 @@ public class JolokiaClient extends MBeanClient {
                     .execute().returnResponse();
             logger.debug("GET /list from jolokia took {} ms", stopwatch.stop().elapsed(TimeUnit.DAYS.MILLISECONDS));
             if (httpResponse.getStatusLine().getStatusCode() != 200) {
-                throw new RuntimeException("Failed listing beans from jolokia. Response = "+httpResponse.getStatusLine());
+                throw new RuntimeException("Failed listing beans from jolokia. Response = " + httpResponse.getStatusLine());
             }
 
             Map<String, Object> listResponse = objectMapper.readValue(httpResponse.getEntity().getContent(), Map.class);
-            Map<String, Object> domains = (Map<String, Object>) listResponse.get("value");
+            Map<String, Object> domains = (Map<String, Object>) listResponse.get(RESPONSE_VALUE_KEY);
             if (domains == null) {
                 throw new RuntimeException("Response doesn't have value attribute expected from a list response");
             }
             return extractMetricsBeans(domains);
-        } catch (URISyntaxException  | IOException e) {
-            throw new MBeanClientPollingFailure("Failed retrieving list of beans from Jolokia. Error = "+e.getMessage(), e);
+        } catch (URISyntaxException | IOException e) {
+            throw new MBeanClientPollingFailure("Failed retrieving list of beans from Jolokia. Error = " + e.getMessage(), e);
         }
     }
 
@@ -87,73 +116,83 @@ public class JolokiaClient extends MBeanClient {
         try {
             String requestBody = objectMapper.writeValueAsString(readRequests);
             if (logger.isTraceEnabled()) logger.trace("Jolokia getBeans request body: {}", requestBody);
+            HttpResponse httpResponse = getHttpResponse(jolokiaFullURL, requestBody);
+            String responseBody = IOUtils.toString(httpResponse.getEntity().getContent(), "UTF-8");
 
-            HttpResponse httpResponse = Post(jolokiaFullURL+"read?ignoreErrors=true&canonicalNaming=false")
-                    .connectTimeout(connectTimeout)
-                    .socketTimeout(socketTimeout)
-                    .bodyString(requestBody, ContentType.APPLICATION_JSON)
-                    .execute().returnResponse();
-
-            if (httpResponse.getStatusLine().getStatusCode() != 200) {
-                throw new RuntimeException("Failed reading beans from jolokia. Response = "+httpResponse.getStatusLine());
+            if (logger.isTraceEnabled()) {
+                logger.trace("Jolokia getBeans response:\n{}", responseBody);
             }
-
-            String responseBody =  IOUtils.toString(httpResponse.getEntity().getContent(), "UTF-8");
-
-            if (logger.isTraceEnabled()) logger.trace("Jolokia getBeans response:\n{}", responseBody);
-
             ArrayList<Map<String, Object>> responses = objectMapper.readValue(responseBody, ArrayList.class);
 
             List<Metric> metrics = Lists.newArrayList();
             for (Map<String, Object> response : responses) {
-                Map<String, Object> request = (Map<String, Object>) response.get("request");
-                String mBeanName = (String) request.get("mbean");
-                int status = (int) response.get("status");
-                if (status != 200) {
-                    String errMsg = "Failed reading mbean '" + mBeanName +"': "+status+" - "+response.get("error");
-                    if (logger.isDebugEnabled()) {
-                        logger.debug(errMsg +". Stacktrace = {}", response.get("stacktrace"));
-                    } else {
-                        logger.warn(errMsg);
-                    }
-                    continue;
-                }
-                Instant metricTime =  Instant.ofEpochMilli((int) response.get("timestamp"));
-                String[] serviceNameAndArgs = mBeanName.split(":");
-                if (serviceNameAndArgs.length != 2 ){
-                    logger.debug("metric name {} not valid", mBeanName);
-                    continue;
-                }
-
-                String serviceName = serviceNameAndArgs[0];
-                String argsString = Metric.DOMAIN_NAME + "=" + serviceName + "," + serviceNameAndArgs[1];
-                List<Dimension> dimensions = Splitter.on(',').splitToList(argsString).stream().map(this::stringArgToDimension).collect(Collectors.toList());
-
-                Map<String, Object> attrValues = (Map<String, Object>) response.get("value");
-                Map<String, Number> metricToValue = flatten(attrValues);
-                for (String attrMetricName : metricToValue.keySet()) {
-                    try {
-                        metrics.add(new Metric(
-                                attrMetricName,
-                                metricToValue.get(attrMetricName),
-                                metricTime,
-                                dimensions
-                        ));
-                    } catch (IllegalArgumentException e) {
-                        logger.info("Can't sent Metric since it's invalid: "+e.getMessage());
-                    }
-                }
+                metrics.addAll(getMetricsForResponse(response));
             }
-
             return metrics;
         } catch (IOException e) {
-            throw new MBeanClientPollingFailure("Failed reading beans from Jolokia. Error = "+e.getMessage(), e);
+            throw new MBeanClientPollingFailure("Failed reading beans from Jolokia. Error = " + e.getMessage(), e);
         }
     }
 
-    private Dimension stringArgToDimension(String arg){
+    private List<Metric> getMetricsForResponse(Map<String, Object> response) {
+        Map<String, Object> request = (Map<String, Object>) response.get(RESPONSE_REQUEST_KEY);
+        String mBeanName = (String) request.get(REQUEST_MBEAN_KEY);
+        int status = (int) response.get(RESPONSE_STATUS_KEY);
+        if (status != HttpURLConnection.HTTP_OK) {
+            String errMsg = "Failed reading mbean '" + mBeanName + "': " + status + " - " + response.get(RESPONSE_ERROR_KEY);
+            logger.warn(errMsg + ". Stacktrace = {}", response.get(RESPONSE_STACKTRACE_KEY));
+            return new ArrayList<>();
+        }
+        Instant metricTime = Instant.ofEpochMilli((int) response.get(RESPONSE_TIMESTAMP_KEY));
+        String[] serviceNameAndArgs = mBeanName.split(":");
+        if (serviceNameAndArgs.length != 2) {
+            logger.debug("metric name {} not valid", mBeanName);
+            return new ArrayList<>();
+        }
+
+        String serviceName = serviceNameAndArgs[SERVICE_NAME_INDEX];
+        String argsString = Metric.DOMAIN_NAME + "=" + serviceName + "," + serviceNameAndArgs[ARGUMENTS_INDEX];
+        List<Dimension> dimensions = Splitter.on(',').splitToList(argsString).stream().map(this::stringArgToDimension).collect(Collectors.toList());
+
+        Map<String, Object> attrValues = (Map<String, Object>) response.get(RESPONSE_VALUE_KEY);
+        Map<String, Number> metricToValue = flatten(attrValues);
+        List<Metric> metrics = new ArrayList<>();
+        for (String attrMetricName : metricToValue.keySet()) {
+            try {
+                metrics.add(new Metric(
+                        attrMetricName,
+                        metricToValue.get(attrMetricName),
+                        metricTime,
+                        dimensions
+                ));
+            } catch (IllegalArgumentException e) {
+                logger.error("Can't send Metric since it's invalid: " + e.getMessage());
+            }
+        }
+        return metrics;
+    }
+
+    private HttpResponse getHttpResponse(String jolokiaFullURL, String requestBody) {
+        HttpResponse httpResponse;
+        try {
+            httpResponse = Post(jolokiaFullURL + "read?ignoreErrors=true&canonicalNaming=false")
+                    .connectTimeout(connectTimeout)
+                    .socketTimeout(socketTimeout)
+                    .bodyString(requestBody, ContentType.APPLICATION_JSON)
+                    .execute().returnResponse();
+        } catch (IOException e) {
+            throw new MBeanClientPollingFailure("Failed reading beans from Jolokia. Error = " + e.getMessage(), e);
+        }
+
+        if (httpResponse.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
+            throw new RuntimeException("Failed reading beans from jolokia. Response = " + httpResponse.getStatusLine());
+        }
+        return httpResponse;
+    }
+
+    private Dimension stringArgToDimension(String arg) {
         String[] argKeyVale = arg.split("=");
-        Dimension dimension = new Dimension(argKeyVale[0], argKeyVale.length > 1 ? argKeyVale[1] : "");
+        Dimension dimension = new Dimension(argKeyVale[ARGUMENT_KEY_INDEX], argKeyVale.length > 1 ? argKeyVale[ARGUMENT_VALUE_INDEX] : "");
         return dimension;
     }
 
@@ -163,7 +202,7 @@ public class JolokiaClient extends MBeanClient {
             Map<String, Object> domain = (Map<String, Object>) domains.get(domainName);
             for (String mbeanName : domain.keySet()) {
                 Map<String, Object> mbean = (Map<String, Object>) domain.get(mbeanName);
-                Map<String, Object> attributes = (Map<String, Object>) mbean.get("attr");
+                Map<String, Object> attributes = (Map<String, Object>) mbean.get(MBEAN_ATTR_KEY);
 
                 if (attributes != null) {
                     List<String> attrNames = new ArrayList<String>(attributes.keySet());
@@ -187,10 +226,8 @@ public class JolokiaClient extends MBeanClient {
                                     + sanitizeMetricName(internalMetricName, /*keepDot*/ false),
                             flattenValueTree.get(internalMetricName));
                 }
-            } else {
-                if (value instanceof Number) {
-                    metricValues.put(sanitizeMetricName(key, /*keepDot*/ false), (Number) value);
-                }
+            } else if (value instanceof Number) {
+                metricValues.put(sanitizeMetricName(key, /*keepDot*/ false), (Number) value);
             }
         }
         return metricValues;

@@ -4,16 +4,6 @@ import java.io.File;
 
 public class LogzioJavaSenderParams {
 
-    public static String LISTENER_URL = "logzioJavaSender.url";
-    public static String LOGZIO_TOKEN = "logzioJavaSender.token";
-    public static String FROM_DISK = "logzioJavaSender.from-disk";
-    public static String IN_MEMORY_QUEUE_CAPACITY = "logzioJavaSender.in-memory-queue-capacity";
-    public static String LOGS_COUNT_LIMIT = "logzioJavaSender.log-count-limit";
-    public static String DISK_SPACE_CHECK_INTERVAL = "logzioJavaSender.disk-space-checks-interval";
-    public static String QUEUE_DIR = "logzioJavaSender.queue-dir";
-    public static String FILE_SYSTEM_SPACE_LIMIT = "logzioJavaSender.file-system-full-percent-threshold";
-    public static String CLEAN_SENT_METRICS_INTERVAL = "logzioJavaSender.clean-sent-metrics-interval";
-
 
     private String url = "https://listener.logz.io:8071";
     private String type = "jmx2LogzioType";

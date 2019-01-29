@@ -6,40 +6,32 @@ import io.logz.jmx2logzio.Utils.Shutdownable;
 import io.logz.jmx2logzio.clients.JavaAgentClient;
 import io.logz.jmx2logzio.clients.JolokiaClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
-import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import io.logz.jmx2logzio.objects.MBeanClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration.MetricClientType.JOLOKIA;
-import static io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration.MetricClientType.MBEAN_PLATFORM;
+import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 public class Jmx2Logzio implements Shutdownable {
 
     private static final Logger logger = LoggerFactory.getLogger(Jmx2Logzio.class);
 
     private final Jmx2LogzioConfiguration conf;
-    private final ScheduledThreadPoolExecutor taskScheduler;
+    private final ScheduledExecutorService taskScheduler;
     private final MBeanClient client;
 
     public Jmx2Logzio(Jmx2LogzioConfiguration conf) {
         this.conf = conf;
 
-        this.taskScheduler = new ScheduledThreadPoolExecutor(1);
+        this.taskScheduler = newSingleThreadScheduledExecutor();
 
-        if (conf.getMetricClientType() == JOLOKIA) {
-            this.client = new JolokiaClient(conf.getJolokiaFullUrl());
-            logger.info("Running with Jolokia URL: {}", conf.getJolokiaFullUrl());
-
-        } else if (conf.getMetricClientType() == MBEAN_PLATFORM) {
-            this.client = new JavaAgentClient();
-            logger.info("Running with Mbean client");
-        } else {
-            throw new IllegalConfiguration("Unsupported client type: " + conf.getMetricClientType());
-        }
+        this.client = conf.getMetricClientType() == JOLOKIA ? new JolokiaClient(conf.getJolokiaFullUrl()) : new JavaAgentClient();
+        String clientString = conf.getMetricClientType() == JOLOKIA ? "Jolokia agent URL: " + conf.getJolokiaFullUrl() : "Mbean client";
+        logger.info("Running with {}", clientString);
     }
 
     public void run() {
@@ -58,15 +50,7 @@ public class Jmx2Logzio implements Shutdownable {
     @Override
     public void shutdown() {
         logger.info("Shutting down...");
-        try {
-            taskScheduler.shutdown();
-            taskScheduler.awaitTermination(20, TimeUnit.SECONDS);
-            taskScheduler.shutdownNow();
-        } catch (InterruptedException e) {
-            logger.error("error shutting down: {}", e.getMessage());
-            Thread.interrupted();
-            taskScheduler.shutdownNow();
-        }
+        taskScheduler.shutdownNow();
     }
 
     /**
