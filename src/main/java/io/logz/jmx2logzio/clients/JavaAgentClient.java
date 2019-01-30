@@ -1,0 +1,226 @@
+package io.logz.jmx2logzio.clients;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import io.logz.jmx2logzio.MetricBean;
+
+import io.logz.jmx2logzio.Utils.Predicator;
+import io.logz.jmx2logzio.configuration.ConfigGetter;
+import io.logz.jmx2logzio.objects.Dimension;
+import io.logz.jmx2logzio.objects.MBeanClient;
+import io.logz.jmx2logzio.objects.Metric;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.management.*;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.TabularData;
+import java.lang.management.ManagementFactory;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static io.logz.jmx2logzio.Utils.MetricsUtils.sanitizeMetricName;
+
+public class JavaAgentClient extends MBeanClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(JavaAgentClient.class);
+    private static final int DIMENSION_INDEX = 1;
+    private static final int DOMAIN_NAME_INDEX = 0;
+    private static final int ARGUMENT_KEY_INDEX = 0;
+    private static final int ARGUMENT_VALUE_INDEX = 1;
+    public static String LISTENER_URL = "logzio-java-sender.url";
+    public static String LOGZIO_TOKEN = "logzio-java-sender.token";
+    public static String FROM_DISK = "logzio-java-sender.from-disk";
+    public static String IN_MEMORY_QUEUE_CAPACITY = "logzio-java-sender.in-memory-queue-capacity";
+    public static String LOGS_COUNT_LIMIT = "logzio-java-sender.log-count-limit";
+    public static String DISK_SPACE_CHECK_INTERVAL = "logzio-java-sender.disk-space-checks-interval";
+    public static String QUEUE_DIR = "logzio-java-sender.queue-dir";
+    public static String FILE_SYSTEM_SPACE_LIMIT = "logzio-java-sender.file-system-full-percent-threshold";
+    public static String CLEAN_SENT_METRICS_INTERVAL = "logzio-java-sender.clean-sent-metrics-interval";
+
+    private final MBeanServer server;
+    private final ObjectMapper objectMapper;
+
+    public JavaAgentClient() {
+
+        server = ManagementFactory.getPlatformMBeanServer();
+
+        // The visibility section here is to tell Jackson that we want it to get over all the object properties and not only the getters
+        // If we wont set it, then it will fetch only partial info from the MBean objects
+        objectMapper = new ObjectMapper();
+        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+    }
+
+    @Override
+    public List<MetricBean> getBeans() throws MBeanClientPollingFailure {
+
+        try {
+            List<MetricBean> metricBeans = Lists.newArrayList();
+            Set<ObjectInstance> instances = server.queryMBeans(null, null);
+
+            for (ObjectInstance instance : instances) {
+                MBeanInfo mBeanInfo = server.getMBeanInfo(instance.getObjectName());
+                List<String> attributes = Lists.newArrayList();
+
+                for (MBeanAttributeInfo attribute : mBeanInfo.getAttributes()) {
+                    attributes.add(attribute.getName());
+                }
+
+                // Dont change to getCanonicalName(), we need it to preserve the order so we can have a valuable metrics tree
+                metricBeans.add(new MetricBean(instance.getObjectName().getDomain() + ":" + instance.getObjectName().getKeyPropertyListString(), attributes));
+            }
+            return metricBeans;
+
+        } catch (IntrospectionException | ReflectionException | InstanceNotFoundException e) {
+            throw new MBeanClientPollingFailure(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<Metric> getMetrics(List<MetricBean> beans) throws MBeanClientPollingFailure {
+        List<Metric> metrics = Lists.newArrayList();
+        for (MetricBean metricBean : beans) {
+            List<Dimension> dimensions = getDimensions(metricBean);
+            if (dimensions != null) {
+                metrics.addAll(getMetricsForBean(metricBean, dimensions));
+            }
+        }
+        return metrics;
+    }
+
+    private List<Metric> getMetricsForBean(MetricBean metricBean, List<Dimension> dimensions) {
+        List<Metric> metrics = Lists.newArrayList();
+        Instant metricTime = Instant.now();
+        try {
+            AttributeList attributeList = server.getAttributes(new ObjectName(metricBean.getName()),
+                    metricBean.getAttributes().toArray(new String[0]));
+
+            Map<String, Object> attrValues = new HashMap<>(attributeList.size());
+            attributeList.asList().forEach((attr) ->
+                    attrValues.put(attr.getName(), attr.getValue()));
+
+            Map<String, Number> metricToValue = flatten(attrValues);
+
+            for (String attrMetricName : metricToValue.keySet()) {
+                try {
+                    metrics.add(new Metric(
+                            attrMetricName,
+                            metricToValue.get(attrMetricName),
+                            metricTime,
+                            dimensions
+                    ));
+                } catch (IllegalArgumentException e) {
+                    logger.warn("Failed converting metric name to Logz.io-friendly name: metricsBean.getName = {}, attrMetricName = {}", metricBean.getName(), attrMetricName, e);
+                }
+            }
+        } catch (MalformedObjectNameException | ReflectionException | InstanceNotFoundException | IllegalArgumentException e) {
+            throw new MBeanClientPollingFailure("Failed to poll Mbean " + e.getMessage(), e);
+        }
+        return metrics;
+    }
+
+    private List<Dimension> getDimensions(MetricBean metricBean) {
+        String[] domainNameAndOtherDimensions = metricBean.getName().split(":");
+
+        if (domainNameAndOtherDimensions.length < 2) {
+            logger.error("metric full path: {} doesn't have domain name and dimensions", metricBean.getName());
+            return null;
+        }
+
+        List<Dimension> dimensions = Splitter.on(',')
+                .splitToList(domainNameAndOtherDimensions[DIMENSION_INDEX])
+                .stream()
+                .map(this::stringArgToDimension)
+                .collect(Collectors.toList());
+        dimensions.add(0, new Dimension("domainName", domainNameAndOtherDimensions[DOMAIN_NAME_INDEX]));
+        return dimensions;
+    }
+
+    private Dimension stringArgToDimension(String arg) {
+        String[] argKeyVale = arg.split("=");
+        Dimension dimension = new Dimension(sanitizeMetricName(argKeyVale[ARGUMENT_KEY_INDEX], false), argKeyVale.length > 1 ? sanitizeMetricName(argKeyVale[ARGUMENT_VALUE_INDEX], false) : "");
+        return dimension;
+    }
+
+    private Map<String, Number> flatten(Map<String, Object> attrValues) {
+
+        final Map<String, Number> metricValues = Maps.newHashMap();
+        for (final String key : attrValues.keySet()) {
+            final Object value = attrValues.get(key);
+            if (value == null || value.getClass().isArray()) {
+                continue;
+            }
+            Map<Predicator, Runnable> addValuesByType = new HashMap<>();
+            addValuesByType.put((obj) -> obj instanceof Number, () -> metricValues.put(sanitizeMetricName(key, /*keepDot*/ false), (Number) value));
+            addValuesByType.put((obj) -> obj instanceof CompositeData, () -> {
+                CompositeData data = (CompositeData) value;
+                Map<String, Object> valueMap = handleCompositeData(data);
+                metricValues.putAll(prependKey(key, flatten(valueMap)));
+            });
+            addValuesByType.put((obj) -> obj instanceof TabularData, () -> {
+                TabularData tabularData = (TabularData) value;
+                Map<String, Object> rowKeyToRowData = handleTabularData(tabularData);
+                metricValues.putAll(prependKey(key, flatten(rowKeyToRowData)));
+            });
+            addValuesByType.put((obj) -> obj instanceof String, () -> {});
+            addValuesByType.put((obj) -> obj instanceof Boolean, () -> {});
+
+            Optional<Map.Entry<Predicator, Runnable>> resultEntry = addValuesByType.entrySet().stream().filter(entry -> entry.getKey().validatePredicate(value)).findFirst();
+            if (!resultEntry.equals(Optional.empty())) {
+                resultEntry.get().getValue().run();
+            } else {
+                Map<String, Object> valueMap;
+                try {
+                    valueMap = objectMapper.convertValue(value, new TypeReference<Map<String, Object>>() {});
+                    metricValues.putAll(prependKey(key, flatten(valueMap)));
+                } catch (Exception e) {
+                    logger.trace("Can't convert attribute named {} with class type {}", key, value.getClass().getCanonicalName());
+                }
+            }
+
+        }
+        return metricValues;
+    }
+
+    private Map<String, Object> handleTabularData(TabularData tabularData) {
+        Map<String, Object> rowKeyToRowData = new HashMap<>();
+
+        tabularData.keySet().forEach(rowKey -> {
+            List<?> rowKeyAsList = (List<?>) rowKey;
+            rowKeyToRowData.put(createKey(rowKeyAsList), tabularData.get(rowKeyAsList.toArray()));
+        });
+        return rowKeyToRowData;
+    }
+
+    private Map<String, Object> handleCompositeData(CompositeData data) {
+        Map<String, Object> valueMap = new HashMap<>();
+
+        data.getCompositeType().keySet().forEach(compositeKey -> {
+            valueMap.put(compositeKey, data.get(compositeKey));
+        });
+        return valueMap;
+    }
+
+    private String createKey(List<?> rowKeyAsList) {
+        return Joiner.on('_').join(rowKeyAsList);
+    }
+
+    private Map<String, Number> prependKey(String key, Map<String, Number> keyToNumber) {
+        Map<String, Number> result = new HashMap<>();
+        for (String internalMetricName : keyToNumber.keySet()) {
+            String resultKey = key.equalsIgnoreCase("value") ? sanitizeMetricName(internalMetricName, /*keepDot*/ false) :
+                    sanitizeMetricName(key, /*keepDot*/ false) + "." + sanitizeMetricName(internalMetricName, /*keepDot*/ false);
+            result.put(resultKey, keyToNumber.get(internalMetricName));
+        }
+        return result;
+    }
+
+}
