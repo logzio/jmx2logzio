@@ -123,26 +123,26 @@ Open jmx2logzio/src/main/resources/application.config in a text editor, and set 
 | **service.poller.white-list-regex** | Only metrics matching this regex will be sent. <br /> **Default**: `.*` (match everything) |
 | **service.poller.black-list-regex** | Metrics matching this regex will not be sent. <br /> **Default**: `$a` (match nothing) |
 | **service.poller.jolokia.jolokiaFullUrl** | URL of the remote Jolokia agent you're forwarding metrics to. |
-| **metricsPollingIntervalInSeconds** | Metrics polling interval, in seconds. <br /> **Default**: `30` |
-| **logzioJavaSender.url** | Listener URL and port. <br /> If your login URL is app.logz.io, use `listener.logz.io`. If your login URL is app-eu.logz.io, use `listener-eu.logz.io`. <br /> **Default**: `https://listener.logz.io:8071` |
-| **logzioJavaSender.token** | **Required**. Your Logz.io [account token](https://app.logz.io/#/dashboard/settings/manage-accounts) |
-| **logzioJavaSender.from-disk** | If `true`, metrics are stored on disk until they're shipped (see [If from-disk=true](#jolokia-if-fromdisk-true)). If `false`, metrics persist in memory until they're shipped (see see [If from-disk=false](#jolokia-if-fromdisk-false)). <br /> **Default**: `true` |
+| **service.poller.metrics-polling-interval-in-seconds** | Metrics polling interval, in seconds. <br /> **Default**: `30` |
+| **logzio-java-sender.url** | Listener URL and port. <br /> If your login URL is app.logz.io, use `listener.logz.io`. If your login URL is app-eu.logz.io, use `listener-eu.logz.io`. <br /> **Default**: `https://listener.logz.io:8071` |
+| **logzio-java-sender.token** | **Required**. Your Logz.io [account token](https://app.logz.io/#/dashboard/settings/manage-accounts) |
+| **logzio-java-sender.from-disk** | If `true`, metrics are stored on disk until they're shipped (see [If from-disk=true](#jolokia-if-fromdisk-true)). If `false`, metrics persist in memory until they're shipped (see see [If from-disk=false](#jolokia-if-fromdisk-false)). <br /> **Default**: `true` |
 
 <h4 id="jolokia-if-fromdisk-true">If from-disk=true</h4>
 
 | Parameter | Description |
 |---|---|
-| **logzioJavaSender.queue-dir** | Path to store the queue. Must be a path to an existing folder. <br /> **Default** `metrics` |
-| **logzioJavaSender.file-system-full-percent-threshold** | Threshold percentage of disk space at which to stop queueing. If this threshold is reached, all new metrics are dropped until used space drops below the threshold. Set to `-1` to ignore threshold. <br /> **Default**: `98` |
-| **logzioJavaSender.clean-sent-metrics-interval** | Time interval, in seconds, to clean sent metrics from the disk <br /> **Default**: `30` |
-| **logzioJavaSender.disk-space-checks-interval** | Time interval, in milliseconds, to check for disk space <br /> **Default**: `1000` |
+| **logzio-java-sender.queue-dir** | Path to store the queue. Must be a path to an existing folder. <br /> **Default** `metrics` |
+| **logzio-java-sender.file-system-full-percent-threshold** | Threshold percentage of disk space at which to stop queueing. If this threshold is reached, all new metrics are dropped until used space drops below the threshold. Set to `-1` to ignore threshold. <br /> **Default**: `98` |
+| **logzio-java-sender.clean-sent-metrics-interval** | Time interval, in seconds, to clean sent metrics from the disk <br /> **Default**: `30` |
+| **logzio-java-sender.disk-space-checks-interval** | Time interval, in milliseconds, to check for disk space <br /> **Default**: `1000` |
 
 <h4 id="jolokia-if-fromdisk-false">If from-disk=false</h4>
 
 | Parameter | Description |
 |---|---|
-| **logzioJavaSender.in-memory-queue-capacity** | The amount of memory, in bytes, jmx2logzio can use for the memory queue. Set to `-1` for unlimited bytes. <br /> **Default**: `1024 * 1024 * 100` |
-| **logzioJavaSender.log-count-limit** | The number of logs in the memory queue before dropping new logs. Default value is -1 (the sender will not limit the queue by logs count) <br /> **Default:** `-1` |
+| **logzio-java-sender.in-memory-queue-capacity** | The amount of memory, in bytes, jmx2logzio can use for the memory queue. Set to `-1` for unlimited bytes. <br /> **Default**: `1024 * 1024 * 100` |
+| **logzio-java-sender.log-count-limit** | The number of logs in the memory queue before dropping new logs. Default value is -1 (the sender will not limit the queue by logs count) <br /> **Default:** `-1` |
 
 
 ### 3. Build and run jmx2logzio
