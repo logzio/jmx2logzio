@@ -35,7 +35,7 @@ public class LogzioSenderTest {
     private MockServerClient mockServerClient = null;
 
     @BeforeTest
-    private void startMock() {
+    private void startMockServer() {
         logger.info("starting mock server");
         mockServer = startClientAndServer(8070);
 

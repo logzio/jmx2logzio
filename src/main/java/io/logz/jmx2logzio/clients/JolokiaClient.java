@@ -116,7 +116,7 @@ public class JolokiaClient extends MBeanClient {
         try {
             String requestBody = objectMapper.writeValueAsString(readRequests);
             if (logger.isTraceEnabled()) logger.trace("Jolokia getBeans request body: {}", requestBody);
-            HttpResponse httpResponse = getHttpResponse(jolokiaFullURL, requestBody);
+            HttpResponse httpResponse = sendToJolokia(jolokiaFullURL, requestBody);
             String responseBody = IOUtils.toString(httpResponse.getEntity().getContent(), "UTF-8");
 
             if (logger.isTraceEnabled()) {
@@ -139,8 +139,8 @@ public class JolokiaClient extends MBeanClient {
         String mBeanName = (String) request.get(REQUEST_MBEAN_KEY);
         int status = (int) response.get(RESPONSE_STATUS_KEY);
         if (status != HttpURLConnection.HTTP_OK) {
-            String errMsg = "Failed reading mbean '" + mBeanName + "': " + status + " - " + response.get(RESPONSE_ERROR_KEY);
-            logger.warn(errMsg + ". Stacktrace = {}", response.get(RESPONSE_STACKTRACE_KEY));
+            logger.warn("Failed reading mbean '" + mBeanName + "': " + status + " - " + response.get(RESPONSE_ERROR_KEY) +
+                    ". Stacktrace = {}", response.get(RESPONSE_STACKTRACE_KEY));
             return new ArrayList<>();
         }
         Instant metricTime = Instant.ofEpochMilli((int) response.get(RESPONSE_TIMESTAMP_KEY));
@@ -172,7 +172,7 @@ public class JolokiaClient extends MBeanClient {
         return metrics;
     }
 
-    private HttpResponse getHttpResponse(String jolokiaFullURL, String requestBody) {
+    private HttpResponse sendToJolokia(String jolokiaFullURL, String requestBody) {
         HttpResponse httpResponse;
         try {
             httpResponse = Post(jolokiaFullURL + "read?ignoreErrors=true&canonicalNaming=false")

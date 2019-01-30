@@ -89,10 +89,9 @@ public class JavaAgentClient extends MBeanClient {
         List<Metric> metrics = Lists.newArrayList();
         for (MetricBean metricBean : beans) {
             List<Dimension> dimensions = getDimensions(metricBean);
-            if (dimensions == null) {
-                continue;
+            if (dimensions != null) {
+                metrics.addAll(getMetricsForBean(metricBean, dimensions));
             }
-            metrics.addAll(getMetricsForBean(metricBean, dimensions));
         }
         return metrics;
     }
