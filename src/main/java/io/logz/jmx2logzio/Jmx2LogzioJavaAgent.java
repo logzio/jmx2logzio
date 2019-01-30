@@ -20,7 +20,7 @@ public class Jmx2LogzioJavaAgent {
     public static final String BLACK_LIST_REGEX = "service.poller.black-list-regex";
     public static final String SERVICE_NAME = "service.name";
     public static final String SERVICE_HOST = "service.host";
-    public static final String METRICS_POLLING_INTERVAL = "poller.metrics-polling-interval-in-seconds";
+    public static final String METRICS_POLLING_INTERVAL = "service.poller.metrics-polling-interval-in-seconds";
 
     private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioJavaAgent.class);
     private static final String JAVA_AGENT_CONFIGURATION_FILE = "javaagent.conf";
