@@ -10,6 +10,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.logz.jmx2logzio.MetricBean;
 
+import io.logz.jmx2logzio.Utils.Predicator;
+import io.logz.jmx2logzio.configuration.ConfigGetter;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.MBeanClient;
 import io.logz.jmx2logzio.objects.Metric;
@@ -117,11 +119,11 @@ public class JavaAgentClient extends MBeanClient {
                             dimensions
                     ));
                 } catch (IllegalArgumentException e) {
-                    logger.info("Failed converting metric name to Logz.io-friendly name: metricsBean.getName = {}, attrMetricName = {}", metricBean.getName(), attrMetricName, e);
+                    logger.warn("Failed converting metric name to Logz.io-friendly name: metricsBean.getName = {}, attrMetricName = {}", metricBean.getName(), attrMetricName, e);
                 }
             }
         } catch (MalformedObjectNameException | ReflectionException | InstanceNotFoundException | IllegalArgumentException e) {
-            throw new MBeanClientPollingFailure(e.getMessage(), e);
+            throw new MBeanClientPollingFailure("Failed to poll Mbean " + e.getMessage(), e);
         }
         return metrics;
     }
@@ -157,37 +159,34 @@ public class JavaAgentClient extends MBeanClient {
             if (value == null || value.getClass().isArray()) {
                 continue;
             }
-
-            Map<Class, Runnable> addValuesByType = new HashMap<>();
-            addValuesByType.put(Number.class, () -> metricValues.put(sanitizeMetricName(key, /*keepDot*/ false), (Number) value));
-            addValuesByType.put(CompositeData.class, () -> {
+            Map<Predicator, Runnable> addValuesByType = new HashMap<>();
+            addValuesByType.put((obj) -> obj instanceof Number, () -> metricValues.put(sanitizeMetricName(key, /*keepDot*/ false), (Number) value));
+            addValuesByType.put((obj) -> obj instanceof CompositeData, () -> {
                 CompositeData data = (CompositeData) value;
                 Map<String, Object> valueMap = handleCompositeData(data);
                 metricValues.putAll(prependKey(key, flatten(valueMap)));
             });
-            addValuesByType.put(TabularData.class, () -> {
+            addValuesByType.put((obj) -> obj instanceof TabularData, () -> {
                 TabularData tabularData = (TabularData) value;
                 Map<String, Object> rowKeyToRowData = handleTabularData(tabularData);
                 metricValues.putAll(prependKey(key, flatten(rowKeyToRowData)));
             });
-            addValuesByType.put(String.class, () -> {
-            });
-            addValuesByType.put(Boolean.class, () -> {
-            });
+            addValuesByType.put((obj) -> obj instanceof String, () -> {});
+            addValuesByType.put((obj) -> obj instanceof Boolean, () -> {});
 
-            if (addValuesByType.containsKey(value)) {
-                addValuesByType.get(value).run();
+            Optional<Map.Entry<Predicator, Runnable>> resultEntry = addValuesByType.entrySet().stream().filter(entry -> entry.getKey().validatePredicate(value)).findFirst();
+            if (!resultEntry.equals(Optional.empty())) {
+                resultEntry.get().getValue().run();
             } else {
                 Map<String, Object> valueMap;
                 try {
-                    valueMap = objectMapper.convertValue(value, new TypeReference<Map<String, Object>>() {
-                    });
+                    valueMap = objectMapper.convertValue(value, new TypeReference<Map<String, Object>>() {});
+                    metricValues.putAll(prependKey(key, flatten(valueMap)));
                 } catch (Exception e) {
                     logger.trace("Can't convert attribute named {} with class type {}", key, value.getClass().getCanonicalName());
-                    continue;
                 }
-                metricValues.putAll(prependKey(key, flatten(valueMap)));
             }
+
         }
         return metricValues;
     }
