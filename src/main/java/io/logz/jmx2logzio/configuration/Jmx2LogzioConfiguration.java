@@ -58,7 +58,7 @@ public class Jmx2LogzioConfiguration {
         logzioJavaSenderParams = new LogzioJavaSenderParams();
         setListenerURL(config);
 
-        if (config.getString(JavaAgentClient.LOGZIO_TOKEN).equals("<your_logz.io_token>")) {
+        if (config.getString(JavaAgentClient.LOGZIO_TOKEN).equals("<ACCOUNT-TOKEN>")) {
             throw new IllegalConfiguration("please enter a valid logz.io token (can be located at https://app.logz.io/#/dashboard/settings/manage-accounts)");
         }
         logzioJavaSenderParams.setToken(config.getString(JavaAgentClient.LOGZIO_TOKEN));
