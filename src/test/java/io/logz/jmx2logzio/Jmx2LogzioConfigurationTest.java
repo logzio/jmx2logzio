@@ -23,8 +23,10 @@ import java.util.Map;
 public class Jmx2LogzioConfigurationTest {
 
     public static final String METRICS_TEST_DIR = "testMetrics";
-    private static final String TEST_ARGUMENTS = "LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=CustomServiceName,SERVICE_HOST=CustomServiceHost,FROM_DISK=false,LISTENER_URL=http://listener.url:2222," +
+    private static final String IN_MEMORY_TEST_ARGUMENTS = "LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=CustomServiceName,SERVICE_HOST=CustomServiceHost,FROM_DISK=false,LISTENER_URL=http://listener.com:2222," +
             "WHITE_LIST_REGEX=anything.with(a|b),BLACK_LIST_REGEX=except.you$,POLLING_INTERVAL_IN_SEC=12,IN_MEMORY_QUEUE_CAPACITY=128000000,LOGS_COUNT_LIMIT=150," +
+            "DISK_SPACE_CHECKS_INTERVAL=13,QUEUE_DIR=testMetrics,FILE_SYSTEM_SPACE_LIMIT=80,CLEAN_SENT_METRICS_INTERVAL=14";
+    private static final String FROM_DISK_TEST_ARGUMENTS = "LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=CustomServiceName,FROM_DISK=true," +
             "DISK_SPACE_CHECKS_INTERVAL=13,QUEUE_DIR=testMetrics,FILE_SYSTEM_SPACE_LIMIT=80,CLEAN_SENT_METRICS_INTERVAL=14";
     private static final String MINIMAL_TEST_CONFIGURATION_ARGUMENTS = "LISTENER_URL=http://127.0.0.1:8070,LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=com.yog.examplerunningapp,QUEUE_DIR=" + METRICS_TEST_DIR;
     private static final String WHITE_LIST_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070,LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=com.yog.examplerunningapp,WHITE_LIST_REGEX=.*MemoryUsagePercent.*,QUEUE_DIR="+ METRICS_TEST_DIR;
@@ -125,8 +127,8 @@ public class Jmx2LogzioConfigurationTest {
     }
 
     @Test
-    public void ConfigurationArgumentsParsingTest() {
-        String testArguments = TEST_ARGUMENTS;
+    public void inMemoryConfigurationArgumentsParsingTest() {
+        String testArguments = IN_MEMORY_TEST_ARGUMENTS;
         Jmx2LogzioConfiguration configuration = new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
         LogzioJavaSenderParams senderParams = configuration.getSenderParams();
 
@@ -134,12 +136,22 @@ public class Jmx2LogzioConfigurationTest {
         Assert.assertEquals(configuration.getServiceName(),"CustomServiceName");
         Assert.assertEquals(configuration.getServiceHost(),"CustomServiceHost");
         Assert.assertFalse(senderParams.isFromDisk());
-        Assert.assertEquals(senderParams.getUrl(),"http://listener.url:2222");
+        Assert.assertEquals(senderParams.getUrl(),"http://listener.com:2222");
         Assert.assertEquals(configuration.getWhiteListPattern().pattern(),"anything.with(a|b)");
         Assert.assertEquals(configuration.getBlackListPattern().pattern(),"except.you$");
         Assert.assertEquals(configuration.getMetricsPollingIntervalInSeconds(),12);
         Assert.assertEquals(senderParams.getInMemoryQueueCapacityInBytes(),128000000);
         Assert.assertEquals(senderParams.getLogsCountLimit(),150);
+
+    }
+
+    @Test
+    public void fromDiskConfigurationArgumentsParsingTest() {
+        String testArguments = FROM_DISK_TEST_ARGUMENTS;
+        Jmx2LogzioConfiguration configuration = new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
+        LogzioJavaSenderParams senderParams = configuration.getSenderParams();
+
+        Assert.assertTrue(senderParams.isFromDisk());
         Assert.assertEquals(senderParams.getDiskSpaceCheckInterval(),13);
         String parent = senderParams.getQueueDir().getParent() == null ? "" : senderParams.getQueueDir().getParent() + "/";
         Assert.assertEquals(parent + senderParams.getQueueDir().getName(),METRICS_TEST_DIR);

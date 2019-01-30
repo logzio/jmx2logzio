@@ -36,6 +36,7 @@ public class LogzioSenderTest {
 
     @BeforeTest
     private void startMock() {
+        logger.info("starting mock server");
         mockServer = startClientAndServer(8070);
 
         mockServerClient = new MockServerClient("localhost", 8070);
@@ -46,6 +47,7 @@ public class LogzioSenderTest {
 
     @AfterTest
     public void stopMockServer() {
+        logger.info("stoping mock server...");
         mockServer.stop();
     }
 
@@ -60,7 +62,7 @@ public class LogzioSenderTest {
     }
 
     private void waitToSend() {
-        logger.debug("waiting for the listener writer to send...");
+        logger.info("waiting for the listener writer to send...");
         try {
             sleep(10000);
         } catch (InterruptedException e) {

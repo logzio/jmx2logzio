@@ -36,12 +36,13 @@ public class ListenerWriter implements Shutdownable {
     public ListenerWriter(Jmx2LogzioConfiguration requestConf) {
 
         this.logzioSenderParams = requestConf.getSenderParams();
-        this.logzioSender = initLogzioSender();
+        this.logzioSender = getLogzioSender();
+        this.logzioSender.start();
         this.messageQueue = new LinkedBlockingQueue<>();
         this.scheduledExecutorService = newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Jmx2ListenerWriter-%d").build());
     }
 
-    private LogzioSender initLogzioSender() {
+    private LogzioSender getLogzioSender() {
 
         try {
             requestConf = HttpsRequestConfiguration

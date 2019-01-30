@@ -65,7 +65,7 @@ public class Jmx2LogzioConfiguration {
 
         ConfigSetter configSetter = (fromDisk) -> logzioJavaSenderParams.setFromDisk((boolean) fromDisk);
         setSingleConfig(config, JavaAgentClient.FROM_DISK, null, configSetter, new ConfigValidator() {
-        }, String.class);
+        }, Boolean.class);
 
         if (logzioJavaSenderParams.isFromDisk()) {
             setDiskStorageParams(config);
@@ -99,7 +99,7 @@ public class Jmx2LogzioConfiguration {
         validateAndSetNatural(config, JavaAgentClient.IN_MEMORY_QUEUE_CAPACITY, logzioJavaSenderParams.getInMemoryQueueCapacityInBytes(), configSetter);
 
         configSetter = (limit) -> logzioJavaSenderParams.setLogsCountLimit((int) limit);
-        validateAndSetNatural(config, JavaAgentClient.IN_MEMORY_QUEUE_CAPACITY, logzioJavaSenderParams.getInMemoryQueueCapacityInBytes(), configSetter);
+        validateAndSetNatural(config, JavaAgentClient.LOGS_COUNT_LIMIT, logzioJavaSenderParams.getInMemoryQueueCapacityInBytes(), configSetter);
     }
 
     private void setListenerURL(Config config) {
@@ -108,11 +108,11 @@ public class Jmx2LogzioConfiguration {
             @Override
             public boolean validatePredicate(Object result) {
                 String urlString = (String) result;
-                urlString = urlString.substring(0,(urlString.indexOf(":")));
+                urlString = urlString.substring(0,(urlString.lastIndexOf(":")));
                 return UrlValidator.getInstance().isValid(urlString);
             }
         };
-        String malformedURLMsg = "malformed listener URL {}. Using default listener URL: " + logzioJavaSenderParams.getUrl();
+        String malformedURLMsg = "URL {} is invalid. Using default listener URL: " + logzioJavaSenderParams.getUrl();
         ConfigSetter configSetter = (url) -> logzioJavaSenderParams.setUrl((String) url);
         setSingleConfig(config, JavaAgentClient.LISTENER_URL, malformedURLMsg, configSetter, urlValidator, String.class);
     }
@@ -193,7 +193,7 @@ public class Jmx2LogzioConfiguration {
                 return (int) result > 0;
             }
         };
-        setSingleConfig(config, arg, "argument " + arg + " has to be a natural number, using default instead: " + defaultValue, setter, validator, int.class);
+        setSingleConfig(config, arg, "argument " + arg + " has to be a natural number, using default instead: " + defaultValue, setter, validator, Integer.class);
     }
 
     public String getJolokiaFullUrl() {
