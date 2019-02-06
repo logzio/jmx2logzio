@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.logz</groupId>
     <artifactId>jmx2logzio</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
 
     <packaging>jar</packaging>
 
@@ -25,39 +25,10 @@
                 <version>2.4</version>
                 <configuration>
                     <archive>
-                        <!--<manifestFile>src/main/java/META-INF/MANIFEST.MF</manifestFile>-->
-                        <index>true</index>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                        </manifest>
-                        <manifestEntries>
-                            <Premain-Class>io.logz.jmx2logzio.Jmx2LogzioJavaAgent</Premain-Class>
-
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <archive>
                         <manifestFile>src/main/java/META-INF/MANIFEST.MF</manifestFile>
+                        <index>true</index>
                     </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
-                        <phase>package</phase> <!-- bind to the packaging phase -->
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -76,10 +47,6 @@
                             <shadedPattern>io.logz.jmx2logzio.sender</shadedPattern>
                         </relocation>
                         <relocation>
-                            <pattern>org.apache.logging.log4j</pattern>
-                            <shadedPattern>io.logz.jmx2logzio.org.apache.logging.log4j</shadedPattern>
-                        </relocation>
-                        <relocation>
                             <pattern>org.slf4j</pattern>
                             <shadedPattern>io.logz.jmx2logzio.org.slf4j</shadedPattern>
                         </relocation>
@@ -93,6 +60,9 @@
                             <artifact>*:*</artifact>
                             <excludes>
                                 <exclude>LICENSE</exclude>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
                             </excludes>
                         </filter>
                     </filters>
