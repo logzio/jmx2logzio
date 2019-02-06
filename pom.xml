@@ -25,7 +25,16 @@
                 <version>2.4</version>
                 <configuration>
                     <archive>
-                        <manifestFile>src/main/java/META-INF/MANIFEST.MF</manifestFile>
+                        <!--<manifestFile>src/main/java/META-INF/MANIFEST.MF</manifestFile>-->
+                        <index>true</index>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Premain-Class>io.logz.jmx2logzio.Jmx2LogzioJavaAgent</Premain-Class>
+
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
@@ -49,6 +58,37 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <version>3.0.0</version>
+                <configuration>
+                <shadedClassifierName>javaagent</shadedClassifierName>
+                <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <relocations>
+                        <relocation>
+                            <pattern>com.typesafe</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.com.typesafe</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>io.logz.sender</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.sender</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.apache.logging.log4j</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.org.apache.logging.log4j</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.slf4j</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.org.slf4j</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>commons-io</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.commons-io</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
             </plugin>
         </plugins>
     </build>
