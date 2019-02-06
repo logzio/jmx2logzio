@@ -26,6 +26,7 @@ import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 public class ListenerWriter implements Shutdownable {
     private static final Logger logger = LoggerFactory.getLogger(ListenerWriter.class);
 
+
     private final static ObjectMapper mapper = new ObjectMapper();
     private final BlockingQueue<Metric> messageQueue;
     private final ScheduledExecutorService scheduledExecutorService;
@@ -57,11 +58,11 @@ public class ListenerWriter implements Shutdownable {
         }
         SenderStatusReporter statusReporter = StatusReporterFactory.newSenderStatusReporter(logger);
         LogzioSender.Builder senderBuilder = LogzioSender
-                .builder()
-                .setTasksExecutor(Executors.newScheduledThreadPool(logzioSenderParams.getThreadPoolSize()))
-                .setReporter(statusReporter)
-                .setHttpsRequestConfiguration(requestConf)
-                .setDebug(logzioSenderParams.isDebug());
+                .builder();
+        senderBuilder.setTasksExecutor(Executors.newScheduledThreadPool(logzioSenderParams.getThreadPoolSize()));
+        senderBuilder.setReporter(statusReporter);
+        senderBuilder.setHttpsRequestConfiguration(requestConf);
+        senderBuilder.setDebug(logzioSenderParams.isDebug());
 
         if (logzioSenderParams.isFromDisk()) {
             senderBuilder.withDiskQueue()
