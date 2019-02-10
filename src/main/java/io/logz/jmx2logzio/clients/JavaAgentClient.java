@@ -159,7 +159,7 @@ public class JavaAgentClient extends MBeanClient {
                 continue;
             }
             Map<Predicator, Runnable> addValuesByType = new HashMap<>();
-            addValuesByType.put((obj) -> obj instanceof Number, () -> metricValues.put(sanitizeMetricName(key, /*keepDot*/ false), (Number) value));
+            addValuesByType.put((obj) -> obj instanceof Number, () -> metricValues.put(sanitizeMetricName(key, /*keepDot*/ true), (Number) value));
             addValuesByType.put((obj) -> obj instanceof CompositeData, () -> {
                 CompositeData data = (CompositeData) value;
                 Map<String, Object> valueMap = handleCompositeData(data);
@@ -216,8 +216,8 @@ public class JavaAgentClient extends MBeanClient {
     private Map<String, Number> prependKey(String key, Map<String, Number> keyToNumber) {
         Map<String, Number> result = new HashMap<>();
         for (String internalMetricName : keyToNumber.keySet()) {
-            String resultKey = key.equalsIgnoreCase("value") ? sanitizeMetricName(internalMetricName, /*keepDot*/ false) :
-                    sanitizeMetricName(key, /*keepDot*/ false) + "." + sanitizeMetricName(internalMetricName, /*keepDot*/ false);
+            String resultKey = key.equalsIgnoreCase("value") ? sanitizeMetricName(internalMetricName, /*keepDot*/ true) :
+                    sanitizeMetricName(key, /*keepDot*/ false) + "." + sanitizeMetricName(internalMetricName, /*keepDot*/ true);
             result.put(resultKey, keyToNumber.get(internalMetricName));
         }
         return result;

@@ -222,12 +222,12 @@ public class JolokiaClient extends MBeanClient {
 
                 for (String internalMetricName : flattenValueTree.keySet()) {
                     metricValues.put(
-                            sanitizeMetricName(key, /*keepDot*/ false) + "."
-                                    + sanitizeMetricName(internalMetricName, /*keepDot*/ false),
+                            sanitizeMetricName(key, /*keepDot*/ true) + "."
+                                    + sanitizeMetricName(internalMetricName, /*keepDot*/ true),
                             flattenValueTree.get(internalMetricName));
                 }
             } else if (value instanceof Number) {
-                metricValues.put(sanitizeMetricName(key, /*keepDot*/ false), (Number) value);
+                metricValues.put(sanitizeMetricName(key, /*keepDot*/ true), (Number) value);
             }
         }
         return metricValues;
