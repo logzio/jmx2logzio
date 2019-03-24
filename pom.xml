@@ -8,6 +8,31 @@
     <version>0.0.6</version>
 
     <packaging>jar</packaging>
+    <name>JMX2logz.io</name>
+    <description>A tool for sending JMX metrics directly to logz.io</description>
+    <url>https://github.com/logzio/jmx2logzio</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Yogev Mets</name>
+            <email>yogev.metzuyanim@logz.io</email>
+            <organization>Logz.io</organization>
+            <organizationUrl>http://logz.io</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:logzio/jmx2logzio.git</connection>
+        <developerConnection>scm:git:git@github.com:logzio/jmx2logzio.git</developerConnection>
+        <url>https://github.com/logzio/jmx2logzio</url>
+    </scm>
 
     <build>
         <plugins>
