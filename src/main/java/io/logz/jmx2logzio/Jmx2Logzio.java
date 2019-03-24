@@ -6,10 +6,12 @@ import io.logz.jmx2logzio.Utils.Shutdownable;
 import io.logz.jmx2logzio.clients.JavaAgentClient;
 import io.logz.jmx2logzio.clients.JolokiaClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
+import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.MBeanClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -30,6 +32,8 @@ public class Jmx2Logzio implements Shutdownable {
         this.taskScheduler = newSingleThreadScheduledExecutor();
 
         this.client = conf.getMetricClientType() == JOLOKIA ? new JolokiaClient(conf.getJolokiaFullUrl()) : new JavaAgentClient();
+        List<Dimension> extraDimensions =conf.getExtraParams();
+        client.setExtraDimensions(extraDimensions);
         String clientString = conf.getMetricClientType() == JOLOKIA ? "Jolokia agent URL: " + conf.getJolokiaFullUrl() : "Mbean client";
         logger.info("Running with {}", clientString);
     }
