@@ -102,7 +102,7 @@ public class Jmx2LogzioConfiguration {
 
     private List<Dimension> parseExtraDimensions(String extraParams) {
         if (extraParams.charAt(0) != '{' || extraParams.charAt(extraParams.length()-1) != '}') {
-            logger.error("malformed extra dimensions - missing encapsulating chars '{' and '}', ignoring extra dimensions.. input received: " + extraParams);
+            logger.error("malformed missing encapsulating chars '{' or '}' or wrong extra dimensions pattern - expected pattern is {key=value:key=value...} , ignoring extra dimensions..");
             return new ArrayList<>();
         }
         extraParams = extraParams.substring(1,extraParams.length()-1);
