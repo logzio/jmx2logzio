@@ -32,7 +32,7 @@ public class Jmx2Logzio implements Shutdownable {
         this.taskScheduler = newSingleThreadScheduledExecutor();
 
         this.client = conf.getMetricClientType() == JOLOKIA ? new JolokiaClient(conf.getJolokiaFullUrl()) : new JavaAgentClient();
-        List<Dimension> extraDimensions =conf.getExtraDimensions();
+        List<Dimension> extraDimensions = conf.getExtraDimensions();
         client.setExtraDimensions(extraDimensions);
         String clientString = conf.getMetricClientType() == JOLOKIA ? "Jolokia agent URL: " + conf.getJolokiaFullUrl() : "Mbean client";
         logger.info("Running with {}", clientString);
