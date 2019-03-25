@@ -51,6 +51,7 @@ public class JolokiaClient extends MBeanClient {
     public static final String QUEUE_DIR = "QUEUE_DIR";
     public static final String FILE_SYSTEM_SPACE_LIMIT = "FILE_SYSTEM_SPACE_LIMIT";
     public static final String CLEAN_SENT_METRICS_INTERVAL = "CLEAN_SENT_METRICS_INTERVAL";
+    public static final String EXTRA_DIMENSIONS = "EXTRA_DIMENSIONS";
     private static final Logger logger = LoggerFactory.getLogger(JolokiaClient.class);
 
     private static final String REQUEST_MBEAN_KEY = "mbean";
@@ -73,6 +74,8 @@ public class JolokiaClient extends MBeanClient {
     private final ObjectMapper objectMapper;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
+    private List<Dimension> extraDimensions;
+
     public JolokiaClient(String jolokiaFullURL) {
 
         this.jolokiaFullURL = jolokiaFullURL;
@@ -81,6 +84,7 @@ public class JolokiaClient extends MBeanClient {
         }
         objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        extraDimensions = new ArrayList<>();
     }
 
     public List<MetricBean> getBeans() throws MBeanClientPollingFailure {
@@ -134,6 +138,11 @@ public class JolokiaClient extends MBeanClient {
         }
     }
 
+    @Override
+    public void setExtraDimensions(List<Dimension> extraDimensions) {
+        this.extraDimensions = extraDimensions;
+    }
+
     private List<Metric> getMetricsForResponse(Map<String, Object> response) {
         Map<String, Object> request = (Map<String, Object>) response.get(RESPONSE_REQUEST_KEY);
         String mBeanName = (String) request.get(REQUEST_MBEAN_KEY);
@@ -153,6 +162,7 @@ public class JolokiaClient extends MBeanClient {
         String serviceName = serviceNameAndArgs[SERVICE_NAME_INDEX];
         String argsString = Metric.DOMAIN_NAME + "=" + serviceName + "," + serviceNameAndArgs[ARGUMENTS_INDEX];
         List<Dimension> dimensions = Splitter.on(',').splitToList(argsString).stream().map(this::stringArgToDimension).collect(Collectors.toList());
+        dimensions.addAll(extraDimensions);
 
         Map<String, Object> attrValues = (Map<String, Object>) response.get(RESPONSE_VALUE_KEY);
         Map<String, Number> metricToValue = flatten(attrValues);

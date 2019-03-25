@@ -47,9 +47,9 @@ public class JavaAgentClient extends MBeanClient {
 
     private final MBeanServer server;
     private final ObjectMapper objectMapper;
+    private List<Dimension> extraDimensions;
 
     public JavaAgentClient() {
-
         server = ManagementFactory.getPlatformMBeanServer();
 
         // The visibility section here is to tell Jackson that we want it to get over all the object properties and not only the getters
@@ -57,6 +57,7 @@ public class JavaAgentClient extends MBeanClient {
         objectMapper = new ObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        extraDimensions = new ArrayList<>();
     }
 
     @Override
@@ -141,6 +142,7 @@ public class JavaAgentClient extends MBeanClient {
                 .map(this::stringArgToDimension)
                 .collect(Collectors.toList());
         dimensions.add(0, new Dimension("domainName", domainNameAndOtherDimensions[DOMAIN_NAME_INDEX]));
+        dimensions.addAll(extraDimensions);
         return dimensions;
     }
 
@@ -223,4 +225,8 @@ public class JavaAgentClient extends MBeanClient {
         return result;
     }
 
+    @Override
+    public void setExtraDimensions(List<Dimension> extraDimensions) {
+        this.extraDimensions = extraDimensions;
+    }
 }

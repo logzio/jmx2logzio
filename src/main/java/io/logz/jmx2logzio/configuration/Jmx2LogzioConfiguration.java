@@ -1,10 +1,12 @@
 package io.logz.jmx2logzio.configuration;
 
+import com.google.common.base.Splitter;
 import com.typesafe.config.Config;
 import io.logz.jmx2logzio.Jmx2LogzioJavaAgent;
 import io.logz.jmx2logzio.clients.JavaAgentClient;
 import io.logz.jmx2logzio.clients.JolokiaClient;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
+import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
@@ -15,9 +17,12 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 public class Jmx2LogzioConfiguration {
@@ -42,6 +47,7 @@ public class Jmx2LogzioConfiguration {
 
     // Which client should we use
     private MetricClientType metricClientType;
+    private List<Dimension> extraDimensions;
 
     public enum MetricClientType {
         JOLOKIA,
@@ -58,6 +64,14 @@ public class Jmx2LogzioConfiguration {
         logzioJavaSenderParams = new LogzioJavaSenderParams();
         setListenerURL(config);
 
+        extraDimensions = new ArrayList<>();
+        if (config.hasPath(Jmx2LogzioJavaAgent.EXTRA_DIMENSIONS)) {
+            if (metricClientType == MetricClientType.MBEAN_PLATFORM) {
+                extraDimensions = parseExtraDimensions(config.getString(Jmx2LogzioJavaAgent.EXTRA_DIMENSIONS));
+            } else {
+                extraDimensions = parseExtraDimensions(config.getConfig(Jmx2LogzioJavaAgent.EXTRA_DIMENSIONS));
+            }
+        }
         if (config.getString(JavaAgentClient.LOGZIO_TOKEN).equals("<ACCOUNT-TOKEN>")) {
             throw new IllegalConfiguration("please enter a valid logz.io token (can be located at https://app.logz.io/#/dashboard/settings/manage-accounts)");
         }
@@ -76,6 +90,27 @@ public class Jmx2LogzioConfiguration {
         configSetter = (interval) -> metricsPollingIntervalInSeconds = (int) interval;
         validateAndSetNatural(config, Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL, metricsPollingIntervalInSeconds, configSetter);
 
+    }
+
+    private List<Dimension> parseExtraDimensions(Config config) {
+        List<Dimension> result = new ArrayList<>();
+        config.entrySet().forEach(entry ->
+                result.add(new Dimension(entry.getKey(),config.getString(entry.getKey()))));
+        return result;
+    }
+
+
+    private List<Dimension> parseExtraDimensions(String extraParams) {
+        if (extraParams.charAt(0) != '{' || extraParams.charAt(extraParams.length()-1) != '}') {
+            logger.error("malformed missing encapsulating chars '{' or '}' or wrong extra dimensions pattern - expected pattern is {key=value:key=value...} , ignoring extra dimensions..");
+            return new ArrayList<>();
+        }
+        extraParams = extraParams.substring(1,extraParams.length()-1);
+        List<Dimension> result = Splitter.on(':').splitToList(extraParams).stream().map((param) -> {
+            String[] keyval = param.split("=");
+            return new Dimension(keyval[0],keyval[1]);
+        }).collect(Collectors.toList());
+        return result;
     }
 
     private void setDiskStorageParams(Config config) {
@@ -226,6 +261,10 @@ public class Jmx2LogzioConfiguration {
 
     public MetricClientType getMetricClientType() {
         return metricClientType;
+    }
+
+    public List<Dimension> getExtraDimensions() {
+        return extraDimensions;
     }
 
 }
