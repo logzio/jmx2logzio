@@ -111,7 +111,7 @@ public class Jmx2LogzioConfigurationTest {
     public void extraDimensionsArgumentParsingTest() {
         String testArguments = EXTRA_DIMENSIONS_ARGUMENT_CONFIGURATION;
         Jmx2LogzioConfiguration configuration = new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
-        List<Dimension> extraDimensions = configuration.getExtraParams();
+        List<Dimension> extraDimensions = configuration.getExtraDimensions();
 
         Assert.assertEquals(extraDimensions.size(), 2);
         Assert.assertEquals(extraDimensions.get(0).getKey(),"origin");

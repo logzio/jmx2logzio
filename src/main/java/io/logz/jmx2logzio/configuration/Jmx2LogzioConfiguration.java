@@ -47,7 +47,7 @@ public class Jmx2LogzioConfiguration {
 
     // Which client should we use
     private MetricClientType metricClientType;
-    private List<Dimension> extraParams;
+    private List<Dimension> extraDimensions;
 
     public enum MetricClientType {
         JOLOKIA,
@@ -64,11 +64,12 @@ public class Jmx2LogzioConfiguration {
         logzioJavaSenderParams = new LogzioJavaSenderParams();
         setListenerURL(config);
 
+        extraDimensions = new ArrayList<>();
         if (config.hasPath(Jmx2LogzioJavaAgent.EXTRA_DIMENSIONS)) {
             if (metricClientType == MetricClientType.MBEAN_PLATFORM) {
-                extraParams = parseExtraDimensions(config.getString(Jmx2LogzioJavaAgent.EXTRA_DIMENSIONS));
+                extraDimensions = parseExtraDimensions(config.getString(Jmx2LogzioJavaAgent.EXTRA_DIMENSIONS));
             } else {
-                extraParams = parseExtraDimensions(config.getConfig(Jmx2LogzioJavaAgent.EXTRA_DIMENSIONS));
+                extraDimensions = parseExtraDimensions(config.getConfig(Jmx2LogzioJavaAgent.EXTRA_DIMENSIONS));
             }
         }
         if (config.getString(JavaAgentClient.LOGZIO_TOKEN).equals("<ACCOUNT-TOKEN>")) {
@@ -262,8 +263,8 @@ public class Jmx2LogzioConfiguration {
         return metricClientType;
     }
 
-    public List<Dimension> getExtraParams() {
-        return extraParams;
+    public List<Dimension> getExtraDimensions() {
+        return extraDimensions;
     }
 
 }
