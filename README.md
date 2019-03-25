@@ -161,6 +161,7 @@ Make sure your app is running, and then start jmx2logzio.
 java -jar jmx2logzio.jar
 ```
 
+You'll find the jmx2logzio jar file in the jmx2logzio/target/ folder.
 
 ## Changelog
 - v0.0.7
