@@ -16,7 +16,7 @@ public class Metric {
     public static final String DOMAIN_NAME = "domainName";
     private String timestamp;
 
-    @JsonProperty("dimensions")
+    @JsonProperty("dim")
     private Map<String, Object> dimensionsMap;
 
     @JsonProperty("metrics")

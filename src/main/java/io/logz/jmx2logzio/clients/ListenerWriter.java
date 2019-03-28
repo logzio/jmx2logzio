@@ -113,8 +113,8 @@ public class ListenerWriter implements Shutdownable {
         try {
             Metric metric = messageQueue.take();
             writeMetrics(Arrays.asList(metric));
-        } catch (Exception e) {
-            logger.error("error enqueueing metrics: {}", e.getMessage());
+        } catch (InterruptedException e) {
+            logger.error("error enqueueing metrics, got interrupt: {}");
         }
     }
 
