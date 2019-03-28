@@ -164,6 +164,8 @@ java -jar jmx2logzio.jar
 You'll find the jmx2logzio jar file in the jmx2logzio/target/ folder.
 
 ## Changelog
+- v0.0.8
+    - Additional metric information will be sent under "dim" instead of "dimensions"
 - v0.0.7
     - Added feature which allows you to add extra dimensions to the collected metrics before sent.
 
