@@ -40,9 +40,9 @@ public class JavaAgentClient extends MBeanClient {
     private final ObjectMapper objectMapper;
     private List<Dimension> extraDimensions;
 
+
     public JavaAgentClient() {
         server = ManagementFactory.getPlatformMBeanServer();
-
         // The visibility section here is to tell Jackson that we want it to get over all the object properties and not only the getters
         // If we wont set it, then it will fetch only partial info from the MBean objects
         objectMapper = new ObjectMapper();
@@ -51,6 +51,11 @@ public class JavaAgentClient extends MBeanClient {
         extraDimensions = new ArrayList<>();
     }
 
+    /**
+     * Override a MBeanClient's method, get Metric Beans from the MBean Server
+     * @return a List of Metric Beans (both from JVM and the app)
+     * @throws MBeanClientPollingFailure
+     */
     @Override
     public List<MetricBean> getBeans() throws MBeanClientPollingFailure {
 
@@ -76,6 +81,12 @@ public class JavaAgentClient extends MBeanClient {
         }
     }
 
+    /**
+     * Converts Metric Beans to Metrics (logz.io)
+     * @param beans a list of MetricBeans
+     * @return a list of Metrics, after extracting and adding dimensions to each metric
+     * @throws MBeanClientPollingFailure if metric polling failed
+     */
     @Override
     public List<Metric> getMetrics(List<MetricBean> beans) throws MBeanClientPollingFailure {
         List<Metric> metrics = Lists.newArrayList();
@@ -88,6 +99,12 @@ public class JavaAgentClient extends MBeanClient {
         return metrics;
     }
 
+    /**
+     * Flattens "metrics tree" and converts it to a list of metrics
+     * @param metricBean a single metric bean
+     * @param dimensions a list of dimensions for the specific metric
+     * @return a list of logz.io metrics
+     */
     private List<Metric> getMetricsForBean(MetricBean metricBean, List<Dimension> dimensions) {
         List<Metric> metrics = Lists.newArrayList();
         Instant metricTime = Instant.now();
@@ -119,6 +136,11 @@ public class JavaAgentClient extends MBeanClient {
         return metrics;
     }
 
+    /**
+     * Collect dimensions from a metric bean and add custom dimensions (from the configurations)
+     * @param metricBean a single metric bean
+     * @return a list of dimensions for that metric
+     */
     private List<Dimension> getDimensions(MetricBean metricBean) {
         String[] domainNameAndOtherDimensions = metricBean.getName().split(":");
 

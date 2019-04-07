@@ -50,6 +50,11 @@ public class Jmx2LogzioJavaAgent {
         }
     }
 
+    /**
+     * Create a config object out of an argument string
+     * @param agentArgument Argument String received as a parameter
+     * @return Config object
+     */
     private static Config getIntegratedConfiguration(String agentArgument) {
         Map<String, String> configurationMap = parseArgumentsString(agentArgument);
 
@@ -71,7 +76,7 @@ public class Jmx2LogzioJavaAgent {
      * Converts a String of arguments to an configuration map
      * @param arguments String received as a parameter in the form of key=value,key=value...
      * @return a key-value configuration map
-     * @throws IllegalConfiguration
+     * @throws IllegalConfiguration when the arguments string pattern is malformed
      */
     public static Map<String, String> parseArgumentsString(String arguments) throws IllegalConfiguration {
         try {

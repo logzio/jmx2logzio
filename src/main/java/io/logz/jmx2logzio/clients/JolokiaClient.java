@@ -72,6 +72,11 @@ public class JolokiaClient extends MBeanClient {
         extraDimensions = new ArrayList<>();
     }
 
+    /**
+     * Override a MBeanClient's method, get Metric Beans from the MBean Server
+     * @return a List of Metric Beans (both from JVM and the app)
+     * @throws MBeanClientPollingFailure when failed to poll metrics
+     */
     public List<MetricBean> getBeans() throws MBeanClientPollingFailure {
         try {
             stopwatch.reset().start();
@@ -96,6 +101,12 @@ public class JolokiaClient extends MBeanClient {
         }
     }
 
+    /**
+     * Converts Metric Beans to Metrics (logz.io)
+     * @param beans a list of MetricBeans
+     * @return a list of Metrics, after extracting and adding dimensions to each metric
+     * @throws MBeanClientPollingFailure if metric polling failed
+     */
     public List<Metric> getMetrics(List<MetricBean> beans) throws MBeanClientPollingFailure {
         List<JolokiaReadRequest> readRequests = Lists.newArrayList();
         for (MetricBean bean : beans) {
@@ -128,6 +139,11 @@ public class JolokiaClient extends MBeanClient {
         this.extraDimensions = extraDimensions;
     }
 
+    /**
+     * Parse metrics from the Jolokia server response
+     * @param response A response map from the Jolokia server
+     * @return a list of logz.io metrics
+     */
     private List<Metric> getMetricsForResponse(Map<String, Object> response) {
         Map<String, Object> request = (Map<String, Object>) response.get(RESPONSE_REQUEST_KEY);
         String mBeanName = (String) request.get(REQUEST_MBEAN_KEY);
