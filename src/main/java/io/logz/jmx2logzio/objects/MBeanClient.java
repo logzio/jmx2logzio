@@ -11,6 +11,7 @@ public abstract class MBeanClient {
 
     public abstract  List<MetricBean> getBeans();
     public abstract List<Metric> getMetrics(List<MetricBean> beans);
+    public abstract void setExtraDimensions(List<Dimension> extraDimensions);
 
     public static class MBeanClientPollingFailure extends RuntimeException {
 

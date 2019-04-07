@@ -1,6 +1,5 @@
 package io.logz.jmx2logzio;
 
-import com.google.common.base.Splitter;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.logz.jmx2logzio.clients.JavaAgentClient;
@@ -21,9 +20,13 @@ public class Jmx2LogzioJavaAgent {
     public static final String SERVICE_NAME = "service.name";
     public static final String SERVICE_HOST = "service.host";
     public static final String METRICS_POLLING_INTERVAL = "service.poller.metrics-polling-interval-in-seconds";
+    public static final String EXTRA_DIMENSIONS = "extra-dimensions";
 
     private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioJavaAgent.class);
     private static final String JAVA_AGENT_CONFIGURATION_FILE = "javaagent.conf";
+    private static final int SPLIT_KEY_VALUE_COUNT_LIMIT = 2;
+    private static final int INDEX_OF_KEY = 0;
+    private static final int INDEX_OF_VALUE = 1;
 
     public static void premain(String agentArgument, Instrumentation instrument) {
 
@@ -58,13 +61,13 @@ public class Jmx2LogzioJavaAgent {
         return userConfig.withFallback(fileConfig);
     }
 
-    private static Map<String, String> parseArgumentsString(String arguments) throws IllegalConfiguration {
+    public static Map<String, String> parseArgumentsString(String arguments) throws IllegalConfiguration {
         try {
             Map<String, String> argumentsMap = new HashMap<>();
-            Map<String, String> keyValues = Splitter.on(',').omitEmptyStrings().withKeyValueSeparator('=').split(arguments);
-
-            keyValues.forEach((k, v) ->
-                    argumentsMap.put(getArgumentConfigurationRepresentation(k), v));
+            for (String argument : arguments.split(",")) {
+                String[] keyval = argument.split("=", SPLIT_KEY_VALUE_COUNT_LIMIT);
+                argumentsMap.put(Jmx2LogzioJavaAgent.getArgumentConfigurationRepresentation(keyval[INDEX_OF_KEY]),keyval[INDEX_OF_VALUE]);
+            }
 
             return argumentsMap;
 
@@ -73,7 +76,7 @@ public class Jmx2LogzioJavaAgent {
         }
     }
 
-    private static String getArgumentConfigurationRepresentation(String key) throws IllegalConfiguration {
+    public static String getArgumentConfigurationRepresentation(String key) throws IllegalConfiguration {
 
         switch (key) {
             case JolokiaClient.LISTENER_URL:
@@ -82,6 +85,8 @@ public class Jmx2LogzioJavaAgent {
                 return Jmx2LogzioJavaAgent.WHITE_LIST_REGEX;
             case JolokiaClient.BLACK_LIST_REGEX:
                 return Jmx2LogzioJavaAgent.BLACK_LIST_REGEX;
+            case JolokiaClient.EXTRA_DIMENSIONS:
+                return Jmx2LogzioJavaAgent.EXTRA_DIMENSIONS;
             case JolokiaClient.LOGZIO_TOKEN:
                 return JavaAgentClient.LOGZIO_TOKEN;
             case JolokiaClient.SERVICE_NAME:
