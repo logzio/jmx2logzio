@@ -35,15 +35,6 @@ public class JavaAgentClient extends MBeanClient {
     private static final int DOMAIN_NAME_INDEX = 0;
     private static final int ARGUMENT_KEY_INDEX = 0;
     private static final int ARGUMENT_VALUE_INDEX = 1;
-    public static String LISTENER_URL = "logzio-java-sender.url";
-    public static String LOGZIO_TOKEN = "logzio-java-sender.token";
-    public static String FROM_DISK = "logzio-java-sender.from-disk";
-    public static String IN_MEMORY_QUEUE_CAPACITY = "logzio-java-sender.in-memory-queue-capacity";
-    public static String LOGS_COUNT_LIMIT = "logzio-java-sender.log-count-limit";
-    public static String DISK_SPACE_CHECK_INTERVAL = "logzio-java-sender.disk-space-checks-interval";
-    public static String QUEUE_DIR = "logzio-java-sender.queue-dir";
-    public static String FILE_SYSTEM_SPACE_LIMIT = "logzio-java-sender.file-system-full-percent-threshold";
-    public static String CLEAN_SENT_METRICS_INTERVAL = "logzio-java-sender.clean-sent-metrics-interval";
 
     private final MBeanServer server;
     private final ObjectMapper objectMapper;

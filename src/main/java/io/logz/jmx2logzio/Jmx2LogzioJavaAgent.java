@@ -2,8 +2,6 @@ package io.logz.jmx2logzio;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import io.logz.jmx2logzio.clients.JavaAgentClient;
-import io.logz.jmx2logzio.clients.JolokiaClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import org.slf4j.Logger;
@@ -15,13 +13,21 @@ import java.util.Map;
 
 public class Jmx2LogzioJavaAgent {
 
-    public static final String WHITE_LIST_REGEX = "service.poller.white-list-regex";
-    public static final String BLACK_LIST_REGEX = "service.poller.black-list-regex";
-    public static final String SERVICE_NAME = "service.name";
-    public static final String SERVICE_HOST = "service.host";
-    public static final String METRICS_POLLING_INTERVAL = "service.poller.metrics-polling-interval-in-seconds";
-    public static final String EXTRA_DIMENSIONS = "extra-dimensions";
-
+    public static final String LISTENER_URL = "LISTENER_URL";
+    public static final String WHITE_LIST_REGEX = "WHITE_LIST_REGEX";
+    public static final String BLACK_LIST_REGEX = "BLACK_LIST_REGEX";
+    public static final String LOGZIO_TOKEN = "LOGZIO_TOKEN";
+    public static final String SERVICE_NAME = "SERVICE_NAME";
+    public static final String SERVICE_HOST = "SERVICE_HOST";
+    public static final String POLLING_INTERVAL_IN_SEC = "POLLING_INTERVAL_IN_SEC";
+    public static final String FROM_DISK = "FROM_DISK";
+    public static final String IN_MEMORY_QUEUE_CAPACITY = "IN_MEMORY_QUEUE_CAPACITY";
+    public static final String LOGS_COUNT_LIMIT = "LOGS_COUNT_LIMIT";
+    public static final String DISK_SPACE_CHECKS_INTERVAL = "DISK_SPACE_CHECKS_INTERVAL";
+    public static final String QUEUE_DIR = "QUEUE_DIR";
+    public static final String FILE_SYSTEM_SPACE_LIMIT = "FILE_SYSTEM_SPACE_LIMIT";
+    public static final String CLEAN_SENT_METRICS_INTERVAL = "CLEAN_SENT_METRICS_INTERVAL";
+    public static final String EXTRA_DIMENSIONS = "EXTRA_DIMENSIONS";
     private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioJavaAgent.class);
     private static final String JAVA_AGENT_CONFIGURATION_FILE = "javaagent.conf";
     private static final int SPLIT_KEY_VALUE_COUNT_LIMIT = 2;
@@ -47,10 +53,10 @@ public class Jmx2LogzioJavaAgent {
     private static Config getIntegratedConfiguration(String agentArgument) {
         Map<String, String> configurationMap = parseArgumentsString(agentArgument);
 
-        if (configurationMap.get(getArgumentConfigurationRepresentation(JolokiaClient.SERVICE_NAME)) == null) {
+        if (configurationMap.get(getArgumentConfigurationRepresentation(SERVICE_NAME)) == null) {
             throw new IllegalConfiguration("SERVICE_NAME must be one of the arguments");
         }
-        if (configurationMap.get(getArgumentConfigurationRepresentation(JolokiaClient.LOGZIO_TOKEN)) == null) {
+        if (configurationMap.get(getArgumentConfigurationRepresentation(LOGZIO_TOKEN)) == null) {
             throw new IllegalConfiguration("LOGZIO_TOKEN must be one of the arguments");
         }
 
@@ -61,6 +67,12 @@ public class Jmx2LogzioJavaAgent {
         return userConfig.withFallback(fileConfig);
     }
 
+    /**
+     * Converts a String of arguments to an configuration map
+     * @param arguments String received as a parameter in the form of key=value,key=value...
+     * @return a key-value configuration map
+     * @throws IllegalConfiguration
+     */
     public static Map<String, String> parseArgumentsString(String arguments) throws IllegalConfiguration {
         try {
             Map<String, String> argumentsMap = new HashMap<>();
@@ -76,39 +88,45 @@ public class Jmx2LogzioJavaAgent {
         }
     }
 
+    /**
+     * Converts java agent client configuration argument to a jolokia client argument representation
+     * @param key java agent client key argument string
+     * @return Jolokia client key argument string
+     * @throws IllegalConfiguration if not found
+     */
     public static String getArgumentConfigurationRepresentation(String key) throws IllegalConfiguration {
 
         switch (key) {
-            case JolokiaClient.LISTENER_URL:
-                return JavaAgentClient.LISTENER_URL;
-            case JolokiaClient.WHITE_LIST_REGEX:
-                return Jmx2LogzioJavaAgent.WHITE_LIST_REGEX;
-            case JolokiaClient.BLACK_LIST_REGEX:
-                return Jmx2LogzioJavaAgent.BLACK_LIST_REGEX;
-            case JolokiaClient.EXTRA_DIMENSIONS:
-                return Jmx2LogzioJavaAgent.EXTRA_DIMENSIONS;
-            case JolokiaClient.LOGZIO_TOKEN:
-                return JavaAgentClient.LOGZIO_TOKEN;
-            case JolokiaClient.SERVICE_NAME:
-                return Jmx2LogzioJavaAgent.SERVICE_NAME;
-            case JolokiaClient.SERVICE_HOST:
-                return Jmx2LogzioJavaAgent.SERVICE_HOST;
-            case JolokiaClient.POLLING_INTERVAL_IN_SEC:
-                return Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL;
-            case JolokiaClient.FROM_DISK:
-                return JavaAgentClient.FROM_DISK;
-            case JolokiaClient.IN_MEMORY_QUEUE_CAPACITY:
-                return JavaAgentClient.IN_MEMORY_QUEUE_CAPACITY;
-            case JolokiaClient.LOGS_COUNT_LIMIT:
-                return JavaAgentClient.LOGS_COUNT_LIMIT;
-            case JolokiaClient.DISK_SPACE_CHECKS_INTERVAL:
-                return JavaAgentClient.DISK_SPACE_CHECK_INTERVAL;
-            case JolokiaClient.QUEUE_DIR:
-                return JavaAgentClient.QUEUE_DIR;
-            case JolokiaClient.FILE_SYSTEM_SPACE_LIMIT:
-                return JavaAgentClient.FILE_SYSTEM_SPACE_LIMIT;
-            case JolokiaClient.CLEAN_SENT_METRICS_INTERVAL:
-                return JavaAgentClient.CLEAN_SENT_METRICS_INTERVAL;
+            case LISTENER_URL:
+                return Jmx2LogzioJolokia.LISTENER_URL;
+            case WHITE_LIST_REGEX:
+                return Jmx2LogzioJolokia.WHITE_LIST_REGEX;
+            case BLACK_LIST_REGEX:
+                return Jmx2LogzioJolokia.BLACK_LIST_REGEX;
+            case EXTRA_DIMENSIONS:
+                return Jmx2LogzioJolokia.EXTRA_DIMENSIONS;
+            case LOGZIO_TOKEN:
+                return Jmx2LogzioJolokia.LOGZIO_TOKEN;
+            case SERVICE_NAME:
+                return Jmx2LogzioJolokia.SERVICE_NAME;
+            case SERVICE_HOST:
+                return Jmx2LogzioJolokia.SERVICE_HOST;
+            case POLLING_INTERVAL_IN_SEC:
+                return Jmx2LogzioJolokia.METRICS_POLLING_INTERVAL;
+            case FROM_DISK:
+                return Jmx2LogzioJolokia.FROM_DISK;
+            case IN_MEMORY_QUEUE_CAPACITY:
+                return Jmx2LogzioJolokia.IN_MEMORY_QUEUE_CAPACITY;
+            case LOGS_COUNT_LIMIT:
+                return Jmx2LogzioJolokia.LOGS_COUNT_LIMIT;
+            case DISK_SPACE_CHECKS_INTERVAL:
+                return Jmx2LogzioJolokia.DISK_SPACE_CHECK_INTERVAL;
+            case QUEUE_DIR:
+                return Jmx2LogzioJolokia.QUEUE_DIR;
+            case FILE_SYSTEM_SPACE_LIMIT:
+                return Jmx2LogzioJolokia.FILE_SYSTEM_SPACE_LIMIT;
+            case CLEAN_SENT_METRICS_INTERVAL:
+                return Jmx2LogzioJolokia.CLEAN_SENT_METRICS_INTERVAL;
             default:
                 throw new IllegalConfiguration("Unknown configuration option: " + key);
         }
