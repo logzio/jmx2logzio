@@ -13,21 +13,21 @@ import java.util.Map;
 
 public class Jmx2LogzioJavaAgent {
 
-    public static final String LISTENER_URL = "LISTENER_URL";
-    public static final String WHITE_LIST_REGEX = "WHITE_LIST_REGEX";
-    public static final String BLACK_LIST_REGEX = "BLACK_LIST_REGEX";
-    public static final String LOGZIO_TOKEN = "LOGZIO_TOKEN";
-    public static final String SERVICE_NAME = "SERVICE_NAME";
-    public static final String SERVICE_HOST = "SERVICE_HOST";
-    public static final String POLLING_INTERVAL_IN_SEC = "POLLING_INTERVAL_IN_SEC";
-    public static final String FROM_DISK = "FROM_DISK";
-    public static final String IN_MEMORY_QUEUE_CAPACITY = "IN_MEMORY_QUEUE_CAPACITY";
-    public static final String LOGS_COUNT_LIMIT = "LOGS_COUNT_LIMIT";
-    public static final String DISK_SPACE_CHECKS_INTERVAL = "DISK_SPACE_CHECKS_INTERVAL";
-    public static final String QUEUE_DIR = "QUEUE_DIR";
-    public static final String FILE_SYSTEM_SPACE_LIMIT = "FILE_SYSTEM_SPACE_LIMIT";
-    public static final String CLEAN_SENT_METRICS_INTERVAL = "CLEAN_SENT_METRICS_INTERVAL";
-    public static final String EXTRA_DIMENSIONS = "EXTRA_DIMENSIONS";
+    private static final String LISTENER_URL = "LISTENER_URL";
+    private static final String WHITE_LIST_REGEX = "WHITE_LIST_REGEX";
+    private static final String BLACK_LIST_REGEX = "BLACK_LIST_REGEX";
+    private static final String LOGZIO_TOKEN = "LOGZIO_TOKEN";
+    private static final String SERVICE_NAME = "SERVICE_NAME";
+    private static final String SERVICE_HOST = "SERVICE_HOST";
+    private static final String POLLING_INTERVAL_IN_SEC = "POLLING_INTERVAL_IN_SEC";
+    private static final String FROM_DISK = "FROM_DISK";
+    private static final String IN_MEMORY_QUEUE_CAPACITY = "IN_MEMORY_QUEUE_CAPACITY";
+    private static final String LOGS_COUNT_LIMIT = "LOGS_COUNT_LIMIT";
+    private static final String DISK_SPACE_CHECKS_INTERVAL = "DISK_SPACE_CHECKS_INTERVAL";
+    private static final String QUEUE_DIR = "QUEUE_DIR";
+    private static final String FILE_SYSTEM_SPACE_LIMIT = "FILE_SYSTEM_SPACE_LIMIT";
+    private static final String CLEAN_SENT_METRICS_INTERVAL = "CLEAN_SENT_METRICS_INTERVAL";
+    private static final String EXTRA_DIMENSIONS = "EXTRA_DIMENSIONS";
     private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioJavaAgent.class);
     private static final String JAVA_AGENT_CONFIGURATION_FILE = "javaagent.conf";
     private static final int SPLIT_KEY_VALUE_COUNT_LIMIT = 2;
