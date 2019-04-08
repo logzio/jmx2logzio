@@ -163,7 +163,7 @@ You'll find the jmx2logzio jar file in the jmx2logzio/target/ folder.
 
 ## Changelog
 - v1.0.0
-    - jmx2logzio is now a maven project 
+    - Added javadoc
 - v0.0.8
     - Additional metric information will be sent under "dim" instead of "dimensions"
 - v0.0.7
