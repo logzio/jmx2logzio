@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 
 
 public class StatusReporterFactory {
+
     public static SenderStatusReporter newSenderStatusReporter(Logger logger) {
         return new SenderStatusReporter() {
             @Override

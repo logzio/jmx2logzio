@@ -43,6 +43,10 @@ public class ListenerWriter implements Shutdownable {
         this.scheduledExecutorService = newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Jmx2ListenerWriter-%d").build());
     }
 
+    /**
+     * Create a logz.io java sender with the received configuration
+     * @return LogzioSender object
+     */
     private LogzioSender getLogzioSender() {
 
         try {
@@ -85,6 +89,10 @@ public class ListenerWriter implements Shutdownable {
         return null;
     }
 
+    /**
+     * Add metrics the sender to be sent
+     * @param metrics a list of metrics to be sent
+     */
     public void writeMetrics(List<Metric> metrics) {
         logger.info("sending {} metrics", metrics.size());
         metrics.stream().forEach(metric -> {
@@ -103,6 +111,9 @@ public class ListenerWriter implements Shutdownable {
         }
     }
 
+    /**
+     * Start a scheduled task to poll the metrics from the metrics queue and send them
+     */
     @PostConstruct
     public void start() {
         scheduledExecutorService.scheduleWithFixedDelay(this::trySendQueueToListener, 0, 5, TimeUnit.SECONDS);
@@ -125,6 +136,9 @@ public class ListenerWriter implements Shutdownable {
         scheduledExecutorService.shutdownNow();
     }
 
+    /**
+     * Enable graceful shutdown
+     */
     private void enableHangupSupport() {
         HangupInterceptor interceptor = new HangupInterceptor(this);
         Runtime.getRuntime().addShutdownHook(interceptor);

@@ -113,13 +113,11 @@ git clone https://github.com/logzio/jmx2logzio.git
 
 Open jmx2logzio/src/main/resources/application.config in a text editor, and set the parameters below.
 
-**Note**: All parameters are required, but we've provided default settings for most of them in the config file.
-
 #### Parameters
 
 | Parameter | Description |
 |---|---|
-| **service.name** | A name you define for the service. This is included in the reported metrics. |
+| **service.name** |  **Required**. A name you define for the service. This is included in the reported metrics. |
 | **service.host** | Hostname to be included in the reported metrics. <br /> **Default**: Host machine name (if setting not defined in application.conf) |
 | **service.poller.white-list-regex** | Only metrics matching this regex will be sent. <br /> **Default**: `.*` (match everything) |
 | **service.poller.black-list-regex** | Metrics matching this regex will not be sent. <br /> **Default**: `$a` (match nothing) |
@@ -164,6 +162,8 @@ java -jar jmx2logzio.jar
 You'll find the jmx2logzio jar file in the jmx2logzio/target/ folder.
 
 ## Changelog
+- v1.0.0
+    - Added javadoc
 - v0.0.8
     - Additional metric information will be sent under "dim" instead of "dimensions"
 - v0.0.7

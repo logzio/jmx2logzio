@@ -105,6 +105,7 @@ public class MetricsPipeline {
             // not throwing out since the scheduler will stop in any exception
         }
 
+
     }
 
     private Instant getPollingWindowStart() {

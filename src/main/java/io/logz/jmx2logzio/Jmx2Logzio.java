@@ -38,6 +38,9 @@ public class Jmx2Logzio implements Shutdownable {
         logger.info("Running with {}", clientString);
     }
 
+    /**
+     * Run a schedule task which collects both JVM and custom metrics and sends them to logz.io
+     */
     public void run() {
         logger.info("java sender: url = {}, token = {}", conf.getSenderParams().getUrl(), conf.getSenderParams().getToken());
         enableHangupSupport();

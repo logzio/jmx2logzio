@@ -2,8 +2,7 @@ package io.logz.jmx2logzio.configuration;
 
 import com.google.common.base.Splitter;
 import com.typesafe.config.Config;
-import io.logz.jmx2logzio.Jmx2LogzioJavaAgent;
-import io.logz.jmx2logzio.clients.JavaAgentClient;
+import io.logz.jmx2logzio.Jmx2LogzioJolokia;
 import io.logz.jmx2logzio.clients.JolokiaClient;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
@@ -55,30 +54,30 @@ public class Jmx2LogzioConfiguration {
     }
 
     public Jmx2LogzioConfiguration(Config config) throws IllegalConfiguration {
-        if (config.hasPath(Jmx2LogzioJavaAgent.SERVICE_HOST)) {
-            serviceHost = config.getString(Jmx2LogzioJavaAgent.SERVICE_HOST);
+        if (config.hasPath(Jmx2LogzioJolokia.SERVICE_HOST)) {
+            serviceHost = config.getString(Jmx2LogzioJolokia.SERVICE_HOST);
         }
         setClient(config);
         setFilterPatterns(config);
-        serviceName = config.getString(Jmx2LogzioJavaAgent.SERVICE_NAME);
+        serviceName = config.getString(Jmx2LogzioJolokia.SERVICE_NAME);
         logzioJavaSenderParams = new LogzioJavaSenderParams();
         setListenerURL(config);
 
         extraDimensions = new ArrayList<>();
-        if (config.hasPath(Jmx2LogzioJavaAgent.EXTRA_DIMENSIONS)) {
+        if (config.hasPath(Jmx2LogzioJolokia.EXTRA_DIMENSIONS)) {
             if (metricClientType == MetricClientType.MBEAN_PLATFORM) {
-                extraDimensions = parseExtraDimensions(config.getString(Jmx2LogzioJavaAgent.EXTRA_DIMENSIONS));
+                extraDimensions = parseExtraDimensions(config.getString(Jmx2LogzioJolokia.EXTRA_DIMENSIONS));
             } else {
-                extraDimensions = parseExtraDimensions(config.getConfig(Jmx2LogzioJavaAgent.EXTRA_DIMENSIONS));
+                extraDimensions = parseExtraDimensions(config.getConfig(Jmx2LogzioJolokia.EXTRA_DIMENSIONS));
             }
         }
-        if (config.getString(JavaAgentClient.LOGZIO_TOKEN).equals("<ACCOUNT-TOKEN>")) {
+        if (config.getString(Jmx2LogzioJolokia.LOGZIO_TOKEN).equals("<ACCOUNT-TOKEN>")) {
             throw new IllegalConfiguration("please enter a valid logz.io token (can be located at https://app.logz.io/#/dashboard/settings/manage-accounts)");
         }
-        logzioJavaSenderParams.setToken(config.getString(JavaAgentClient.LOGZIO_TOKEN));
+        logzioJavaSenderParams.setToken(config.getString(Jmx2LogzioJolokia.LOGZIO_TOKEN));
 
         ConfigSetter configSetter = (fromDisk) -> logzioJavaSenderParams.setFromDisk((boolean) fromDisk);
-        setSingleConfig(config, JavaAgentClient.FROM_DISK, null, configSetter, new ConfigValidator() {
+        setSingleConfig(config, Jmx2LogzioJolokia.FROM_DISK, null, configSetter, new ConfigValidator() {
         }, Boolean.class);
 
         if (logzioJavaSenderParams.isFromDisk()) {
@@ -88,7 +87,7 @@ public class Jmx2LogzioConfiguration {
         }
 
         configSetter = (interval) -> metricsPollingIntervalInSeconds = (int) interval;
-        validateAndSetNatural(config, Jmx2LogzioJavaAgent.METRICS_POLLING_INTERVAL, metricsPollingIntervalInSeconds, configSetter);
+        validateAndSetNatural(config, Jmx2LogzioJolokia.METRICS_POLLING_INTERVAL, metricsPollingIntervalInSeconds, configSetter);
 
     }
 
@@ -115,26 +114,26 @@ public class Jmx2LogzioConfiguration {
 
     private void setDiskStorageParams(Config config) {
         ConfigSetter configSetter = (interval) -> logzioJavaSenderParams.setDiskSpaceCheckInterval((int) interval);
-        validateAndSetNatural(config, JavaAgentClient.DISK_SPACE_CHECK_INTERVAL, logzioJavaSenderParams.getDiskSpaceCheckInterval(), configSetter);
+        validateAndSetNatural(config, Jmx2LogzioJolokia.DISK_SPACE_CHECK_INTERVAL, logzioJavaSenderParams.getDiskSpaceCheckInterval(), configSetter);
 
         configSetter = (queuePath) -> logzioJavaSenderParams.setQueueDir(new File((String) queuePath));
-        setSingleConfig(config, JavaAgentClient.QUEUE_DIR, null, configSetter, new ConfigValidator() {
+        setSingleConfig(config, Jmx2LogzioJolokia.QUEUE_DIR, null, configSetter, new ConfigValidator() {
         }, String.class);
 
         configSetter = (limit) -> logzioJavaSenderParams.setFileSystemFullPercentThreshold((int) limit);
-        validateAndSetNatural(config, JavaAgentClient.FILE_SYSTEM_SPACE_LIMIT, logzioJavaSenderParams.getFileSystemFullPercentThreshold(), configSetter);
+        validateAndSetNatural(config, Jmx2LogzioJolokia.FILE_SYSTEM_SPACE_LIMIT, logzioJavaSenderParams.getFileSystemFullPercentThreshold(), configSetter);
 
         configSetter = (interval) -> logzioJavaSenderParams.setGcPersistedQueueFilesIntervalSeconds((int) interval);
-        validateAndSetNatural(config, JavaAgentClient.CLEAN_SENT_METRICS_INTERVAL, logzioJavaSenderParams.getGcPersistedQueueFilesIntervalSeconds(), configSetter);
+        validateAndSetNatural(config, Jmx2LogzioJolokia.CLEAN_SENT_METRICS_INTERVAL, logzioJavaSenderParams.getGcPersistedQueueFilesIntervalSeconds(), configSetter);
     }
 
 
     private void setInMemoryParams(Config config) {
         ConfigSetter configSetter = (capacity) -> logzioJavaSenderParams.setInMemoryQueueCapacityInBytes((int) capacity);
-        validateAndSetNatural(config, JavaAgentClient.IN_MEMORY_QUEUE_CAPACITY, logzioJavaSenderParams.getInMemoryQueueCapacityInBytes(), configSetter);
+        validateAndSetNatural(config, Jmx2LogzioJolokia.IN_MEMORY_QUEUE_CAPACITY, logzioJavaSenderParams.getInMemoryQueueCapacityInBytes(), configSetter);
 
         configSetter = (limit) -> logzioJavaSenderParams.setLogsCountLimit((int) limit);
-        validateAndSetNatural(config, JavaAgentClient.LOGS_COUNT_LIMIT, logzioJavaSenderParams.getInMemoryQueueCapacityInBytes(), configSetter);
+        validateAndSetNatural(config, Jmx2LogzioJolokia.LOGS_COUNT_LIMIT, logzioJavaSenderParams.getInMemoryQueueCapacityInBytes(), configSetter);
     }
 
     private void setListenerURL(Config config) {
@@ -149,23 +148,23 @@ public class Jmx2LogzioConfiguration {
         };
         String malformedURLMsg = "URL {} is invalid. Using default listener URL: " + logzioJavaSenderParams.getUrl();
         ConfigSetter configSetter = (url) -> logzioJavaSenderParams.setUrl((String) url);
-        setSingleConfig(config, JavaAgentClient.LISTENER_URL, malformedURLMsg, configSetter, urlValidator, String.class);
+        setSingleConfig(config, Jmx2LogzioJolokia.LISTENER_URL, malformedURLMsg, configSetter, urlValidator, String.class);
     }
 
     private void setFilterPatterns(Config config) {
         try {
-            whiteListPattern = Pattern.compile(config.hasPath(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX) ?
-                    config.getString(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX) : ".*");
+            whiteListPattern = Pattern.compile(config.hasPath(Jmx2LogzioJolokia.WHITE_LIST_REGEX) ?
+                    config.getString(Jmx2LogzioJolokia.WHITE_LIST_REGEX) : ".*");
         } catch (Exception e) {
-            logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX), e.getMessage());
+            logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJolokia.WHITE_LIST_REGEX), e.getMessage());
             whiteListPattern = Pattern.compile(".*");
         }
 
         try {
-            blackListPattern = Pattern.compile(config.hasPath(Jmx2LogzioJavaAgent.BLACK_LIST_REGEX) ?
-                    config.getString(Jmx2LogzioJavaAgent.BLACK_LIST_REGEX) : "$a"); // $a is a regexp that will never match anything (will match an "a" character after the end of the string
+            blackListPattern = Pattern.compile(config.hasPath(Jmx2LogzioJolokia.BLACK_LIST_REGEX) ?
+                    config.getString(Jmx2LogzioJolokia.BLACK_LIST_REGEX) : "$a"); // $a is a regexp that will never match anything (will match an "a" character after the end of the string
         } catch (Exception e) {
-            logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJavaAgent.WHITE_LIST_REGEX), e.getMessage());
+            logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJolokia.WHITE_LIST_REGEX), e.getMessage());
             blackListPattern = Pattern.compile("$a");
         }
     }
