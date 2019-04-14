@@ -40,20 +40,9 @@ public class Jmx2LogzioJavaAgent {
 
     public static void premain(String agentArgument, Instrumentation instrument) {
 
-        logger.info("Loading with agentArgument: {}", agentArgument);
+        logger.debug("Loading with agentArgument: {}", agentArgument);
         Config finalConfig = getIntegratedConfiguration(agentArgument);
-        Level logLevel = Level.WARN;
-        if (finalConfig.hasPath(Jmx2LogzioJolokia.LOG_LEVEL)) {
-            Level configLogLevel = Level.toLevel(finalConfig.getString(Jmx2LogzioJolokia.LOG_LEVEL)); // If this method fails, it will return Level.DEBUG
-            if (configLogLevel.equals(Level.DEBUG) && !finalConfig.getString(Jmx2LogzioJolokia.LOG_LEVEL).equals(LOG_LEVEL_DEBUG)) {
-                logger.warn("failed to parse log level configuration, view the Readme file for valid level options. setting log level to default..");
-            } else {
-                logLevel = configLogLevel;
-            }
-        }
-        ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(logLevel);
-        logger.setLevel(logLevel);
-
+        setLogLevel(finalConfig);
         Jmx2LogzioConfiguration jmx2LogzioConfiguration = new Jmx2LogzioConfiguration(finalConfig);
         Jmx2Logzio main = new Jmx2Logzio(jmx2LogzioConfiguration);
         logger.info("Initiated new java agent based Jmx2Logzio instance");
@@ -63,6 +52,21 @@ public class Jmx2LogzioJavaAgent {
         } catch (Throwable e) {
             logger.error("Stopping jmx2logzio Java Agent due to unexpected exception: " + e.getMessage(), e);
         }
+    }
+
+    private static void setLogLevel(Config finalConfig) {
+        Level logLevel = Jmx2Logzio.DEFAULT_LOG_LEVEL;
+        if (finalConfig.hasPath(Jmx2LogzioJolokia.LOG_LEVEL)) {
+            Level configLogLevel = Level.toLevel(finalConfig.getString(Jmx2LogzioJolokia.LOG_LEVEL)); // If this method fails, it will return Level.DEBUG
+            if (configLogLevel.equals(Level.DEBUG) && !finalConfig.getString(Jmx2LogzioJolokia.LOG_LEVEL).equals(LOG_LEVEL_DEBUG)) {
+                logger.warn("failed to parse log level configuration, view the Readme file for valid level options. setting log level to default: " + logLevel.levelStr);
+            } else {
+                logLevel = configLogLevel;
+            }
+        }
+        ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(logLevel);
+        logger.setLevel(logLevel);
+
     }
 
     /**

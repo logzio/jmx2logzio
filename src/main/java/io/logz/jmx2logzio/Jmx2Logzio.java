@@ -1,5 +1,6 @@
 package io.logz.jmx2logzio;
 
+import ch.qos.logback.classic.Level;
 import io.logz.jmx2logzio.Utils.HangupInterceptor;
 import io.logz.jmx2logzio.Utils.MetricsPipeline;
 import io.logz.jmx2logzio.Utils.Shutdownable;
@@ -19,6 +20,7 @@ import static io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration.MetricCli
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 public class Jmx2Logzio implements Shutdownable {
+    public static final Level DEFAULT_LOG_LEVEL = Level.WARN;
     private final Logger logger = (Logger) LoggerFactory.getLogger(Jmx2Logzio.class);
 
     private final Jmx2LogzioConfiguration conf;

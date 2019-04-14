@@ -29,22 +29,26 @@ public class Jmx2LogzioJolokia {
     private static final String LOG_LEVEL_DEBUG = "DEBUG";
 
     public static void main(String[] args) {
-        logger.info("Starting Jmx2Logzio");
+        logger.debug("Starting Jmx2Logzio");
         Config config = ConfigFactory.load();
-        Level logLevel = Level.WARN;
-        if (config.hasPath(LOG_LEVEL)) {
-            Level configLogLevel = Level.toLevel(config.getString(LOG_LEVEL)); // If this method fails, it will return Level.DEBUG
-            if (!(configLogLevel.equals(Level.DEBUG) && !config.getString(LOG_LEVEL).equals(LOG_LEVEL_DEBUG))) {
-                logLevel = configLogLevel;
-            } else {
-                logger.warn("failed to parse log level configuration, view the Readme file for the level options");
-            }
-        }
-        ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(logLevel);
-        logger.setLevel(logLevel);
+        setLogLevel(config);
         Jmx2LogzioConfiguration jmx2LogzioConfiguration = new Jmx2LogzioConfiguration(config);
         Jmx2Logzio main = new Jmx2Logzio(jmx2LogzioConfiguration);
         logger.info("Starting jmx2Logzio using Jolokia-based poller");
         main.run();
+    }
+
+    private static void setLogLevel(Config config) {
+        Level logLevel = Jmx2Logzio.DEFAULT_LOG_LEVEL;
+        if (config.hasPath(LOG_LEVEL)) {
+            Level configLogLevel = Level.toLevel(config.getString(LOG_LEVEL)); // If this method fails, it will return Lev el.DEBUG
+            if (!(configLogLevel.equals(Level.DEBUG) && !config.getString(LOG_LEVEL).equals(LOG_LEVEL_DEBUG))) {
+                logLevel = configLogLevel;
+            } else {
+                logger.warn("failed to parse log level configuration, view the Readme file for the level options. setting log level to default: " + logLevel.levelStr);
+            }
+        }
+        ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(logLevel);
+        logger.setLevel(logLevel);
     }
 }
