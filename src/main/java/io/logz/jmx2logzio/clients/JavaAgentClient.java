@@ -11,11 +11,10 @@ import com.google.common.collect.Maps;
 import io.logz.jmx2logzio.MetricBean;
 
 import io.logz.jmx2logzio.Utils.Predicator;
-import io.logz.jmx2logzio.configuration.ConfigGetter;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.MBeanClient;
 import io.logz.jmx2logzio.objects.Metric;
-import org.slf4j.Logger;
+import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.*;
@@ -30,7 +29,7 @@ import static io.logz.jmx2logzio.Utils.MetricsUtils.sanitizeMetricName;
 
 public class JavaAgentClient extends MBeanClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(JavaAgentClient.class);
+    private final Logger logger = (Logger) LoggerFactory.getLogger(JavaAgentClient.class);
     private static final int DIMENSION_INDEX = 1;
     private static final int DOMAIN_NAME_INDEX = 0;
     private static final int ARGUMENT_KEY_INDEX = 0;

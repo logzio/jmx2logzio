@@ -7,7 +7,7 @@ import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.MBeanClient;
 import io.logz.jmx2logzio.objects.Metric;
 import io.logz.jmx2logzio.MetricBean;
-import org.slf4j.Logger;
+import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class MetricsPipeline {
     private static final DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ").withZone(ZoneId.of("UTC"));
-    private static final Logger logger = LoggerFactory.getLogger(MetricsPipeline.class);
+    private final Logger logger = (Logger) LoggerFactory.getLogger(MetricsPipeline.class);
     private final Pattern beansWhiteListPattern;
     private final Pattern beansBlackListPattern;
     private final List<Dimension> metricsPrefix;

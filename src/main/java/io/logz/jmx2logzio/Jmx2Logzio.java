@@ -1,5 +1,6 @@
 package io.logz.jmx2logzio;
 
+import ch.qos.logback.classic.Level;
 import io.logz.jmx2logzio.Utils.HangupInterceptor;
 import io.logz.jmx2logzio.Utils.MetricsPipeline;
 import io.logz.jmx2logzio.Utils.Shutdownable;
@@ -8,7 +9,7 @@ import io.logz.jmx2logzio.clients.JolokiaClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.MBeanClient;
-import org.slf4j.Logger;
+import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
@@ -19,8 +20,8 @@ import static io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration.MetricCli
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 public class Jmx2Logzio implements Shutdownable {
-
-    private static final Logger logger = LoggerFactory.getLogger(Jmx2Logzio.class);
+    public static final Level DEFAULT_LOG_LEVEL = Level.WARN;
+    private final Logger logger = (Logger) LoggerFactory.getLogger(Jmx2Logzio.class);
 
     private final Jmx2LogzioConfiguration conf;
     private final ScheduledExecutorService taskScheduler;
@@ -28,9 +29,7 @@ public class Jmx2Logzio implements Shutdownable {
 
     public Jmx2Logzio(Jmx2LogzioConfiguration conf) {
         this.conf = conf;
-
         this.taskScheduler = newSingleThreadScheduledExecutor();
-
         this.client = conf.getMetricClientType() == JOLOKIA ? new JolokiaClient(conf.getJolokiaFullUrl()) : new JavaAgentClient();
         List<Dimension> extraDimensions = conf.getExtraDimensions();
         client.setExtraDimensions(extraDimensions);

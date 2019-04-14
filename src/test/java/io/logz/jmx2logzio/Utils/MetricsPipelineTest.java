@@ -6,7 +6,8 @@ import io.logz.jmx2logzio.clients.JavaAgentClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import org.apache.commons.io.FileUtils;
 
-import org.slf4j.Logger;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -21,7 +22,7 @@ public class MetricsPipelineTest {
 
 
     private Jmx2LogzioConfiguration jmx2LogzioConfiguration;
-    private static final Logger logger = LoggerFactory.getLogger(MetricsPipeline.class);
+    private final Logger logger = (Logger) LoggerFactory.getLogger(MetricsPipeline.class);
 
     @AfterTest
     private void clean() {

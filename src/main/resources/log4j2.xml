@@ -14,7 +14,7 @@
         <AppenderRef ref="default.console"/>
     </Logger>-->
 
-    <Root level="info">
+    <Root level="WARN">
         <AppenderRef ref="default.console"/>
         <AppenderRef ref="default.file"/>
     </Root>
