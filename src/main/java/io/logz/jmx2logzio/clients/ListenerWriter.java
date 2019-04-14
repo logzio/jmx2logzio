@@ -3,6 +3,7 @@ package io.logz.jmx2logzio.clients;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.logz.jmx2logzio.Jmx2Logzio;
 import io.logz.jmx2logzio.Utils.HangupInterceptor;
 import io.logz.jmx2logzio.Utils.Shutdownable;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
@@ -13,7 +14,8 @@ import io.logz.sender.HttpsRequestConfiguration;
 import io.logz.sender.LogzioSender;
 import io.logz.sender.SenderStatusReporter;
 import io.logz.sender.exceptions.LogzioParameterErrorException;
-import org.slf4j.Logger;
+
+import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
@@ -24,8 +26,7 @@ import java.util.concurrent.*;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 public class ListenerWriter implements Shutdownable {
-    private static final Logger logger = LoggerFactory.getLogger(ListenerWriter.class);
-
+    private static final Logger logger = (Logger) LoggerFactory.getLogger(ListenerWriter.class);
 
     private final static ObjectMapper mapper = new ObjectMapper();
     private final BlockingQueue<Metric> messageQueue;
@@ -35,7 +36,7 @@ public class ListenerWriter implements Shutdownable {
     private final LogzioSender logzioSender;
 
     public ListenerWriter(Jmx2LogzioConfiguration requestConf) {
-
+        logger.setLevel(Jmx2Logzio.logLevel);
         this.logzioSenderParams = requestConf.getSenderParams();
         this.logzioSender = getLogzioSender();
         this.logzioSender.start();

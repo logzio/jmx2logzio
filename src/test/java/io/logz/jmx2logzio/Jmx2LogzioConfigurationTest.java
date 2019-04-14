@@ -7,7 +7,8 @@ import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
+import ch.qos.logback.classic.Logger;
+import org.junit.Before;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -30,7 +31,7 @@ public class Jmx2LogzioConfigurationTest {
     private static final String WHITE_LIST_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070,LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=com.yog.examplerunningapp,WHITE_LIST_REGEX=.*MemoryUsagePercent.*,QUEUE_DIR="+ METRICS_TEST_DIR;
     private static final String BLACK_LIST_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070,LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=com.yog.examplerunningapp,BLACK_LIST_REGEX=.*Max.*,QUEUE_DIR=" + METRICS_TEST_DIR;
     private static final String EXTRA_DIMENSIONS_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070,LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=com.yog.examplerunningapp,EXTRA_DIMENSIONS={origin=local:framework=spring},QUEUE_DIR=" + METRICS_TEST_DIR;
-    private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioConfigurationTest.class);
+    private static final Logger logger = (Logger) LoggerFactory.getLogger(Jmx2LogzioConfigurationTest.class);
 
     private static Config getIntegratedConfiguration(String agentArgument) {
 
@@ -63,6 +64,11 @@ public class Jmx2LogzioConfigurationTest {
     public static Jmx2LogzioConfiguration getBlackListTestConfiguration() {
         String testArguments = BLACK_LIST_ARGUMENT_CONFIGURATION;
         return new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
+    }
+
+    @Before
+    private void setup() {
+        logger.setLevel(Jmx2Logzio.logLevel);
     }
 
     @AfterTest

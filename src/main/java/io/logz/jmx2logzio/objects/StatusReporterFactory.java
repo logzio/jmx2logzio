@@ -1,8 +1,7 @@
 package io.logz.jmx2logzio.objects;
 
 import io.logz.sender.SenderStatusReporter;
-import org.slf4j.Logger;
-
+import ch.qos.logback.classic.Logger;
 
 public class StatusReporterFactory {
 
@@ -30,12 +29,20 @@ public class StatusReporterFactory {
 
             @Override
             public void info(String s) {
-                logger.info(s);
+                if (s.contains("DEBUG:"))  {
+                    logger.debug(s);
+                } else {
+                    logger.info(s);
+                }
             }
 
             @Override
             public void info(String s, Throwable throwable) {
-                logger.info(s + " " + throwable.getMessage());
+                if (s.contains("DEBUG:"))  {
+                    logger.debug(s + " " + throwable.getMessage());
+                } else {
+                    logger.info(s + " " + throwable.getMessage());
+                }
             }
         };
     }

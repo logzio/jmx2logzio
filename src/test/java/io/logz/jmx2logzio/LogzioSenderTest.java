@@ -8,7 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpRequest;
-import org.slf4j.Logger;
+import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -28,7 +28,7 @@ import static org.mockserver.model.HttpResponse.response;
 
 public class LogzioSenderTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(LogzioSenderTest.class);
+    private static final Logger logger = (Logger) LoggerFactory.getLogger(LogzioSenderTest.class);
     private Jmx2LogzioConfiguration config;
     private ClientAndServer mockServer;
     private HttpRequest[] recordedRequests;
@@ -36,6 +36,7 @@ public class LogzioSenderTest {
 
     @BeforeTest
     private void startMockServer() {
+        logger.setLevel(Jmx2Logzio.logLevel);
         logger.info("starting mock server");
         mockServer = startClientAndServer(8070);
 

@@ -6,6 +6,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.logz.jmx2logzio.Jmx2Logzio;
 import io.logz.jmx2logzio.MetricBean;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.JolokiaReadRequest;
@@ -14,7 +15,7 @@ import io.logz.jmx2logzio.objects.Metric;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
-import org.slf4j.Logger;
+import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -37,7 +38,7 @@ public class JolokiaClient extends MBeanClient {
     public static final String POLLER_JOLOKIA = "service.poller.jolokia";
     public static final String JOLOKIA_FULL_URL = "service.poller.jolokia.jolokiaFullUrl";
 
-    private static final Logger logger = LoggerFactory.getLogger(JolokiaClient.class);
+    private static final Logger logger = (Logger) LoggerFactory.getLogger(JolokiaClient.class);
 
     private static final String REQUEST_MBEAN_KEY = "mbean";
     private static final String RESPONSE_REQUEST_KEY = "request";
@@ -62,7 +63,7 @@ public class JolokiaClient extends MBeanClient {
     private List<Dimension> extraDimensions;
 
     public JolokiaClient(String jolokiaFullURL) {
-
+        logger.setLevel(Jmx2Logzio.logLevel);
         this.jolokiaFullURL = jolokiaFullURL;
         if (!jolokiaFullURL.endsWith("/")) {
             this.jolokiaFullURL = jolokiaFullURL + "/";

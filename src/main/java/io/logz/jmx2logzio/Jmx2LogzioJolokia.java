@@ -1,13 +1,14 @@
 package io.logz.jmx2logzio;
 
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
-import org.slf4j.Logger;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 public class Jmx2LogzioJolokia {
-    private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioJolokia.class);
+    private static final Logger logger = (Logger) LoggerFactory.getLogger(Jmx2LogzioJolokia.class);
 
     public static final String WHITE_LIST_REGEX = "service.poller.white-list-regex";
     public static final String BLACK_LIST_REGEX = "service.poller.black-list-regex";
@@ -24,9 +25,21 @@ public class Jmx2LogzioJolokia {
     public static final String QUEUE_DIR = "logzio-java-sender.queue-dir";
     public static final String FILE_SYSTEM_SPACE_LIMIT = "logzio-java-sender.file-system-full-percent-threshold";
     public static final String CLEAN_SENT_METRICS_INTERVAL = "logzio-java-sender.clean-sent-metrics-interval";
+    public static final String LOG_LEVEL = "log-level";
+    private static final String LOG_LEVEL_DEBUG = "DEBUG";
 
     public static void main(String[] args) {
         Config config = ConfigFactory.load();
+        if (config.hasPath(LOG_LEVEL)) {
+            Level configLogLevel = Level.toLevel(config.getString(LOG_LEVEL)); // If this method fails, it will return Level.DEBUG
+            if (!(configLogLevel.equals(Level.DEBUG) && !config.getString(LOG_LEVEL).equals(LOG_LEVEL_DEBUG))) {
+                Jmx2Logzio.logLevel = configLogLevel;
+            } else {
+                logger.warn("failed to parse log level configuration, view the Readme file for the level options");
+            }
+        }
+        Jmx2Logzio.logLevel = config.hasPath(LOG_LEVEL) ? Level.toLevel(config.getString(LOG_LEVEL)) : Jmx2Logzio.logLevel;
+        logger.setLevel(Jmx2Logzio.logLevel);
         Jmx2LogzioConfiguration jmx2LogzioConfiguration = new Jmx2LogzioConfiguration(config);
         Jmx2Logzio main = new Jmx2Logzio(jmx2LogzioConfiguration);
         logger.info("Starting jmx2Logzio using Jolokia-based poller");
