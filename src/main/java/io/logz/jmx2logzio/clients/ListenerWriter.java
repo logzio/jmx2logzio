@@ -26,7 +26,7 @@ import java.util.concurrent.*;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 public class ListenerWriter implements Shutdownable {
-    private static final Logger logger = (Logger) LoggerFactory.getLogger(ListenerWriter.class);
+    private final Logger logger = (Logger) LoggerFactory.getLogger(ListenerWriter.class);
 
     private final static ObjectMapper mapper = new ObjectMapper();
     private final BlockingQueue<Metric> messageQueue;
@@ -36,7 +36,6 @@ public class ListenerWriter implements Shutdownable {
     private final LogzioSender logzioSender;
 
     public ListenerWriter(Jmx2LogzioConfiguration requestConf) {
-        logger.setLevel(Jmx2Logzio.logLevel);
         this.logzioSenderParams = requestConf.getSenderParams();
         this.logzioSender = getLogzioSender();
         this.logzioSender.start();

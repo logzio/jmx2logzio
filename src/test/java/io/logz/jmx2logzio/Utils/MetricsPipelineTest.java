@@ -22,7 +22,7 @@ public class MetricsPipelineTest {
 
 
     private Jmx2LogzioConfiguration jmx2LogzioConfiguration;
-    private static final Logger logger = (Logger) LoggerFactory.getLogger(MetricsPipeline.class);
+    private final Logger logger = (Logger) LoggerFactory.getLogger(MetricsPipeline.class);
 
     @AfterTest
     private void clean() {

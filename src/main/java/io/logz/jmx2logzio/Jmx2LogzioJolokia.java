@@ -29,17 +29,19 @@ public class Jmx2LogzioJolokia {
     private static final String LOG_LEVEL_DEBUG = "DEBUG";
 
     public static void main(String[] args) {
+        logger.info("Starting Jmx2Logzio");
         Config config = ConfigFactory.load();
+        Level logLevel = Level.WARN;
         if (config.hasPath(LOG_LEVEL)) {
             Level configLogLevel = Level.toLevel(config.getString(LOG_LEVEL)); // If this method fails, it will return Level.DEBUG
             if (!(configLogLevel.equals(Level.DEBUG) && !config.getString(LOG_LEVEL).equals(LOG_LEVEL_DEBUG))) {
-                Jmx2Logzio.logLevel = configLogLevel;
+                logLevel = configLogLevel;
             } else {
                 logger.warn("failed to parse log level configuration, view the Readme file for the level options");
             }
         }
-        Jmx2Logzio.logLevel = config.hasPath(LOG_LEVEL) ? Level.toLevel(config.getString(LOG_LEVEL)) : Jmx2Logzio.logLevel;
-        logger.setLevel(Jmx2Logzio.logLevel);
+        ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(logLevel);
+        logger.setLevel(logLevel);
         Jmx2LogzioConfiguration jmx2LogzioConfiguration = new Jmx2LogzioConfiguration(config);
         Jmx2Logzio main = new Jmx2Logzio(jmx2LogzioConfiguration);
         logger.info("Starting jmx2Logzio using Jolokia-based poller");

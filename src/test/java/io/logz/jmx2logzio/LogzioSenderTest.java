@@ -28,7 +28,7 @@ import static org.mockserver.model.HttpResponse.response;
 
 public class LogzioSenderTest {
 
-    private static final Logger logger = (Logger) LoggerFactory.getLogger(LogzioSenderTest.class);
+    private final Logger logger = (Logger) LoggerFactory.getLogger(LogzioSenderTest.class);
     private Jmx2LogzioConfiguration config;
     private ClientAndServer mockServer;
     private HttpRequest[] recordedRequests;
@@ -36,8 +36,7 @@ public class LogzioSenderTest {
 
     @BeforeTest
     private void startMockServer() {
-        logger.setLevel(Jmx2Logzio.logLevel);
-        logger.info("starting mock server");
+logger.info("starting mock server");
         mockServer = startClientAndServer(8070);
 
         mockServerClient = new MockServerClient("localhost", 8070);

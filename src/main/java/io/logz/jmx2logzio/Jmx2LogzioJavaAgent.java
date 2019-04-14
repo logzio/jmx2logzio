@@ -42,14 +42,18 @@ public class Jmx2LogzioJavaAgent {
 
         logger.info("Loading with agentArgument: {}", agentArgument);
         Config finalConfig = getIntegratedConfiguration(agentArgument);
-        if (finalConfig.hasPath(LOG_LEVEL)) {
-            Level configLogLevel = Level.toLevel(finalConfig.getString(LOG_LEVEL)); // If this method fails, it will return Level.DEBUG
-            if (!(configLogLevel.equals(Level.DEBUG) && !finalConfig.getString(LOG_LEVEL).equals(LOG_LEVEL_DEBUG))) {
-                Jmx2Logzio.logLevel = configLogLevel;
+        Level logLevel = Level.WARN;
+        if (finalConfig.hasPath(Jmx2LogzioJolokia.LOG_LEVEL)) {
+            Level configLogLevel = Level.toLevel(finalConfig.getString(Jmx2LogzioJolokia.LOG_LEVEL)); // If this method fails, it will return Level.DEBUG
+            if (!(configLogLevel.equals(Level.DEBUG) && !finalConfig.getString(Jmx2LogzioJolokia.LOG_LEVEL).equals(LOG_LEVEL_DEBUG))) {
+                logLevel = configLogLevel;
             } else {
-                logger.warn("failed to parse log level configuration, view the Readme file for the level options");
+                logger.warn("failed to parse log level configuration, view the Readme file for valid level options. setting log level to default..");
             }
         }
+        ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(logLevel);
+        logger.setLevel(logLevel);
+
         Jmx2LogzioConfiguration jmx2LogzioConfiguration = new Jmx2LogzioConfiguration(finalConfig);
         Jmx2Logzio main = new Jmx2Logzio(jmx2LogzioConfiguration);
         logger.info("Initiated new java agent based Jmx2Logzio instance");
@@ -143,6 +147,8 @@ public class Jmx2LogzioJavaAgent {
                 return Jmx2LogzioJolokia.FILE_SYSTEM_SPACE_LIMIT;
             case CLEAN_SENT_METRICS_INTERVAL:
                 return Jmx2LogzioJolokia.CLEAN_SENT_METRICS_INTERVAL;
+            case LOG_LEVEL:
+                return Jmx2LogzioJolokia.LOG_LEVEL;
             default:
                 throw new IllegalConfiguration("Unknown configuration option: " + key);
         }
