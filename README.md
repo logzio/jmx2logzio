@@ -64,7 +64,7 @@ java -javaagent:~/jmx2logzio/target/jmx2logzio-1.0.1.jar=LOGZIO_TOKEN=<ACCOUNT-T
 | **WHITE_LIST_REGEX** | Only metrics matching this regex will be sent. <br /> **Default**: `.*` (match everything) |
 | **BLACK_LIST_REGEX** | Metrics matching this regex will not be sent. <br /> **Default**: `$a` (match nothing) |
 | **EXTRA_DIMENSIONS** | A list of key-values separated by ':' that will be added to the dimensions of the collected metrics. <br /> Example: EXTRA_DIMENSIONS={origin=local:env=java} |
-| **LOG_LEVEL** | The level of logs produced by jmx2logzio to be omitted. <br /> The available levels are: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` and `OFF` <br /> **Default**: WARN |
+| **LOG_LEVEL** | The level of logs produced by the jmx2logzio agent to be reported. <br /> The available levels are: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, and `OFF` <br /> **Default**: `WARN` |
 | **FROM_DISK** | If `true`, metrics are stored on disk until they're shipped (see [If FROM_DISK=true](#agent-if-fromdisk-true)). If `false`, metrics persist in memory until they're shipped (see see [If FROM_DISK=false](#agent-if-fromdisk-false)). <br /> **Default**: `true` |
 
 <h4 id="agent-if-fromdisk-true">If FROM_DISK=true</h4>
@@ -125,7 +125,7 @@ Open jmx2logzio/src/main/resources/application.config in a text editor, and set 
 | **service.poller.jolokia.jolokiaFullUrl** | URL of the remote Jolokia agent you're forwarding metrics to. |
 | **service.poller.metrics-polling-interval-in-seconds** | Metrics polling interval, in seconds. <br /> **Default**: `30` |
 | **extra-dimensions** | A dictionary of key-values that will be added to the dimensions of the collected metrics |
-| **log-level** | The level of logs produced by jmx2logzio to be omitted. <br /> The available levels are: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` and `OFF` <br /> **Default**: WARN |
+| **log-level** | The level of logs produced by the jmx2logzio app to be reported. <br /> The available levels are: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` and `OFF` <br /> **Default**: `WARN` |
 | **logzio-java-sender.url** | Listener URL and port. <br /> If your login URL is app.logz.io, use `listener.logz.io`. If your login URL is app-eu.logz.io, use `listener-eu.logz.io`. <br /> **Default**: `https://listener.logz.io:8071` |
 | **logzio-java-sender.token** | **Required**. Your Logz.io [account token](https://app.logz.io/#/dashboard/settings/manage-accounts) |
 | **logzio-java-sender.from-disk** | If `true`, metrics are stored on disk until they're shipped (see [If from-disk=true](#jolokia-if-fromdisk-true)). If `false`, metrics persist in memory until they're shipped (see see [If from-disk=false](#jolokia-if-fromdisk-false)). <br /> **Default**: `true` |
