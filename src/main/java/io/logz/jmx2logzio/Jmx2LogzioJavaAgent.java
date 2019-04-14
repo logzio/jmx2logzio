@@ -45,10 +45,10 @@ public class Jmx2LogzioJavaAgent {
         Level logLevel = Level.WARN;
         if (finalConfig.hasPath(Jmx2LogzioJolokia.LOG_LEVEL)) {
             Level configLogLevel = Level.toLevel(finalConfig.getString(Jmx2LogzioJolokia.LOG_LEVEL)); // If this method fails, it will return Level.DEBUG
-            if (!(configLogLevel.equals(Level.DEBUG) && !finalConfig.getString(Jmx2LogzioJolokia.LOG_LEVEL).equals(LOG_LEVEL_DEBUG))) {
-                logLevel = configLogLevel;
-            } else {
+            if (configLogLevel.equals(Level.DEBUG) && !finalConfig.getString(Jmx2LogzioJolokia.LOG_LEVEL).equals(LOG_LEVEL_DEBUG)) {
                 logger.warn("failed to parse log level configuration, view the Readme file for valid level options. setting log level to default..");
+            } else {
+                logLevel = configLogLevel;
             }
         }
         ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(logLevel);
