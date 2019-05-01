@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.logz</groupId>
     <artifactId>jmx2logzio</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 
     <packaging>jar</packaging>
     <name>JMX2logz.io</name>
@@ -88,6 +88,50 @@
                         <relocation>
                             <pattern>commons-io</pattern>
                             <shadedPattern>io.logz.jmx2logzio.commons-io</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>ch.qos.logback</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.ch.qos.logback</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.apache.httpcomponents</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.org.apache.httpcomponents</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>commons-codec</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.commons-codec</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.googlecode.json-simple</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.com.googlecode.json-simple</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.google.code.gson</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.com.google.code.gson</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.testng</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.org.testng</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.mock-server</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.org.mock-server</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.google.guava</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.com.google.guava</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.fasterxml.jackson.core</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.com.fasterxml.jackson.core</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>commons-validator</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.commons-validator</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>commons-beanutils</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.commons-beanutils</shadedPattern>
                         </relocation>
                     </relocations>
                     <filters>
