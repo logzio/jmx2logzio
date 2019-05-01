@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.logz</groupId>
     <artifactId>jmx2logzio</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 
     <packaging>jar</packaging>
     <name>JMX2logz.io</name>
@@ -88,6 +88,10 @@
                         <relocation>
                             <pattern>commons-io</pattern>
                             <shadedPattern>io.logz.jmx2logzio.commons-io</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>ch.qos.logback</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.ch.qos.logback</shadedPattern>
                         </relocation>
                     </relocations>
                     <filters>

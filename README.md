@@ -164,6 +164,8 @@ java -jar jmx2logzio.jar
 You'll find the jmx2logzio jar file in the jmx2logzio/target/ folder.
 
 ## Changelog
+- v1.0.2
+    - shade logback dependency
 - v1.0.1
     - jmx2logz.io output log level can be configured.
 - v1.0.0
