@@ -129,8 +129,15 @@ public class ListenerWriter implements Shutdownable {
 
     @Override
     public void shutdown() {
-        logger.info("Closing Listener Writer...");
         logzioSender.stop();
+        logger.info("Requesting auto slow monitoring thread to stop");
+        scheduledExecutorService.shutdown();
+        try {
+            scheduledExecutorService.awaitTermination(20, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.warn("final metrics sending operation was interrupted");
+        }
+        logger.info("Closing Listener Writer...");
         scheduledExecutorService.shutdownNow();
     }
 
