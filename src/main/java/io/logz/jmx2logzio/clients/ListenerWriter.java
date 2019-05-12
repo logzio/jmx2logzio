@@ -101,6 +101,10 @@ public class ListenerWriter implements Shutdownable {
     }
 
 
+    public LogzioSender getSender() {
+        return logzioSender;
+    }
+
     private String convertToJson(Metric metric) {
         try {
             return mapper.writeValueAsString(metric);
