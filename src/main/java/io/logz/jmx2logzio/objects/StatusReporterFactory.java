@@ -1,7 +1,7 @@
 package io.logz.jmx2logzio.objects;
 
-import io.logz.sender.SenderStatusReporter;
 import ch.qos.logback.classic.Logger;
+import io.logz.sender.SenderStatusReporter;
 
 public class StatusReporterFactory {
 

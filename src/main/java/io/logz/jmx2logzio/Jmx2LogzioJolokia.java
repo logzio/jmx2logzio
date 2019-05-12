@@ -1,11 +1,11 @@
 package io.logz.jmx2logzio;
 
-import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import org.slf4j.LoggerFactory;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
+import org.slf4j.LoggerFactory;
 
 public class Jmx2LogzioJolokia {
     private static final Logger logger = (Logger) LoggerFactory.getLogger(Jmx2LogzioJolokia.class);

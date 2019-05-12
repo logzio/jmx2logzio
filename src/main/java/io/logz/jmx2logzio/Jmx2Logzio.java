@@ -1,6 +1,7 @@
 package io.logz.jmx2logzio;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import io.logz.jmx2logzio.Utils.HangupInterceptor;
 import io.logz.jmx2logzio.Utils.MetricsPipeline;
 import io.logz.jmx2logzio.Utils.Shutdownable;
@@ -9,7 +10,6 @@ import io.logz.jmx2logzio.clients.JolokiaClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.MBeanClient;
-import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;

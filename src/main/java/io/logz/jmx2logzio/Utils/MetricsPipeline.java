@@ -1,13 +1,13 @@
 package io.logz.jmx2logzio.Utils;
 
+import ch.qos.logback.classic.Logger;
 import com.google.common.base.Stopwatch;
+import io.logz.jmx2logzio.MetricBean;
 import io.logz.jmx2logzio.clients.ListenerWriter;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.MBeanClient;
 import io.logz.jmx2logzio.objects.Metric;
-import io.logz.jmx2logzio.MetricBean;
-import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;

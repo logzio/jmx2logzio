@@ -1,9 +1,9 @@
 package io.logz.jmx2logzio.clients;
 
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.logz.jmx2logzio.Jmx2Logzio;
 import io.logz.jmx2logzio.Utils.HangupInterceptor;
 import io.logz.jmx2logzio.Utils.Shutdownable;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
@@ -14,8 +14,6 @@ import io.logz.sender.HttpsRequestConfiguration;
 import io.logz.sender.LogzioSender;
 import io.logz.sender.SenderStatusReporter;
 import io.logz.sender.exceptions.LogzioParameterErrorException;
-
-import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;

@@ -1,5 +1,6 @@
 package io.logz.jmx2logzio.clients;
 
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Splitter;
@@ -14,7 +15,6 @@ import io.logz.jmx2logzio.objects.Metric;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
-import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;

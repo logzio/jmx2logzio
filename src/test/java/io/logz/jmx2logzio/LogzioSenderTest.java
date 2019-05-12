@@ -1,5 +1,6 @@
 package io.logz.jmx2logzio;
 
+import ch.qos.logback.classic.Logger;
 import io.logz.jmx2logzio.clients.ListenerWriter;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
@@ -8,7 +9,6 @@ import org.apache.commons.io.FileUtils;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpRequest;
-import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
