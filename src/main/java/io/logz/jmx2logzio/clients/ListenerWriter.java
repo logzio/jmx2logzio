@@ -17,7 +17,6 @@ import io.logz.sender.exceptions.LogzioParameterErrorException;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
