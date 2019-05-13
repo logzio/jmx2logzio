@@ -55,7 +55,7 @@ public class Jmx2Logzio implements Shutdownable {
 
     @Override
     public void shutdown() {
-        logger.info("Requesting metrics poller to stop");
+        logger.debug("Requesting metrics poller to stop");
         try {
             taskScheduler.shutdown();
             if (!taskScheduler.awaitTermination(20, TimeUnit.SECONDS)) {
