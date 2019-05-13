@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -123,25 +124,18 @@ public class ListenerWriter implements Shutdownable {
     }
 
     private void trySendQueueToListener() {
-        try {
-            Metric metric = messageQueue.take();
-            writeMetrics(Arrays.asList(metric));
-        } catch (InterruptedException e) {
-            logger.error("error enqueueing metrics, got interrupt: {}", e.getMessage());
-        }
+            Metric metric = messageQueue.poll();
+            if (metric != null) {
+                writeMetrics(Collections.singletonList(metric));
+            }
     }
 
     @Override
     public void shutdown() {
         logzioSender.stop();
-        logger.info("Requesting auto slow monitoring thread to stop");
+        logger.info("Stopping metrics poller");
         try {
             scheduledExecutorService.shutdown();
-            if (!scheduledExecutorService.awaitTermination(20, TimeUnit.SECONDS)) {
-                scheduledExecutorService.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            logger.warn("final metrics sending operation was interrupted: " + e.getMessage());
         } catch (SecurityException ex) {
             logger.error("can't submit final request: " + ex.getMessage());
         }
