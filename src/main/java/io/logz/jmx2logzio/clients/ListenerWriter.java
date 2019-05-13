@@ -1,9 +1,8 @@
 package io.logz.jmx2logzio.clients;
 
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.logz.jmx2logzio.Jmx2Logzio;
 import io.logz.jmx2logzio.Utils.HangupInterceptor;
 import io.logz.jmx2logzio.Utils.Shutdownable;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
@@ -14,23 +13,17 @@ import io.logz.sender.HttpsRequestConfiguration;
 import io.logz.sender.LogzioSender;
 import io.logz.sender.SenderStatusReporter;
 import io.logz.sender.exceptions.LogzioParameterErrorException;
-
-import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
 
-import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 public class ListenerWriter implements Shutdownable {
     private final Logger logger = (Logger) LoggerFactory.getLogger(ListenerWriter.class);
 
     private final static ObjectMapper mapper = new ObjectMapper();
-    private final BlockingQueue<Metric> messageQueue;
-    private final ScheduledExecutorService scheduledExecutorService;
     private HttpsRequestConfiguration requestConf;
     private final LogzioJavaSenderParams logzioSenderParams;
     private final LogzioSender logzioSender;
@@ -39,8 +32,6 @@ public class ListenerWriter implements Shutdownable {
         this.logzioSenderParams = requestConf.getSenderParams();
         this.logzioSender = getLogzioSender();
         this.logzioSender.start();
-        this.messageQueue = new LinkedBlockingQueue<>();
-        this.scheduledExecutorService = newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Jmx2ListenerWriter-%d").build());
     }
 
     /**
@@ -103,6 +94,10 @@ public class ListenerWriter implements Shutdownable {
     }
 
 
+    public LogzioSender getSender() {
+        return logzioSender;
+    }
+
     private String convertToJson(Metric metric) {
         try {
             return mapper.writeValueAsString(metric);
@@ -116,24 +111,13 @@ public class ListenerWriter implements Shutdownable {
      */
     @PostConstruct
     public void start() {
-        scheduledExecutorService.scheduleWithFixedDelay(this::trySendQueueToListener, 0, 5, TimeUnit.SECONDS);
         enableHangupSupport();
-    }
-
-    private void trySendQueueToListener() {
-        try {
-            Metric metric = messageQueue.take();
-            writeMetrics(Arrays.asList(metric));
-        } catch (InterruptedException e) {
-            logger.error("error enqueueing metrics, got interrupt: {}", e.getMessage());
-        }
     }
 
     @Override
     public void shutdown() {
-        logger.info("Closing Listener Writer...");
         logzioSender.stop();
-        scheduledExecutorService.shutdownNow();
+        logger.info("Closing Listener Writer...");
     }
 
     /**

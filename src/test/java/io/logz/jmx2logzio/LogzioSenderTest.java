@@ -1,5 +1,6 @@
 package io.logz.jmx2logzio;
 
+import ch.qos.logback.classic.Logger;
 import io.logz.jmx2logzio.clients.ListenerWriter;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
@@ -8,7 +9,6 @@ import org.apache.commons.io.FileUtils;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpRequest;
-import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.Thread.sleep;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -61,15 +60,6 @@ logger.debug("starting mock server");
         }
     }
 
-    private void waitToSend() {
-        logger.info("waiting for the listener writer to send...");
-        try {
-            sleep(10000);
-        } catch (InterruptedException e) {
-           logger.info("error in wait: {}", e.getMessage());
-        }
-    }
-
     @Test
     public void sendMetricTest() {
         config = Jmx2LogzioConfigurationTest.getMinimalTestConfiguration();
@@ -82,7 +72,7 @@ logger.debug("starting mock server");
 
         ListenerWriter writer = new ListenerWriter(config);
         writer.writeMetrics(metrics);
-        waitToSend();
+        writer.getSender().drainQueueAndSend();
         recordedRequests = mockServerClient.retrieveRecordedRequests(request().withMethod("POST"));
         Assert.assertEquals(recordedRequests.length, 1);
         String message = recordedRequests[0].getBodyAsString();

@@ -1,5 +1,6 @@
 package io.logz.jmx2logzio;
 
+import ch.qos.logback.classic.Logger;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
@@ -7,7 +8,6 @@ import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
 import org.apache.commons.io.FileUtils;
-import ch.qos.logback.classic.Logger;
 import org.junit.Before;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;

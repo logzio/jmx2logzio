@@ -1,13 +1,11 @@
 package io.logz.jmx2logzio.Utils;
 
+import ch.qos.logback.classic.Logger;
 import io.logz.jmx2logzio.Jmx2LogzioConfigurationTest;
 import io.logz.jmx2logzio.MetricBean;
 import io.logz.jmx2logzio.clients.JavaAgentClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import org.apache.commons.io.FileUtils;
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;

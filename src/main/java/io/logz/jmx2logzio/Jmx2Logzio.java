@@ -1,6 +1,7 @@
 package io.logz.jmx2logzio;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import io.logz.jmx2logzio.Utils.HangupInterceptor;
 import io.logz.jmx2logzio.Utils.MetricsPipeline;
 import io.logz.jmx2logzio.Utils.Shutdownable;
@@ -9,7 +10,6 @@ import io.logz.jmx2logzio.clients.JolokiaClient;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.MBeanClient;
-import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
@@ -55,8 +55,19 @@ public class Jmx2Logzio implements Shutdownable {
 
     @Override
     public void shutdown() {
+        logger.debug("Requesting metrics poller to stop");
+        try {
+            taskScheduler.shutdown();
+            if (!taskScheduler.awaitTermination(20, TimeUnit.SECONDS)) {
+                taskScheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            logger.warn("final request was interrupted: " + e.getMessage());
+        } catch (SecurityException ex) {
+            logger.error("can't submit final request: " + ex.getMessage());
+        }
+
         logger.info("Shutting down...");
-        taskScheduler.shutdownNow();
     }
 
     /**
