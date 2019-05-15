@@ -72,6 +72,10 @@ public class Metric {
     }
 
 
+    /**
+     * Converts the dimensions property to map for jsonify
+     * @return dimensions as map
+     */
     public Map<String, Object> getDimensionsMap() {
         Map<String, Object> jsonDimensions = new HashMap<>();
         for (Dimension dimension : dimensions) {
