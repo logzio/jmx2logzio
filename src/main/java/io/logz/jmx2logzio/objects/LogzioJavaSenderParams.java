@@ -23,6 +23,9 @@ public class LogzioJavaSenderParams {
     private int gcPersistedQueueFilesIntervalSeconds = 30;
     private int diskSpaceCheckInterval = 1000;
 
+    /**
+     * Constructor automatically create metrics directory
+     */
     public LogzioJavaSenderParams() {
         String queuePath = System.getProperty("user.dir");
         queuePath += queuePath.endsWith("/") ? "" : "/";
