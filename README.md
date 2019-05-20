@@ -64,7 +64,6 @@ java -javaagent:~/jmx2logzio/target/jmx2logzio-1.0.1.jar=LOGZIO_TOKEN=<ACCOUNT-T
 | **WHITE_LIST_REGEX** | Only metrics matching this regex will be sent. <br /> **Default**: `.*` (match everything) |
 | **BLACK_LIST_REGEX** | Metrics matching this regex will not be sent. <br /> **Default**: `$a` (match nothing) |
 | **EXTRA_DIMENSIONS** | A list of key-values separated by ':' that will be added to the dimensions of the collected metrics. <br /> Example: EXTRA_DIMENSIONS={origin=local:env=java} |
-| **LOG_LEVEL** | The level of logs produced by the jmx2logzio agent to be reported. <br /> The available levels are: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, and `OFF` <br /> **Default**: `WARN` |
 | **FROM_DISK** | If `true`, metrics are stored on disk until they're shipped (see [If FROM_DISK=true](#agent-if-fromdisk-true)). If `false`, metrics persist in memory until they're shipped (see see [If FROM_DISK=false](#agent-if-fromdisk-false)). <br /> **Default**: `true` |
 
 <h4 id="agent-if-fromdisk-true">If FROM_DISK=true</h4>
@@ -164,10 +163,14 @@ java -jar jmx2logzio.jar
 You'll find the jmx2logzio jar file in the jmx2logzio/target/ folder.
 
 ## Changelog
+- v1.0.4
+    - The changed below is applied only to the javaagent version, the Jolokia version has not been changed.
+    - Jmx2logz.io logger changed from logback to slf4j and will now inhere it's properties from the java app.
+    - Set level feature was removed and will also be inherited from the main ap
 - v1.0.2
-    - shade all dependencies
+    - Shade all dependencies
 - v1.0.1
-    - jmx2logz.io output log level can be configured.
+    - Jmx2logz.io output log level can be configured.
 - v1.0.0
     - Added javadoc
 - v0.0.8
