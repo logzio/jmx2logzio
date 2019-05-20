@@ -1,6 +1,6 @@
 package io.logz.jmx2logzio.Utils;
 
-import ch.qos.logback.classic.Logger;
+import org.slf4j.Logger;
 import com.google.common.base.Stopwatch;
 import io.logz.jmx2logzio.MetricBean;
 import io.logz.jmx2logzio.clients.ListenerWriter;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class MetricsPipeline {
     private static final DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ").withZone(ZoneId.of("UTC"));
-    private final Logger logger = (Logger) LoggerFactory.getLogger(MetricsPipeline.class);
+    private final Logger logger = LoggerFactory.getLogger(MetricsPipeline.class);
     private final Pattern beansWhiteListPattern;
     private final Pattern beansBlackListPattern;
     private final List<Dimension> metricsPrefix;
@@ -61,13 +61,13 @@ public class MetricsPipeline {
             List<MetricBean> beans = client.getBeans();
             List<MetricBean> filteredBeans = getFilteredBeans(beans);
 
-            logger.info("Found {} metric beans and after filtering list work with {} . Time = {}ms, for {}", beans.size(), filteredBeans.size(),
+            logger.debug("Found {} metric beans and after filtering list work with {} . Time = {}ms, for {}", beans.size(), filteredBeans.size(),
                     sw.stop().elapsed(TimeUnit.MILLISECONDS),
                     timestampFormatter.format(pollingWindowStart));
 
             sw.reset().start();
             List<Metric> metrics = client.getMetrics(filteredBeans);
-            logger.info("metrics fetched. Time: {} ms; Metrics: {}", sw.stop().elapsed(TimeUnit.MILLISECONDS), metrics.size());
+            logger.debug("metrics fetched. Time: {} ms; Metrics: {}", sw.stop().elapsed(TimeUnit.MILLISECONDS), metrics.size());
             if (logger.isTraceEnabled()) printToFile(metrics);
             return changeTimeTo(pollingWindowStart, metrics);
 
@@ -90,14 +90,14 @@ public class MetricsPipeline {
     public void pollAndSend() {
 
         try {
-            logger.info("polling metrics");
+            logger.debug("polling metrics");
             List<Metric> metrics = poll();
 
             if (metrics == null || metrics.isEmpty()) return;
             addPrefix(metrics);
             Stopwatch sw = Stopwatch.createStarted();
             sendToListener(metrics);
-            logger.info("metrics sent to listener. Time: {} ms",
+            logger.debug("metrics sent to listener. Time: {} ms",
                     sw.stop().elapsed(TimeUnit.MILLISECONDS));
 
         } catch (Throwable t) {

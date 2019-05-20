@@ -1,6 +1,6 @@
 package io.logz.jmx2logzio;
 
-import ch.qos.logback.classic.Logger;
+import org.slf4j.Logger;
 import io.logz.jmx2logzio.clients.ListenerWriter;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
@@ -27,7 +27,7 @@ import static org.mockserver.model.HttpResponse.response;
 
 public class LogzioSenderTest {
 
-    private final Logger logger = (Logger) LoggerFactory.getLogger(LogzioSenderTest.class);
+    private final Logger logger = LoggerFactory.getLogger(LogzioSenderTest.class);
     private Jmx2LogzioConfiguration config;
     private ClientAndServer mockServer;
     private HttpRequest[] recordedRequests;

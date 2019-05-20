@@ -1,6 +1,6 @@
 package io.logz.jmx2logzio;
 
-import ch.qos.logback.classic.Logger;
+import org.slf4j.Logger;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
@@ -68,7 +68,7 @@ public class Jmx2LogzioConfigurationTest {
 
     @Before
     private void setup() {
-        logger = (Logger) LoggerFactory.getLogger(Jmx2LogzioConfigurationTest.class);
+        logger = LoggerFactory.getLogger(Jmx2LogzioConfigurationTest.class);
 }
 
     @AfterTest

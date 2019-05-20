@@ -1,6 +1,6 @@
 package io.logz.jmx2logzio.clients;
 
-import ch.qos.logback.classic.Logger;
+import org.slf4j.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.logz.jmx2logzio.Utils.HangupInterceptor;
@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 
 
 public class ListenerWriter implements Shutdownable {
-    private final Logger logger = (Logger) LoggerFactory.getLogger(ListenerWriter.class);
+    private final Logger logger = LoggerFactory.getLogger(ListenerWriter.class);
 
     private final static ObjectMapper mapper = new ObjectMapper();
     private HttpsRequestConfiguration requestConf;
@@ -85,7 +85,7 @@ public class ListenerWriter implements Shutdownable {
      * @param metrics a list of metrics to be sent
      */
     public void writeMetrics(List<Metric> metrics) {
-        logger.info("sending {} metrics", metrics.size());
+        logger.debug("sending {} metrics", metrics.size());
         metrics.stream().forEach(metric -> {
             String jsonStringMetric = convertToJson(metric);
             byte[] metricAsBytes = java.nio.charset.StandardCharsets.UTF_8.encode(jsonStringMetric).array();

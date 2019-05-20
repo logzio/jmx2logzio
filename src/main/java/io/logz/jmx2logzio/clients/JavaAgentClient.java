@@ -1,6 +1,6 @@
 package io.logz.jmx2logzio.clients;
 
-import ch.qos.logback.classic.Logger;
+import org.slf4j.Logger;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -28,7 +28,7 @@ import static io.logz.jmx2logzio.Utils.MetricsUtils.sanitizeMetricName;
 
 public class JavaAgentClient extends MBeanClient {
 
-    private final Logger logger = (Logger) LoggerFactory.getLogger(JavaAgentClient.class);
+    private final Logger logger = LoggerFactory.getLogger(JavaAgentClient.class);
     private static final int DIMENSION_INDEX = 1;
     private static final int DOMAIN_NAME_INDEX = 0;
     private static final int ARGUMENT_KEY_INDEX = 0;

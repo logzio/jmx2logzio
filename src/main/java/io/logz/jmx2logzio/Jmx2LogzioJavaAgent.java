@@ -1,7 +1,7 @@
 package io.logz.jmx2logzio;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
+import org.slf4j.Logger;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
@@ -31,18 +31,16 @@ public class Jmx2LogzioJavaAgent {
     private static final String CLEAN_SENT_METRICS_INTERVAL = "CLEAN_SENT_METRICS_INTERVAL";
     private static final String EXTRA_DIMENSIONS = "EXTRA_DIMENSIONS";
     private static final String LOG_LEVEL = "LOG_LEVEL";
-    private static final Logger logger = (Logger) LoggerFactory.getLogger(Jmx2LogzioJavaAgent.class);
+    private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioJavaAgent.class);
     private static final String JAVA_AGENT_CONFIGURATION_FILE = "javaagent.conf";
     private static final int SPLIT_KEY_VALUE_COUNT_LIMIT = 2;
     private static final int INDEX_OF_KEY = 0;
     private static final int INDEX_OF_VALUE = 1;
-    private static final String LOG_LEVEL_DEBUG = "DEBUG";
 
     public static void premain(String agentArgument, Instrumentation instrument) {
 
         logger.debug("Loading with agentArgument: {}", agentArgument);
         Config finalConfig = getIntegratedConfiguration(agentArgument);
-        setLogLevel(finalConfig);
         Jmx2LogzioConfiguration jmx2LogzioConfiguration = new Jmx2LogzioConfiguration(finalConfig);
         Jmx2Logzio main = new Jmx2Logzio(jmx2LogzioConfiguration);
         logger.info("Initiated new java agent based Jmx2Logzio instance");
@@ -52,21 +50,6 @@ public class Jmx2LogzioJavaAgent {
         } catch (Throwable e) {
             logger.error("Stopping jmx2logzio Java Agent due to unexpected exception: " + e.getMessage(), e);
         }
-    }
-
-    private static void setLogLevel(Config finalConfig) {
-        Level logLevel = Jmx2Logzio.DEFAULT_LOG_LEVEL;
-        if (finalConfig.hasPath(Jmx2LogzioJolokia.LOG_LEVEL)) {
-            Level configLogLevel = Level.toLevel(finalConfig.getString(Jmx2LogzioJolokia.LOG_LEVEL)); // If this method fails, it will return Level.DEBUG
-            if (configLogLevel.equals(Level.DEBUG) && !finalConfig.getString(Jmx2LogzioJolokia.LOG_LEVEL).equals(LOG_LEVEL_DEBUG)) {
-                logger.warn("failed to parse log level configuration, view the Readme file for valid level options. setting log level to default: " + logLevel.levelStr);
-            } else {
-                logLevel = configLogLevel;
-            }
-        }
-        ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(logLevel);
-        logger.setLevel(logLevel);
-
     }
 
     /**
