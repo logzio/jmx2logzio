@@ -30,7 +30,6 @@
 
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -70,8 +69,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <version>3.2.1</version>
                 <configuration>
-                <shadedClassifierName>javaagent</shadedClassifierName>
-                <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>javaagent</shadedClassifierName>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
                     <relocations>
                         <relocation>
                             <pattern>com.typesafe</pattern>
@@ -82,16 +81,8 @@
                             <shadedPattern>io.logz.jmx2logzio.sender</shadedPattern>
                         </relocation>
                         <relocation>
-                            <pattern>org.slf4j</pattern>
-                            <shadedPattern>io.logz.jmx2logzio.org.slf4j</shadedPattern>
-                        </relocation>
-                        <relocation>
                             <pattern>commons-io</pattern>
                             <shadedPattern>io.logz.jmx2logzio.commons-io</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>ch.qos.logback</pattern>
-                            <shadedPattern>io.logz.jmx2logzio.ch.qos.logback</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>org.apache.httpcomponents</pattern>
@@ -176,6 +167,20 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.8.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.8.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
             <version>1.3.0</version>
@@ -234,11 +239,6 @@
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
             <version>1.9.3</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
         </dependency>
 
     </dependencies>

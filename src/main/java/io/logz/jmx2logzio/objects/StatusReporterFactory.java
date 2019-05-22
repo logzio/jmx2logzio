@@ -1,7 +1,7 @@
 package io.logz.jmx2logzio.objects;
 
-import org.slf4j.Logger;
 import io.logz.sender.SenderStatusReporter;
+import org.slf4j.Logger;
 
 public class StatusReporterFactory {
 

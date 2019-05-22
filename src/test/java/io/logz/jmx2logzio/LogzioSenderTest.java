@@ -1,6 +1,5 @@
 package io.logz.jmx2logzio;
 
-import org.slf4j.Logger;
 import io.logz.jmx2logzio.clients.ListenerWriter;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
@@ -9,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpRequest;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -35,7 +35,7 @@ public class LogzioSenderTest {
 
     @BeforeTest
     private void startMockServer() {
-logger.debug("starting mock server");
+        logger.debug("starting mock server");
         mockServer = startClientAndServer(8070);
 
         mockServerClient = new MockServerClient("localhost", 8070);

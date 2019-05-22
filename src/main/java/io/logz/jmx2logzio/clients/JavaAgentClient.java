@@ -1,6 +1,5 @@
 package io.logz.jmx2logzio.clients;
 
-import org.slf4j.Logger;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -14,6 +13,7 @@ import io.logz.jmx2logzio.Utils.Predicator;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.MBeanClient;
 import io.logz.jmx2logzio.objects.Metric;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.*;
