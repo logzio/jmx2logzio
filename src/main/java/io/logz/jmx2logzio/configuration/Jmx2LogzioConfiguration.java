@@ -1,6 +1,5 @@
 package io.logz.jmx2logzio.configuration;
 
-import ch.qos.logback.classic.Logger;
 import com.google.common.base.Splitter;
 import com.typesafe.config.Config;
 import io.logz.jmx2logzio.Jmx2LogzioJolokia;
@@ -9,6 +8,7 @@ import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 
 public class Jmx2LogzioConfiguration {
-    private final Logger logger = (Logger) LoggerFactory.getLogger(Jmx2LogzioConfiguration.class);
+    private final Logger logger = LoggerFactory.getLogger(Jmx2LogzioConfiguration.class);
 
     private static final String POLLER_MBEAN_DIRECT = "service.poller.mbean-direct";
 

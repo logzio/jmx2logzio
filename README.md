@@ -22,6 +22,8 @@ In this configuration, jmx2logzio forwards metrics directly to Logz.io.
 
 If your app is running in a Docker container, consider using [jmx2logzio with Jolokia](#jmx2logzio-jolokia-setup) instead.
 
+**Note:** The agent uses Slf4j logging framework. In order to get logs from the agent, you'll need to supply a [slf4j binder](https://www.slf4j.org/faq.html#requirements).
+
 **You'll need**: [Maven](https://maven.apache.org/), [Java 1.8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) or higher
 
 ### 1. Download and build jmx2logzio
@@ -49,7 +51,7 @@ This code block shows a sample command to run jmx2logzio with runtime configurat
 For a complete list of options, see the configuration parameters below the code block.👇
 
 ```shell
-java -javaagent:~/jmx2logzio/target/jmx2logzio-1.0.1.jar=LOGZIO_TOKEN=<ACCOUNT-TOKEN>,SERVICE_NAME=myService /path/to/your/app
+java -javaagent:~/jmx2logzio/target/jmx2logzio-1.0.4-javaagent.jar=LOGZIO_TOKEN=<ACCOUNT-TOKEN>,SERVICE_NAME=myService /path/to/your/app
  ```
 
 #### Parameters
@@ -64,8 +66,7 @@ java -javaagent:~/jmx2logzio/target/jmx2logzio-1.0.1.jar=LOGZIO_TOKEN=<ACCOUNT-T
 | **WHITE_LIST_REGEX** | Only metrics matching this regex will be sent. <br /> **Default**: `.*` (match everything) |
 | **BLACK_LIST_REGEX** | Metrics matching this regex will not be sent. <br /> **Default**: `$a` (match nothing) |
 | **EXTRA_DIMENSIONS** | A list of key-values separated by ':' that will be added to the dimensions of the collected metrics. <br /> Example: EXTRA_DIMENSIONS={origin=local:env=java} |
-| **LOG_LEVEL** | The level of logs produced by the jmx2logzio agent to be reported. <br /> The available levels are: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, and `OFF` <br /> **Default**: `WARN` |
-| **FROM_DISK** | If `true`, metrics are stored on disk until they're shipped (see [If FROM_DISK=true](#agent-if-fromdisk-true)). If `false`, metrics persist in memory until they're shipped (see see [If FROM_DISK=false](#agent-if-fromdisk-false)). <br /> **Default**: `true` |
+| **FROM_DISK** | If `true`, metrics are stored on disk until they're shipped (see [If FROM_DISK=true](#agent-if-fromdisk-true)). If `false`, metrics persist in memory until they're shipped (see [If FROM_DISK=false](#agent-if-fromdisk-false)). <br /> **Default**: `true` |
 
 <h4 id="agent-if-fromdisk-true">If FROM_DISK=true</h4>
 
@@ -125,10 +126,9 @@ Open jmx2logzio/src/main/resources/application.config in a text editor, and set 
 | **service.poller.jolokia.jolokiaFullUrl** | URL of the remote Jolokia agent you're forwarding metrics to. |
 | **service.poller.metrics-polling-interval-in-seconds** | Metrics polling interval, in seconds. <br /> **Default**: `30` |
 | **extra-dimensions** | A dictionary of key-values that will be added to the dimensions of the collected metrics |
-| **log-level** | The level of logs produced by the jmx2logzio app to be reported. <br /> The available levels are: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` and `OFF` <br /> **Default**: `WARN` |
 | **logzio-java-sender.url** | Listener URL and port. <br /> If your login URL is app.logz.io, use `listener.logz.io`. If your login URL is app-eu.logz.io, use `listener-eu.logz.io`. <br /> **Default**: `https://listener.logz.io:8071` |
 | **logzio-java-sender.token** | **Required**. Your Logz.io [account token](https://app.logz.io/#/dashboard/settings/manage-accounts) |
-| **logzio-java-sender.from-disk** | If `true`, metrics are stored on disk until they're shipped (see [If from-disk=true](#jolokia-if-fromdisk-true)). If `false`, metrics persist in memory until they're shipped (see see [If from-disk=false](#jolokia-if-fromdisk-false)). <br /> **Default**: `true` |
+| **logzio-java-sender.from-disk** | If `true`, metrics are stored on disk until they're shipped (see [If from-disk=true](#jolokia-if-fromdisk-true)). If `false`, metrics persist in memory until they're shipped (see [If from-disk=false](#jolokia-if-fromdisk-false)). <br /> **Default**: `true` |
 
 <h4 id="jolokia-if-fromdisk-true">If from-disk=true</h4>
 
@@ -164,16 +164,19 @@ java -jar jmx2logzio.jar
 You'll find the jmx2logzio jar file in the jmx2logzio/target/ folder.
 
 ## Changelog
+- v1.0.4
+    - Jmx2logz.io logger changed from logback to slf4j and will now inhere its properties from the java app.
+    - Set level feature was removed and will also be inherited from the main ap
 - v1.0.2
-    - shade all dependencies
+    - Shade all dependencies
 - v1.0.1
-    - jmx2logz.io output log level can be configured.
+    - Jmx2logz.io output log level can be configured.
 - v1.0.0
-    - Added javadoc
+    - Added Javadoc
 - v0.0.8
     - Additional metric information will be sent under "dim" instead of "dimensions"
 - v0.0.7
-    - Added feature which allows you to add extra dimensions to the collected metrics before sent.
+    - Added a feature that allows you to add extra dimensions to the collected metrics before sent.
 
 # The other stuff
 

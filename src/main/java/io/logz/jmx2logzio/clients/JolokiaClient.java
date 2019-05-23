@@ -1,6 +1,5 @@
 package io.logz.jmx2logzio.clients;
 
-import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Splitter;
@@ -15,6 +14,7 @@ import io.logz.jmx2logzio.objects.Metric;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class JolokiaClient extends MBeanClient {
     public static final String POLLER_JOLOKIA = "service.poller.jolokia";
     public static final String JOLOKIA_FULL_URL = "service.poller.jolokia.jolokiaFullUrl";
 
-    private final Logger logger = (Logger) LoggerFactory.getLogger(JolokiaClient.class);
+    private final Logger logger = LoggerFactory.getLogger(JolokiaClient.class);
 
     private static final String REQUEST_MBEAN_KEY = "mbean";
     private static final String RESPONSE_REQUEST_KEY = "request";

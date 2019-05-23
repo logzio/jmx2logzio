@@ -1,6 +1,5 @@
 package io.logz.jmx2logzio;
 
-import ch.qos.logback.classic.Logger;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
@@ -9,6 +8,7 @@ import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -68,7 +68,7 @@ public class Jmx2LogzioConfigurationTest {
 
     @Before
     private void setup() {
-        logger = (Logger) LoggerFactory.getLogger(Jmx2LogzioConfigurationTest.class);
+        logger = LoggerFactory.getLogger(Jmx2LogzioConfigurationTest.class);
 }
 
     @AfterTest

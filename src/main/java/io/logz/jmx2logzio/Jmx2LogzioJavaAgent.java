@@ -1,11 +1,10 @@
 package io.logz.jmx2logzio;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.exceptions.IllegalConfiguration;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.instrument.Instrumentation;
@@ -30,19 +29,15 @@ public class Jmx2LogzioJavaAgent {
     private static final String FILE_SYSTEM_SPACE_LIMIT = "FILE_SYSTEM_SPACE_LIMIT";
     private static final String CLEAN_SENT_METRICS_INTERVAL = "CLEAN_SENT_METRICS_INTERVAL";
     private static final String EXTRA_DIMENSIONS = "EXTRA_DIMENSIONS";
-    private static final String LOG_LEVEL = "LOG_LEVEL";
-    private static final Logger logger = (Logger) LoggerFactory.getLogger(Jmx2LogzioJavaAgent.class);
+    private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioJavaAgent.class);
     private static final String JAVA_AGENT_CONFIGURATION_FILE = "javaagent.conf";
     private static final int SPLIT_KEY_VALUE_COUNT_LIMIT = 2;
     private static final int INDEX_OF_KEY = 0;
     private static final int INDEX_OF_VALUE = 1;
-    private static final String LOG_LEVEL_DEBUG = "DEBUG";
 
     public static void premain(String agentArgument, Instrumentation instrument) {
-
         logger.debug("Loading with agentArgument: {}", agentArgument);
         Config finalConfig = getIntegratedConfiguration(agentArgument);
-        setLogLevel(finalConfig);
         Jmx2LogzioConfiguration jmx2LogzioConfiguration = new Jmx2LogzioConfiguration(finalConfig);
         Jmx2Logzio main = new Jmx2Logzio(jmx2LogzioConfiguration);
         logger.info("Initiated new java agent based Jmx2Logzio instance");
@@ -54,26 +49,11 @@ public class Jmx2LogzioJavaAgent {
         }
     }
 
-    private static void setLogLevel(Config finalConfig) {
-        Level logLevel = Jmx2Logzio.DEFAULT_LOG_LEVEL;
-        if (finalConfig.hasPath(Jmx2LogzioJolokia.LOG_LEVEL)) {
-            Level configLogLevel = Level.toLevel(finalConfig.getString(Jmx2LogzioJolokia.LOG_LEVEL)); // If this method fails, it will return Level.DEBUG
-            if (configLogLevel.equals(Level.DEBUG) && !finalConfig.getString(Jmx2LogzioJolokia.LOG_LEVEL).equals(LOG_LEVEL_DEBUG)) {
-                logger.warn("failed to parse log level configuration, view the Readme file for valid level options. setting log level to default: " + logLevel.levelStr);
-            } else {
-                logLevel = configLogLevel;
-            }
-        }
-        ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(logLevel);
-        logger.setLevel(logLevel);
-
-    }
-
-    /**
-     * Create a config object out of an argument string
-     * @param agentArgument Argument String received as a parameter
-     * @return Config object
-     */
+        /**
+         * Create a config object out of an argument string
+         * @param agentArgument Argument String received as a parameter
+         * @return Config object
+         */
     private static Config getIntegratedConfiguration(String agentArgument) {
         Map<String, String> configurationMap = parseArgumentsString(agentArgument);
 
@@ -151,8 +131,6 @@ public class Jmx2LogzioJavaAgent {
                 return Jmx2LogzioJolokia.FILE_SYSTEM_SPACE_LIMIT;
             case CLEAN_SENT_METRICS_INTERVAL:
                 return Jmx2LogzioJolokia.CLEAN_SENT_METRICS_INTERVAL;
-            case LOG_LEVEL:
-                return Jmx2LogzioJolokia.LOG_LEVEL;
             default:
                 throw new IllegalConfiguration("Unknown configuration option: " + key);
         }
