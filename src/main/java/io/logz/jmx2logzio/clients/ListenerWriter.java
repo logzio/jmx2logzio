@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 public class ListenerWriter implements Shutdownable {
@@ -27,6 +29,7 @@ public class ListenerWriter implements Shutdownable {
     private HttpsRequestConfiguration requestConf;
     private final LogzioJavaSenderParams logzioSenderParams;
     private final LogzioSender logzioSender;
+    private ScheduledExecutorService senderExecutors;
 
     public ListenerWriter(Jmx2LogzioConfiguration requestConf) {
         this.logzioSenderParams = requestConf.getSenderParams();
@@ -40,6 +43,7 @@ public class ListenerWriter implements Shutdownable {
      */
     private LogzioSender getLogzioSender() {
 
+        senderExecutors = Executors.newScheduledThreadPool(logzioSenderParams.getThreadPoolSize());
         try {
             requestConf = HttpsRequestConfiguration
                     .builder()
@@ -54,7 +58,7 @@ public class ListenerWriter implements Shutdownable {
         SenderStatusReporter statusReporter = StatusReporterFactory.newSenderStatusReporter(logger);
         LogzioSender.Builder senderBuilder = LogzioSender
                 .builder();
-        senderBuilder.setTasksExecutor(Executors.newScheduledThreadPool(logzioSenderParams.getThreadPoolSize()));
+        senderBuilder.setTasksExecutor(senderExecutors);
         senderBuilder.setReporter(statusReporter);
         senderBuilder.setHttpsRequestConfiguration(requestConf);
         senderBuilder.setDebug(logzioSenderParams.isDebug());
@@ -117,6 +121,15 @@ public class ListenerWriter implements Shutdownable {
     @Override
     public void shutdown() {
         logzioSender.stop();
+        senderExecutors.shutdown();
+        try {
+            senderExecutors.awaitTermination(20, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.error("Shutdown was interrupted");
+        }
+        if (!senderExecutors.isTerminated()) {
+            senderExecutors.shutdownNow();
+        }
         logger.info("Closing Listener Writer...");
     }
 
