@@ -51,7 +51,7 @@ This code block shows a sample command to run jmx2logzio with runtime configurat
 For a complete list of options, see the configuration parameters below the code block.👇
 
 ```shell
-java -javaagent:~/jmx2logzio/target/jmx2logzio-1.0.4-javaagent.jar=LOGZIO_TOKEN=<ACCOUNT-TOKEN>,SERVICE_NAME=myService /path/to/your/app
+java -javaagent:~/jmx2logzio/target/jmx2logzio-1.0.5-javaagent.jar=LOGZIO_TOKEN=<ACCOUNT-TOKEN>,SERVICE_NAME=myService /path/to/your/app
  ```
 
 #### Parameters
@@ -164,9 +164,11 @@ java -jar jmx2logzio.jar
 You'll find the jmx2logzio jar file in the jmx2logzio/target/ folder.
 
 ## Changelog
+- v1.0.5
+    - Kill sender threads upon shutdown
 - v1.0.4
     - Jmx2logz.io logger changed from logback to slf4j and will now inhere its properties from the java app.
-    - Set level feature was removed and will also be inherited from the main ap
+    - Set level feature was removed and will also be inherited from the main app
 - v1.0.2
     - Shade all dependencies
 - v1.0.1
