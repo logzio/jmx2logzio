@@ -1,11 +1,16 @@
 language: java
 jdk: oraclejdk8
-
-sudo: false # faster builds
-
+sudo: false
 cache:
   directories:
-      - '$HOME/.m2'
-
+  - "$HOME/.m2"
 install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script: mvn test -B
+deploy:
+  provider: releases
+  api_key:
+    secure: VP9mfUcULyNLCQUn4xTkfkGxgVXqMOG8d755q+lngXaMh140x3YnmmYLjegC1r8X2cbL5U9a2yWm4W5gIGAINxkx5ewEN1dVNF8UAw+oThkV5/bMN+jmlueP8f2MJnBAaftP6i+FKmSLYDCp+w23/4EVpyTA6wy4MReRAMNhcp/AYFdjqhK8yjdAMYF/RJaAyMPMWMSMAU556aWpVgM+NMFbLuGbevTWmmKHY8JPCxefEUPDkt5hFCHdOtVuDENRaJ625H4CVya6FnSYdP5b6BkyUhd2qvPygTRLmqhVF0T+F96bIBkW0hLC7sFCHUA1A8EWLQsbKYnyfJTrSi/ZV9fBGibqfzTaq6LIi6dkW2EdYwpD+9hF4mlZQp4xVN+yT7pq8xYaaVXjbsgowxqcjZL3tozBsFclNjUk1nqHpVghUF2ywlVFbdDT0o64+49pHb/vn1ynQN28TrAgEPap07BpQ8d+KcUVR2tUlwb7QoUcRIl6VAsHgtoxiKfUWD/ybJaks6sD3cCo42rcbNCLUTawoxg987bCV0UnTZ0DT+Da3eC9LllvRTR7ci6e5wPENT1ov0YeaSgsUOizQUac9KJa2oT2xxXTgyrsU/HUFDa5/qpT2O/NJ2W5kHuQlYTF98uD4oEe6TNm/OZynVZJemt/c/IdIoQNWK8/HISSdoQ=
+  agent-version: $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)
+  file: "./target/jmx2logzio-{{agent-version}}-javaagent.jar"
+  on:
+    repo: logzio/jmx2logzio
