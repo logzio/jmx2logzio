@@ -121,15 +121,17 @@ public class ListenerWriter implements Shutdownable {
     @Override
     public void shutdown() {
         logzioSender.stop();
-        senderExecutors.shutdown();
-        boolean shutdownResult = false;
-        try {
-            shutdownResult = senderExecutors.awaitTermination(20, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            logger.error("Shutdown was interrupted");
-        }
-        if (!shutdownResult) {
-            senderExecutors.shutdownNow();
+        if (senderExecutors != null) {
+            senderExecutors.shutdown();
+            boolean shutdownResult = false;
+            try {
+                shutdownResult = senderExecutors.awaitTermination(20, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                logger.error("Shutdown was interrupted");
+            }
+            if (!shutdownResult) {
+                senderExecutors.shutdownNow();
+            }
         }
         logger.info("Closing Listener Writer...");
     }
