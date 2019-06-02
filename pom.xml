@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.logz</groupId>
     <artifactId>jmx2logzio</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
 
     <packaging>jar</packaging>
     <name>JMX2logz.io</name>
@@ -73,8 +73,8 @@
                     <shadedArtifactAttached>true</shadedArtifactAttached>
                     <relocations>
                         <relocation>
-                            <pattern>com.typesafe</pattern>
-                            <shadedPattern>io.logz.jmx2logzio.com.typesafe</shadedPattern>
+                            <pattern>com.</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.com.</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>io.logz.sender</pattern>
@@ -85,37 +85,14 @@
                             <shadedPattern>io.logz.jmx2logzio.commons-io</shadedPattern>
                         </relocation>
                         <relocation>
-                            <pattern>org.apache.httpcomponents</pattern>
-                            <shadedPattern>io.logz.jmx2logzio.org.apache.httpcomponents</shadedPattern>
+                            <pattern>org.apache</pattern>
+                            <shadedPattern>io.logz.jmx2logzio.org.apache</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>commons-codec</pattern>
                             <shadedPattern>io.logz.jmx2logzio.commons-codec</shadedPattern>
                         </relocation>
-                        <relocation>
-                            <pattern>com.googlecode.json-simple</pattern>
-                            <shadedPattern>io.logz.jmx2logzio.com.googlecode.json-simple</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>com.google.code.gson</pattern>
-                            <shadedPattern>io.logz.jmx2logzio.com.google.code.gson</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>org.testng</pattern>
-                            <shadedPattern>io.logz.jmx2logzio.org.testng</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>org.mock-server</pattern>
-                            <shadedPattern>io.logz.jmx2logzio.org.mock-server</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>com.google.guava</pattern>
-                            <shadedPattern>io.logz.jmx2logzio.com.google.guava</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>com.fasterxml.jackson.core</pattern>
-                            <shadedPattern>io.logz.jmx2logzio.com.fasterxml.jackson.core</shadedPattern>
-                        </relocation>
+
                         <relocation>
                             <pattern>commons-validator</pattern>
                             <shadedPattern>io.logz.jmx2logzio.commons-validator</shadedPattern>
@@ -202,11 +179,13 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.14.2</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-netty</artifactId>
             <version>5.5.1</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
