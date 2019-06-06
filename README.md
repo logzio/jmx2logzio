@@ -26,18 +26,12 @@ If your app is running in a Docker container, consider using [jmx2logzio with Jo
 
 **You'll need**: [Maven](https://maven.apache.org/), [Java 1.8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) or higher
 
-### 1. Download and build jmx2logzio
-
-Clone the jmx2logzio GitHub repo to your machine.
+### 1. Download jmx2logzio
 
 ```shell
-git clone https://github.com/logzio/jmx2logzio.git
-```
-
-`cd` to the jmx2logzio/ folder and build the source:
-
-```shell
-mvn clean install
+RELEASE_JAR=$(curl -s https://api.github.com/repos/logzio/jmx2logzio/releases/latest \
+  | grep "browser_download_url" | awk '{print substr($2, 2, length($2)-2)}') \
+  ; wget -O jmx2logzio-javaagent.jar $RELEASE_JAR
 ```
 
 ### 2. Configure and run jmx2logzio
@@ -51,7 +45,7 @@ This code block shows a sample command to run jmx2logzio with runtime configurat
 For a complete list of options, see the configuration parameters below the code block.👇
 
 ```shell
-java -javaagent:~/jmx2logzio/target/jmx2logzio-1.0.5-javaagent.jar=LOGZIO_TOKEN=<ACCOUNT-TOKEN>,SERVICE_NAME=myService /path/to/your/app
+java -javaagent:./jmx2logzio-javaagent.jar=LOGZIO_TOKEN=<ACCOUNT-TOKEN>,SERVICE_NAME=myService /path/to/your/app
  ```
 
 #### Parameters
