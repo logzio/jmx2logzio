@@ -58,14 +58,14 @@ public class JavaAgentClient extends MBeanClient {
      * @throws MBeanClientPollingFailure
      */
     @Override
-    public List<MetricBean> getBeans() throws MBeanClientPollingFailure {
+    public List<MetricBean> getBeans() {
 
             List<MetricBean> metricBeans = Lists.newArrayList();
             Set<ObjectInstance> instances = server.queryMBeans(null, null);
 
             for (ObjectInstance instance : instances) {
+                instancesCount++;
                 try {
-
                     MBeanInfo mBeanInfo = server.getMBeanInfo(instance.getObjectName());
                     List<String> attributes = Lists.newArrayList();
 
@@ -82,7 +82,6 @@ public class JavaAgentClient extends MBeanClient {
                     logger.warn(e.getMessage(), e);
                 }
             }
-            instancesCount += instances.size();
             if (instancesCount >= 100 ) {
                 if (((double)instanceNotFoundCount / (double)instancesCount) * 100 > INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD) {
                     logger.warn("more than {}% of instances were not found! ({} out of {})", INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD, instanceNotFoundCount, instancesCount);
