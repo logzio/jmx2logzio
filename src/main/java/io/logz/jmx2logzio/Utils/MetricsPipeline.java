@@ -55,10 +55,12 @@ public class MetricsPipeline {
     }
 
     private List<Metric> poll() {
-        try {
             Instant pollingWindowStart = getPollingWindowStart();
             Stopwatch sw = Stopwatch.createStarted();
             List<MetricBean> beans = client.getBeans();
+            if (beans.isEmpty()) {
+                return null;
+            }
             List<MetricBean> filteredBeans = getFilteredBeans(beans);
 
             logger.debug("Found {} metric beans and after filtering list work with {} . Time = {}ms, for {}", beans.size(), filteredBeans.size(),
@@ -70,11 +72,6 @@ public class MetricsPipeline {
             logger.debug("metrics fetched. Time: {} ms; Metrics: {}", sw.stop().elapsed(TimeUnit.MILLISECONDS), metrics.size());
             if (logger.isTraceEnabled()) printToFile(metrics);
             return changeTimeTo(pollingWindowStart, metrics);
-
-        } catch (MBeanClient.MBeanClientPollingFailure e) {
-            logger.error("Failed polling metrics from client ({}): {}", client.getClass().toString(), e.getMessage());
-            return null;
-        }
     }
 
     public List<MetricBean> getFilteredBeans(List<MetricBean> beans) {

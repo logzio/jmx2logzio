@@ -29,6 +29,7 @@ import static io.logz.jmx2logzio.Utils.MetricsUtils.sanitizeMetricName;
 public class JavaAgentClient extends MBeanClient {
 
     private final Logger logger = LoggerFactory.getLogger(JavaAgentClient.class);
+    private static final int INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD = 10;
     private static final int DIMENSION_INDEX = 1;
     private static final int DOMAIN_NAME_INDEX = 0;
     private static final int ARGUMENT_KEY_INDEX = 0;
@@ -37,6 +38,8 @@ public class JavaAgentClient extends MBeanClient {
     private final MBeanServer server;
     private final ObjectMapper objectMapper;
     private List<Dimension> extraDimensions;
+    private int instancesCount = 0;
+    private int instanceNotFoundCount = 0;
 
 
     public JavaAgentClient() {
@@ -57,26 +60,37 @@ public class JavaAgentClient extends MBeanClient {
     @Override
     public List<MetricBean> getBeans() throws MBeanClientPollingFailure {
 
-        try {
             List<MetricBean> metricBeans = Lists.newArrayList();
             Set<ObjectInstance> instances = server.queryMBeans(null, null);
 
             for (ObjectInstance instance : instances) {
-                MBeanInfo mBeanInfo = server.getMBeanInfo(instance.getObjectName());
-                List<String> attributes = Lists.newArrayList();
+                try {
 
-                for (MBeanAttributeInfo attribute : mBeanInfo.getAttributes()) {
-                    attributes.add(attribute.getName());
+                    MBeanInfo mBeanInfo = server.getMBeanInfo(instance.getObjectName());
+                    List<String> attributes = Lists.newArrayList();
+
+                    for (MBeanAttributeInfo attribute : mBeanInfo.getAttributes()) {
+                        attributes.add(attribute.getName());
+                    }
+
+                    // Dont change to getCanonicalName(), we need it to preserve the order so we can have a valuable metrics tree
+                    metricBeans.add(new MetricBean(instance.getObjectName().getDomain() + ":" + instance.getObjectName().getKeyPropertyListString(), attributes));
+                } catch (InstanceNotFoundException e) {
+                    logger.debug("Instance Not found: " + e.getMessage(), e);
+                    instanceNotFoundCount++;
+                }  catch (IntrospectionException | ReflectionException e) {
+                    logger.warn(e.getMessage(), e);
                 }
-
-                // Dont change to getCanonicalName(), we need it to preserve the order so we can have a valuable metrics tree
-                metricBeans.add(new MetricBean(instance.getObjectName().getDomain() + ":" + instance.getObjectName().getKeyPropertyListString(), attributes));
+            }
+            instancesCount += instances.size();
+            if (instancesCount >= 100 ) {
+                if (((double)instanceNotFoundCount / (double)instancesCount) * 100 > INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD) {
+                    logger.warn("more than {}% of instances were not found! ({} out of {})", INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD, instanceNotFoundCount, instancesCount);
+                }
+                instancesCount = 0;
+                instanceNotFoundCount = 0;
             }
             return metricBeans;
-
-        } catch (IntrospectionException | ReflectionException | InstanceNotFoundException e) {
-            throw new MBeanClientPollingFailure(e.getMessage(), e);
-        }
     }
 
     /**
