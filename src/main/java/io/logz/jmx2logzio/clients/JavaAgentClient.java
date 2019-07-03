@@ -76,14 +76,16 @@ public class JavaAgentClient extends MBeanClient {
                     // Dont change to getCanonicalName(), we need it to preserve the order so we can have a valuable metrics tree
                     metricBeans.add(new MetricBean(instance.getObjectName().getDomain() + ":" + instance.getObjectName().getKeyPropertyListString(), attributes));
                 } catch (InstanceNotFoundException e) {
-                    logger.debug("Instance Not found: " + e.getMessage(), e);
+                    logger.debug("Instance Not found: {}", e.getMessage(), e);
                     instanceNotFoundCount++;
-                }  catch (IntrospectionException | ReflectionException e) {
-                    logger.warn(e.getMessage(), e);
+                }  catch (IntrospectionException e) {
+                    logger.warn("Error inspecting MBean: {}", e.getMessage(), e);
+                } catch (ReflectionException e) {
+                    logger.warn("An error occurred at MBean server while trying to invoke methods on MBeans :{}", e.getMessage(), e);
                 }
             }
             if (instancesCount >= 100 ) {
-                if (((double)instanceNotFoundCount / (double)instancesCount) * 100 > INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD) {
+                if (((double) instanceNotFoundCount / instancesCount) * 100 > INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD) {
                     logger.warn("more than {}% of instances were not found! ({} out of {})", INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD, instanceNotFoundCount, instancesCount);
                 }
                 instancesCount = 0;
