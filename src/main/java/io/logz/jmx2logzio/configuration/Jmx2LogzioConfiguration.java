@@ -144,7 +144,7 @@ public class Jmx2LogzioConfiguration {
             public boolean validatePredicate(Object result) {
                 String urlString = (String) result;
                 urlString = urlString.substring(0,(urlString.lastIndexOf(":")));
-                return UrlValidator.getInstance().isValid(urlString);
+                return new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS).isValid(urlString);
             }
         };
         String malformedURLMsg = "URL {} is invalid. Using default listener URL: " + logzioJavaSenderParams.getUrl();
