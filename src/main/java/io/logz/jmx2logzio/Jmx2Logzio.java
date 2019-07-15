@@ -60,9 +60,9 @@ public class Jmx2Logzio implements Shutdownable {
                 taskScheduler.shutdownNow();
             }
         } catch (InterruptedException e) {
-            logger.warn("final request was interrupted: " + e.getMessage());
+            logger.warn("final request was interrupted: " + e.getMessage(), e);
         } catch (SecurityException ex) {
-            logger.error("can't submit final request: " + ex.getMessage());
+            logger.error("can't submit final request: " + ex.getMessage(), ex);
         }
 
         logger.info("Shutting down...");

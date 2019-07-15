@@ -14,7 +14,7 @@ public class StatusReporterFactory {
 
             @Override
             public void error(String s, Throwable throwable) {
-                logger.error(s + " " + throwable.getMessage());
+                logger.error(s + " " + throwable.getMessage(), throwable);
             }
 
             @Override
@@ -24,7 +24,7 @@ public class StatusReporterFactory {
 
             @Override
             public void warning(String s, Throwable throwable) {
-                logger.warn(s + " " + throwable.getMessage());
+                logger.warn(s + " " + throwable.getMessage(), throwable);
             }
 
             @Override
@@ -34,7 +34,7 @@ public class StatusReporterFactory {
 
             @Override
             public void info(String s, Throwable throwable) {
-                logger.debug(s + " " + throwable.getMessage());
+                logger.debug(s + " " + throwable.getMessage(), throwable);
             }
         };
     }

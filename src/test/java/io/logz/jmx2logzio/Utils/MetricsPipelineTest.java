@@ -28,7 +28,7 @@ public class MetricsPipelineTest {
             logger.info("removing test metrics directory");
             FileUtils.deleteDirectory(new File(Jmx2LogzioConfigurationTest.METRICS_TEST_DIR));
         } catch (IOException e) {
-            logger.error("couldn't remove temp metrics directory " + Jmx2LogzioConfigurationTest.METRICS_TEST_DIR);
+            logger.error("couldn't remove temp metrics directory {}: {}", Jmx2LogzioConfigurationTest.METRICS_TEST_DIR, e.getMessage(), e);
         }
     }
 

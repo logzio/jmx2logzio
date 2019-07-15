@@ -19,7 +19,7 @@ public final class HangupInterceptor extends Thread {
         try {
             main.shutdown();
         } catch (Exception ex) {
-            logger.error("Error during stopping main", ex);
+            logger.error("Error during stopping main: {}", ex.getMessage(), ex);
         }
     }
 }
