@@ -6,8 +6,7 @@ import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.nio.file.Files;
+import java.io.*;
 
 public class Jmx2LogzioJolokia {
     private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioJolokia.class);
@@ -34,6 +33,7 @@ public class Jmx2LogzioJolokia {
         Config config;
         if (args.length > 0) {
            if ((new File(args[0])).exists()) {
+               logger.info("Loading from config file: {}", args[0]);
                config = ConfigFactory.parseFile(new File(args[0]));
            } else {
                logger.error("config filename {} supplied but couldn't be found.", args[0]);
