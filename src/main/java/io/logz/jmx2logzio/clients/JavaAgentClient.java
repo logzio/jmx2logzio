@@ -38,9 +38,6 @@ public class JavaAgentClient extends MBeanClient {
     private final MBeanServer server;
     private final ObjectMapper objectMapper;
     private List<Dimension> extraDimensions;
-    private int instancesCount = 0;
-    private int instanceNotFoundCount = 0;
-
 
     public JavaAgentClient() {
         server = ManagementFactory.getPlatformMBeanServer();
@@ -59,39 +56,37 @@ public class JavaAgentClient extends MBeanClient {
      */
     @Override
     public List<MetricBean> getBeans() {
+        int instancesCount = 0;
+        int instanceNotFoundCount = 0;
+        List<MetricBean> metricBeans = Lists.newArrayList();
+        Set<ObjectInstance> instances = server.queryMBeans(null, null);
 
-            List<MetricBean> metricBeans = Lists.newArrayList();
-            Set<ObjectInstance> instances = server.queryMBeans(null, null);
+        for (ObjectInstance instance : instances) {
+            instancesCount++;
+            try {
+                MBeanInfo mBeanInfo = server.getMBeanInfo(instance.getObjectName());
+                List<String> attributes = Lists.newArrayList();
 
-            for (ObjectInstance instance : instances) {
-                instancesCount++;
-                try {
-                    MBeanInfo mBeanInfo = server.getMBeanInfo(instance.getObjectName());
-                    List<String> attributes = Lists.newArrayList();
-
-                    for (MBeanAttributeInfo attribute : mBeanInfo.getAttributes()) {
-                        attributes.add(attribute.getName());
-                    }
-
-                    // Dont change to getCanonicalName(), we need it to preserve the order so we can have a valuable metrics tree
-                    metricBeans.add(new MetricBean(instance.getObjectName().getDomain() + ":" + instance.getObjectName().getKeyPropertyListString(), attributes));
-                } catch (InstanceNotFoundException e) {
-                    logger.debug("Instance Not found: {}", e.getMessage(), e);
-                    instanceNotFoundCount++;
-                }  catch (IntrospectionException e) {
-                    logger.warn("Error inspecting MBean: {}", e.getMessage(), e);
-                } catch (ReflectionException e) {
-                    logger.warn("An error occurred at MBean server while trying to invoke methods on MBeans :{}", e.getMessage(), e);
+                for (MBeanAttributeInfo attribute : mBeanInfo.getAttributes()) {
+                    attributes.add(attribute.getName());
                 }
+
+                // Dont change to getCanonicalName(), we need it to preserve the order so we can have a valuable metrics tree
+                metricBeans.add(new MetricBean(instance.getObjectName().getDomain() + ":" + instance.getObjectName().getKeyPropertyListString(), attributes));
+            } catch (InstanceNotFoundException e) {
+                logger.debug("Instance Not found: {}", e.getMessage(), e);
+                instanceNotFoundCount++;
+            }  catch (IntrospectionException e) {
+                logger.warn("Error inspecting MBean: {}", e.getMessage(), e);
+            } catch (ReflectionException e) {
+                logger.warn("An error occurred at MBean server while trying to invoke methods on MBeans :{}", e.getMessage(), e);
             }
-            if (instancesCount >= 100 ) {
-                if (((double) instanceNotFoundCount / instancesCount) * 100 > INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD) {
-                    logger.warn("more than {}% of instances were not found! ({} out of {})", INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD, instanceNotFoundCount, instancesCount);
-                }
-                instancesCount = 0;
-                instanceNotFoundCount = 0;
-            }
-            return metricBeans;
+        }
+        if (((double) instanceNotFoundCount / instancesCount) * 100 > INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD) {
+            logger.warn("more than {}% of instances were not found! ({} out of {})", INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD, instanceNotFoundCount, instancesCount);
+        }
+
+        return metricBeans;
     }
 
     /**
