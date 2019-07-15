@@ -158,6 +158,13 @@ java -jar jmx2logzio.jar
 You'll find the jmx2logzio jar file in the jmx2logzio/target/ folder.
 
 ## Changelog
+- v1.0.8
+    - Hide your logz.io token, to keep you safe
+    - Change logger logic for 'instance not found'
+- v1.0.7
+    - For testing purposes and simulations we'd like the agent to be able to work with local addresses
+- v1.0.6
+    - This release ensures no conflicts between the dependencies of this agent and any java app.
 - v1.0.5
     - Kill sender threads upon shutdown
 - v1.0.4
