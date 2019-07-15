@@ -6,7 +6,7 @@ import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
 
 public class Jmx2LogzioJolokia {
     private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioJolokia.class);
