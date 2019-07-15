@@ -29,6 +29,7 @@ import static io.logz.jmx2logzio.Utils.MetricsUtils.sanitizeMetricName;
 public class JavaAgentClient extends MBeanClient {
 
     private final Logger logger = LoggerFactory.getLogger(JavaAgentClient.class);
+    private static final int INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD = 10;
     private static final int DIMENSION_INDEX = 1;
     private static final int DOMAIN_NAME_INDEX = 0;
     private static final int ARGUMENT_KEY_INDEX = 0;
@@ -37,7 +38,6 @@ public class JavaAgentClient extends MBeanClient {
     private final MBeanServer server;
     private final ObjectMapper objectMapper;
     private List<Dimension> extraDimensions;
-
 
     public JavaAgentClient() {
         server = ManagementFactory.getPlatformMBeanServer();
@@ -55,13 +55,15 @@ public class JavaAgentClient extends MBeanClient {
      * @throws MBeanClientPollingFailure
      */
     @Override
-    public List<MetricBean> getBeans() throws MBeanClientPollingFailure {
+    public List<MetricBean> getBeans() {
+        int instancesCount = 0;
+        int instanceNotFoundCount = 0;
+        List<MetricBean> metricBeans = Lists.newArrayList();
+        Set<ObjectInstance> instances = server.queryMBeans(null, null);
 
-        try {
-            List<MetricBean> metricBeans = Lists.newArrayList();
-            Set<ObjectInstance> instances = server.queryMBeans(null, null);
-
-            for (ObjectInstance instance : instances) {
+        for (ObjectInstance instance : instances) {
+            instancesCount++;
+            try {
                 MBeanInfo mBeanInfo = server.getMBeanInfo(instance.getObjectName());
                 List<String> attributes = Lists.newArrayList();
 
@@ -71,12 +73,20 @@ public class JavaAgentClient extends MBeanClient {
 
                 // Dont change to getCanonicalName(), we need it to preserve the order so we can have a valuable metrics tree
                 metricBeans.add(new MetricBean(instance.getObjectName().getDomain() + ":" + instance.getObjectName().getKeyPropertyListString(), attributes));
+            } catch (InstanceNotFoundException e) {
+                logger.debug("Instance Not found: {}", e.getMessage(), e);
+                instanceNotFoundCount++;
+            }  catch (IntrospectionException e) {
+                logger.warn("Error inspecting MBean: {}", e.getMessage(), e);
+            } catch (ReflectionException e) {
+                logger.warn("An error occurred at MBean server while trying to invoke methods on MBeans :{}", e.getMessage(), e);
             }
-            return metricBeans;
-
-        } catch (IntrospectionException | ReflectionException | InstanceNotFoundException e) {
-            throw new MBeanClientPollingFailure(e.getMessage(), e);
         }
+        if (((double) instanceNotFoundCount / instancesCount) * 100 > INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD) {
+            logger.warn("more than {}% of instances were not found! ({} out of {})", INSTANCES_NOT_FOUND_PERCENTAGE_WARNING_THRESHOLD, instanceNotFoundCount, instancesCount);
+        }
+
+        return metricBeans;
     }
 
     /**
