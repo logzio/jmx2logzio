@@ -55,7 +55,7 @@ public class ListenerWriter implements Shutdownable {
         } catch (LogzioParameterErrorException e) {
             logger.error("problem in one or more parameters with error {}", e.getMessage(), e);
         }
-        SenderStatusReporter statusReporter = StatusReporterFactory.newSenderStatusReporter(logger);
+        SenderStatusReporter statusReporter = StatusReporterFactory.newSenderStatusReporter(LoggerFactory.getLogger(LogzioSender.class));
         LogzioSender.Builder senderBuilder = LogzioSender
                 .builder();
         senderBuilder.setTasksExecutor(senderExecutors);
