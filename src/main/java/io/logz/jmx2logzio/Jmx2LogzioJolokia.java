@@ -6,6 +6,9 @@ import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.nio.file.Files;
+
 public class Jmx2LogzioJolokia {
     private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioJolokia.class);
 
@@ -27,7 +30,19 @@ public class Jmx2LogzioJolokia {
 
     public static void main(String[] args) {
         logger.debug("Starting Jmx2Logzio");
-        Config config = ConfigFactory.load();
+
+        Config config;
+        if (args.length > 0) {
+           if ((new File(args[0])).exists()) {
+               config = ConfigFactory.parseFile(new File(args[0]));
+           } else {
+               logger.error("config filename {} supplied but couldn't be found.", args[0]);
+               return;
+           }
+        } else {
+            config = ConfigFactory.load();
+        }
+
         Jmx2LogzioConfiguration jmx2LogzioConfiguration = new Jmx2LogzioConfiguration(config);
         Jmx2Logzio main = new Jmx2Logzio(jmx2LogzioConfiguration);
         logger.info("Starting jmx2Logzio using Jolokia-based poller");
