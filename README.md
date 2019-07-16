@@ -18,7 +18,7 @@ Metrics reported by jmx2logzio follow this format:
 <h2 #id="jmx2logzio-as-java-agent-setup">jmx2logzio as Java agent setup</h2>
 
 In most cases, you can configure jmx2logzio to run as an agent.
-In this configuration, jmx2logzio forwards metrics directly to Logz.io.
+In this configuration, Jolokia exposes the metrics as REST, and jmx2logzio reads it from them and sends it to Logz.io
 
 If your app is running in a Docker container, consider using [jmx2logzio with Jolokia](#jmx2logzio-jolokia-setup) instead.
 
@@ -158,6 +158,8 @@ java -jar jmx2logzio.jar
 You'll find the jmx2logzio jar file in the jmx2logzio/target/ folder.
 
 ## Changelog
+- v1.0.9
+    - Provide an external configuration file when using as an app that connects to a Jolokia agent
 - v1.0.8
     - Hide your logz.io token, to keep you safe
     - Change logger logic for 'instance not found'

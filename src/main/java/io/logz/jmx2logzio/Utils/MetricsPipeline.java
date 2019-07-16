@@ -74,7 +74,7 @@ public class MetricsPipeline {
             if (logger.isTraceEnabled()) printToFile(metrics);
             return changeTimeTo(pollingWindowStart, metrics);
         } catch (MBeanClient.MBeanClientPollingFailure e) {
-            logger.error("Failed polling metrics from client ({}): {}", client.getClass().toString(), e.getMessage());
+            logger.error("Failed polling metrics from client ({}): {}", client.getClass().toString(), e.getMessage(), e);
             return null;
         }
     }

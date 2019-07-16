@@ -157,7 +157,7 @@ public class Jmx2LogzioConfiguration {
             whiteListPattern = Pattern.compile(config.hasPath(Jmx2LogzioJolokia.WHITE_LIST_REGEX) ?
                     config.getString(Jmx2LogzioJolokia.WHITE_LIST_REGEX) : ".*");
         } catch (Exception e) {
-            logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJolokia.WHITE_LIST_REGEX), e.getMessage());
+            logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJolokia.WHITE_LIST_REGEX), e.getMessage(), e);
             whiteListPattern = Pattern.compile(".*");
         }
 
@@ -165,7 +165,7 @@ public class Jmx2LogzioConfiguration {
             blackListPattern = Pattern.compile(config.hasPath(Jmx2LogzioJolokia.BLACK_LIST_REGEX) ?
                     config.getString(Jmx2LogzioJolokia.BLACK_LIST_REGEX) : "$a"); // $a is a regexp that will never match anything (will match an "a" character after the end of the string
         } catch (Exception e) {
-            logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJolokia.WHITE_LIST_REGEX), e.getMessage());
+            logger.error("Failed to parse regex {} with error {}", config.getString(Jmx2LogzioJolokia.WHITE_LIST_REGEX), e.getMessage(), e);
             blackListPattern = Pattern.compile("$a");
         }
     }

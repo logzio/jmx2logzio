@@ -53,9 +53,9 @@ public class ListenerWriter implements Shutdownable {
                     .setCompressRequests(logzioSenderParams.isCompressRequests())
                     .build();
         } catch (LogzioParameterErrorException e) {
-            logger.error("problem in one or more parameters with error {}", e.getMessage());
+            logger.error("problem in one or more parameters with error {}", e.getMessage(), e);
         }
-        SenderStatusReporter statusReporter = StatusReporterFactory.newSenderStatusReporter(logger);
+        SenderStatusReporter statusReporter = StatusReporterFactory.newSenderStatusReporter(LoggerFactory.getLogger(LogzioSender.class));
         LogzioSender.Builder senderBuilder = LogzioSender
                 .builder();
         senderBuilder.setTasksExecutor(senderExecutors);
@@ -79,7 +79,7 @@ public class ListenerWriter implements Shutdownable {
         try {
             return senderBuilder.build();
         } catch (LogzioParameterErrorException e) {
-            logger.error("problem in one or more parameters with error {}", e.getMessage());
+            logger.error("problem in one or more parameters with error {}", e.getMessage(), e);
         }
         return null;
     }
@@ -125,7 +125,7 @@ public class ListenerWriter implements Shutdownable {
         try {
             senderExecutors.awaitTermination(20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            logger.error("Shutdown was interrupted");
+            logger.error("Shutdown was interrupted {}", e.getMessage(), e);
         }
         if (!senderExecutors.isTerminated()) {
             senderExecutors.shutdownNow();

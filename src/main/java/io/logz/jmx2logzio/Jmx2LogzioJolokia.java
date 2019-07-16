@@ -6,6 +6,8 @@ import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+
 public class Jmx2LogzioJolokia {
     private static final Logger logger = LoggerFactory.getLogger(Jmx2LogzioJolokia.class);
 
@@ -24,10 +26,25 @@ public class Jmx2LogzioJolokia {
     public static final String QUEUE_DIR = "logzio-java-sender.queue-dir";
     public static final String FILE_SYSTEM_SPACE_LIMIT = "logzio-java-sender.file-system-full-percent-threshold";
     public static final String CLEAN_SENT_METRICS_INTERVAL = "logzio-java-sender.clean-sent-metrics-interval";
+    private static final int CONFIG_FILE_INDEX = 0;
 
     public static void main(String[] args) {
         logger.debug("Starting Jmx2Logzio");
-        Config config = ConfigFactory.load();
+
+        Config config;
+        if (args.length > 0) {
+            String configFilePath = args[CONFIG_FILE_INDEX];
+           if ((new File(configFilePath)).exists()) {
+               logger.info("Loading from config file: {}", configFilePath);
+               config = ConfigFactory.parseFile(new File(configFilePath));
+           } else {
+               logger.error("config filename {} supplied but couldn't be found.", configFilePath);
+               return;
+           }
+        } else {
+            config = ConfigFactory.load();
+        }
+
         Jmx2LogzioConfiguration jmx2LogzioConfiguration = new Jmx2LogzioConfiguration(config);
         Jmx2Logzio main = new Jmx2Logzio(jmx2LogzioConfiguration);
         logger.info("Starting jmx2Logzio using Jolokia-based poller");

@@ -176,7 +176,7 @@ public class JolokiaClient extends MBeanClient {
                         dimensions
                 ));
             } catch (IllegalArgumentException e) {
-                logger.error("Can't send Metric since it's invalid: " + e.getMessage());
+                logger.error("Can't send Metric since it's invalid: " + e.getMessage(), e);
             }
         }
         return metrics;
