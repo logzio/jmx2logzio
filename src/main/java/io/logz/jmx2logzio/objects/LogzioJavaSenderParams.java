@@ -9,7 +9,7 @@ public class LogzioJavaSenderParams {
 
 
     private String url = "https://listener.logz.io:8071";
-    private String type = "jmx2LogzioType";
+    public static String TYPE = "jmx2LogzioType";
     private String token;
     private int threadPoolSize = 3;
     private boolean debug = true;
@@ -32,7 +32,7 @@ public class LogzioJavaSenderParams {
 
     public void setQueueDir() {
         String tokenTypeSha = Hashing.sha256()
-                .hashString(type + token, StandardCharsets.UTF_8)
+                .hashString(TYPE + token, StandardCharsets.UTF_8)
                 .toString();
 
         String queuePath = System.getProperty("user.dir");
@@ -50,7 +50,7 @@ public class LogzioJavaSenderParams {
     }
 
     public String getType() {
-        return type;
+        return TYPE;
     }
 
 

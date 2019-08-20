@@ -205,7 +205,7 @@ public class JavaAgentClient extends MBeanClient {
                     valueMap = objectMapper.convertValue(value, new TypeReference<Map<String, Object>>() {});
                     metricValues.putAll(prependKey(key, flatten(valueMap)));
                 } catch (Exception e) {
-                    logger.trace("Can't convert attribute named {} with class type {}", key, value.getClass().getCanonicalName(), e);
+                    logger.trace("Can't convert attribute named {} with class TYPE {}", key, value.getClass().getCanonicalName(), e);
                 }
             }
 

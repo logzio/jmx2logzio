@@ -196,7 +196,7 @@ public class Jmx2LogzioConfiguration {
                 }
             }
         } else {
-            throw new IllegalConfiguration("Client type has to be either Jolokia or MBean");
+            throw new IllegalConfiguration("Client TYPE has to be either Jolokia or MBean");
         }
     }
 

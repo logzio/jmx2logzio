@@ -54,9 +54,9 @@ public class LogzioSenderTest {
     @AfterTest
     private void clean() {
         try {
-            FileUtils.deleteDirectory(new File(Jmx2LogzioConfigurationTest.METRICS_TEST_DIR));
+            FileUtils.deleteDirectory(new File(Jmx2LogzioConfigurationTest.getShaQueueDir()));
         } catch (IOException e) {
-            logger.error("couldn't remove temp metrics directory {}: {}", Jmx2LogzioConfigurationTest.METRICS_TEST_DIR, e.getMessage(), e);
+            logger.error("couldn't remove temp metrics directory {}: {}", Jmx2LogzioConfigurationTest.getShaQueueDir(), e.getMessage(), e);
         }
     }
 
@@ -66,7 +66,7 @@ public class LogzioSenderTest {
         String key = "The-Answer-To-Life-The-Universe-And-Everything";
         Number value = 42;
         List<Dimension> dimensions = new ArrayList<>();
-        dimensions.add(0, new Dimension("type", "myType"));
+        dimensions.add(0, new Dimension("TYPE", "myType"));
         List<Metric> metrics = new ArrayList<>();
         metrics.add(new Metric(key, value, Instant.now(), dimensions));
 

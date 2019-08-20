@@ -6,7 +6,7 @@ import java.util.List;
 
 public class JolokiaReadRequest {
 
-    @JsonProperty("type")
+    @JsonProperty("TYPE")
     private final String type = "read";
 
     @JsonProperty("mbean")
