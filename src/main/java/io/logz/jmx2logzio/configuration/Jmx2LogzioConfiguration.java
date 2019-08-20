@@ -11,7 +11,6 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -116,10 +115,6 @@ public class Jmx2LogzioConfiguration {
     private void setDiskStorageParams(Config config) {
         ConfigSetter configSetter = (interval) -> logzioJavaSenderParams.setDiskSpaceCheckInterval((int) interval);
         validateAndSetNatural(config, Jmx2LogzioJolokia.DISK_SPACE_CHECK_INTERVAL, logzioJavaSenderParams.getDiskSpaceCheckInterval(), configSetter);
-
-        configSetter = (queuePath) -> logzioJavaSenderParams.setQueueDir(new File((String) queuePath));
-        setSingleConfig(config, Jmx2LogzioJolokia.QUEUE_DIR, null, configSetter, new ConfigValidator() {
-        }, String.class);
 
         configSetter = (limit) -> logzioJavaSenderParams.setFileSystemFullPercentThreshold((int) limit);
         validateAndSetNatural(config, Jmx2LogzioJolokia.FILE_SYSTEM_SPACE_LIMIT, logzioJavaSenderParams.getFileSystemFullPercentThreshold(), configSetter);

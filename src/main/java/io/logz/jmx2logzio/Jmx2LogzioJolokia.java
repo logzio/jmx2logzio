@@ -23,7 +23,6 @@ public class Jmx2LogzioJolokia {
     public static final String IN_MEMORY_QUEUE_CAPACITY = "logzio-java-sender.in-memory-queue-capacity";
     public static final String LOGS_COUNT_LIMIT = "logzio-java-sender.log-count-limit";
     public static final String DISK_SPACE_CHECK_INTERVAL = "logzio-java-sender.disk-space-checks-interval";
-    public static final String QUEUE_DIR = "logzio-java-sender.queue-dir";
     public static final String FILE_SYSTEM_SPACE_LIMIT = "logzio-java-sender.file-system-full-percent-threshold";
     public static final String CLEAN_SENT_METRICS_INTERVAL = "logzio-java-sender.clean-sent-metrics-interval";
     private static final int CONFIG_FILE_INDEX = 0;

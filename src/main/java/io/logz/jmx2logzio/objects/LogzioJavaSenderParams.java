@@ -94,10 +94,6 @@ public class LogzioJavaSenderParams {
         return queueDir;
     }
 
-    public void setQueueDir(File queueDir) {
-        this.queueDir = queueDir;
-    }
-
     public int getFileSystemFullPercentThreshold() {
         return fileSystemFullPercentThreshold;
     }
