@@ -56,7 +56,7 @@ java -javaagent:./jmx2logzio-javaagent.jar=LOGZIO_TOKEN=<<SHIPPING-TOKEN>>,SERVI
 |---|---|
 | LOGZIO_TOKEN | **Required**. Your Logz.io [account token](https://app.logz.io/#/dashboard/settings/manage-accounts) <br> Replace `<<SHIPPING-TOKEN>>` with the [token](https://app.logz.io/#/dashboard/settings/general) of the account you want to ship to. |
 | SERVICE_NAME | **Required**. A name you define for the service.This is included in the reported metrics. |
-| LISTENER_URL | **Default**: `listener.logz.io` <br>  Listener URL and port.Replace `<<LISTENER-HOST>>` with your region's listener host. For more information on finding your account's region, see [Account region](https://docs.logz.io/user-guide/accounts/account-region.html). |
+| LISTENER_URL | **Default**: `https://listener.logz.io:8071` <br>  Listener URL and port.Replace `<<LISTENER-HOST>>` with your region's listener host (for example `listner.logz.io`). For more information on finding your account's region, see [Account region](https://docs.logz.io/user-guide/accounts/account-region.html). |
 | SERVICE_HOST | Hostname to be included in the reported metrics. | **Default**: Host machine name |
 | POLLING_INTERVAL_IN_SEC | **Default**: `30` <br>  Metrics polling interval, in seconds. |
 | WHITE_LIST_REGEX | **Default**: `.*` (match everything) <br> Only metrics matching this regex will be sent. |
