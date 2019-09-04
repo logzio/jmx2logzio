@@ -66,7 +66,7 @@ public class LogzioSenderTest {
         String key = "The-Answer-To-Life-The-Universe-And-Everything";
         Number value = 42;
         List<Dimension> dimensions = new ArrayList<>();
-        dimensions.add(0, new Dimension("TYPE", "myType"));
+        dimensions.add(0, new Dimension("type", "myType"));
         List<Metric> metrics = new ArrayList<>();
         metrics.add(new Metric(key, value, Instant.now(), dimensions));
 
