@@ -25,7 +25,6 @@ public class Jmx2LogzioJavaAgent {
     private static final String IN_MEMORY_QUEUE_CAPACITY = "IN_MEMORY_QUEUE_CAPACITY";
     private static final String LOGS_COUNT_LIMIT = "LOGS_COUNT_LIMIT";
     private static final String DISK_SPACE_CHECKS_INTERVAL = "DISK_SPACE_CHECKS_INTERVAL";
-    private static final String QUEUE_DIR = "QUEUE_DIR";
     private static final String FILE_SYSTEM_SPACE_LIMIT = "FILE_SYSTEM_SPACE_LIMIT";
     private static final String CLEAN_SENT_METRICS_INTERVAL = "CLEAN_SENT_METRICS_INTERVAL";
     private static final String EXTRA_DIMENSIONS = "EXTRA_DIMENSIONS";
@@ -125,8 +124,6 @@ public class Jmx2LogzioJavaAgent {
                 return Jmx2LogzioJolokia.LOGS_COUNT_LIMIT;
             case DISK_SPACE_CHECKS_INTERVAL:
                 return Jmx2LogzioJolokia.DISK_SPACE_CHECK_INTERVAL;
-            case QUEUE_DIR:
-                return Jmx2LogzioJolokia.QUEUE_DIR;
             case FILE_SYSTEM_SPACE_LIMIT:
                 return Jmx2LogzioJolokia.FILE_SYSTEM_SPACE_LIMIT;
             case CLEAN_SENT_METRICS_INTERVAL:

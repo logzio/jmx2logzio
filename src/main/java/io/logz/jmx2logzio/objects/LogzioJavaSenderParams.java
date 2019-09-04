@@ -1,13 +1,16 @@
 package io.logz.jmx2logzio.objects;
 
+import com.google.common.hash.Hashing;
+
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 
 public class LogzioJavaSenderParams {
 
 
     private String url = "https://listener.logz.io:8071";
-    private String type = "jmx2LogzioType";
-    private String Token;
+    public static String TYPE = "jmx2LogzioType";
+    private String token;
     private int threadPoolSize = 3;
     private boolean debug = true;
     private boolean compressRequests = true;
@@ -26,10 +29,15 @@ public class LogzioJavaSenderParams {
     /**
      * Constructor automatically create metrics directory
      */
-    public LogzioJavaSenderParams() {
+
+    public void setQueueDir() {
+        String tokenTypeSha = Hashing.sha256()
+                .hashString(TYPE + token, StandardCharsets.UTF_8)
+                .toString();
+
         String queuePath = System.getProperty("user.dir");
         queuePath += queuePath.endsWith("/") ? "" : "/";
-        queuePath += "metrics";
+        queuePath += "metrics" + tokenTypeSha;
         this.queueDir = new File(queuePath);
     }
 
@@ -42,16 +50,17 @@ public class LogzioJavaSenderParams {
     }
 
     public String getType() {
-        return type;
+        return TYPE;
     }
 
 
     public String getToken() {
-        return Token;
+        return token;
     }
 
     public void setToken(String token) {
-        Token = token;
+        this.token = token;
+        setQueueDir();
     }
 
     public int getThreadPoolSize() {
@@ -92,10 +101,6 @@ public class LogzioJavaSenderParams {
 
     public File getQueueDir() {
         return queueDir;
-    }
-
-    public void setQueueDir(File queueDir) {
-        this.queueDir = queueDir;
     }
 
     public int getFileSystemFullPercentThreshold() {

@@ -54,9 +54,9 @@ public class LogzioSenderTest {
     @AfterTest
     private void clean() {
         try {
-            FileUtils.deleteDirectory(new File(Jmx2LogzioConfigurationTest.METRICS_TEST_DIR));
+            FileUtils.deleteDirectory(new File(Jmx2LogzioConfigurationTest.getShaQueueDir()));
         } catch (IOException e) {
-            logger.error("couldn't remove temp metrics directory {}: {}", Jmx2LogzioConfigurationTest.METRICS_TEST_DIR, e.getMessage(), e);
+            logger.error("couldn't remove temp metrics directory {}: {}", Jmx2LogzioConfigurationTest.getShaQueueDir(), e.getMessage(), e);
         }
     }
 
