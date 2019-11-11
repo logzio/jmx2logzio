@@ -19,7 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
@@ -68,7 +70,9 @@ public class LogzioSenderTest {
         List<Dimension> dimensions = new ArrayList<>();
         dimensions.add(0, new Dimension("type", "myType"));
         List<Metric> metrics = new ArrayList<>();
-        metrics.add(new Metric(key, value, Instant.now(), dimensions));
+        Map<String, Number> keyvalues =  new HashMap<>();
+        keyvalues.put(key,value);
+        metrics.add(new Metric(keyvalues, Instant.now(), dimensions));
 
         ListenerWriter writer = new ListenerWriter(config);
         writer.writeMetrics(metrics);
