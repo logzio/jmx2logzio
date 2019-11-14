@@ -173,6 +173,8 @@ docker run -v $(pwd)/config.conf:/application.conf logzio/jmx2logzio
 Give your metrics some time to get from your system to ours, and then open [Logz.io](https://app.logz.io/#/dashboard/kibana).
 
 ## Changelog
+- v1.1.0
+    - Combine metrics with the same dimensions to a single doc.
 - v1.0.10
     - Use newer version of logzio-java-sender to prevent tokens clash.
 - v1.0.9
