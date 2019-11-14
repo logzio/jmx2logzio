@@ -101,7 +101,10 @@ public class JavaAgentClient extends MBeanClient {
         for (MetricBean metricBean : beans) {
             List<Dimension> dimensions = getDimensions(metricBean);
             if (dimensions != null) {
-                metrics.add(getMetricsForBean(metricBean, dimensions));
+                Metric metric = getMetricsForBean(metricBean, dimensions);
+                if (metric.getMetricMap() != null) {
+                    metrics.add(metric);
+                }
             }
         }
         return metrics;
@@ -125,11 +128,12 @@ public class JavaAgentClient extends MBeanClient {
                     attrValues.put(attr.getName(), attr.getValue()));
 
             Map<String, Number> metricToValue = flatten(attrValues);
-
-            try {
-               metric = new Metric(metricToValue, metricTime, dimensions);
-            } catch (IllegalArgumentException e) {
-                logger.warn("Failed converting metric name to Logz.io-friendly name: metricsBean.getName = {}", metricBean.getName(), e);
+            if (!metricToValue.isEmpty()) {
+                try {
+                    metric = new Metric(metricToValue, metricTime, dimensions);
+                } catch (IllegalArgumentException e) {
+                    logger.warn("Failed converting metric name to Logz.io-friendly name: metricsBean.getName = {}", metricBean.getName(), e);
+                }
             }
         } catch (MalformedObjectNameException | ReflectionException | InstanceNotFoundException | IllegalArgumentException e) {
             throw new MBeanClientPollingFailure("Failed to poll Mbean " + e.getMessage(), e);
