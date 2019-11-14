@@ -131,7 +131,7 @@ public class Jmx2LogzioConfigurationTest {
         Jmx2LogzioConfiguration configuration = new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
         List<Dimension> extraDimensions = configuration.getExtraDimensions();
 
-        Assert.assertEquals(extraDimensions.size(), 2);
+        Assert.assertEquals(extraDimensions.size(), 3); //agent's version automatically added to the dimensions
         Assert.assertEquals(extraDimensions.get(0).getKey(),"origin");
         Assert.assertEquals(extraDimensions.get(0).getValue(), "local");
     }
