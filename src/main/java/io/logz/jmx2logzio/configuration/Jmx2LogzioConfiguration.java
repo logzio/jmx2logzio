@@ -11,6 +11,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -19,11 +20,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
 public class Jmx2LogzioConfiguration {
+    private static final String JMX2LOGZIO_AGENT_VERSION_DIMENSION = "jmx2logzio.agent.version";
     private final Logger logger = LoggerFactory.getLogger(Jmx2LogzioConfiguration.class);
 
     private static final String POLLER_MBEAN_DIRECT = "service.poller.mbean-direct";
@@ -70,6 +73,14 @@ public class Jmx2LogzioConfiguration {
                 extraDimensions = parseExtraDimensions(config.getConfig(Jmx2LogzioJolokia.EXTRA_DIMENSIONS));
             }
         }
+        final Properties properties = new Properties();
+        try {
+            properties.load(this.getClass().getClassLoader().getResourceAsStream(".properties"));
+            extraDimensions.add(new Dimension(JMX2LOGZIO_AGENT_VERSION_DIMENSION,properties.getProperty("agent.version")));
+        } catch (IOException | NullPointerException e) {
+            logger.warn("couldn't add jmx2logzio agent version as a dimension", e);
+        }
+
         if (config.getString(Jmx2LogzioJolokia.LOGZIO_TOKEN).equals("<ACCOUNT-TOKEN>")) {
             throw new IllegalConfiguration("please enter a valid logz.io token (can be located at https://app.logz.io/#/dashboard/settings/manage-accounts)");
         }
