@@ -126,7 +126,7 @@ public class JolokiaClient extends MBeanClient {
             List<Metric> metrics = Lists.newArrayList();
             for (Map<String, Object> response : responses) {
                 Metric metric = getMetricsDocForResponse(response);
-                if (metric != null) {
+                if (!metric.getMetricMap().isEmpty()) {
                     metrics.add(metric);
                 }
             }
