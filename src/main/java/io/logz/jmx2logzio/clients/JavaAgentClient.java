@@ -101,7 +101,7 @@ public class JavaAgentClient extends MBeanClient {
         for (MetricBean metricBean : beans) {
             List<Dimension> dimensions = getDimensions(metricBean);
             if (dimensions != null) {
-                Metric metric = getMetricsForBean(metricBean, dimensions);
+                Metric metric = getMetricsDocForBean(metricBean, dimensions);
                 if (metric.getMetricMap() != null) {
                     metrics.add(metric);
                 }
@@ -116,9 +116,9 @@ public class JavaAgentClient extends MBeanClient {
      * @param dimensions a list of dimensions for the specific metric
      * @return a list of logz.io metrics
      */
-    private Metric getMetricsForBean(MetricBean metricBean, List<Dimension> dimensions) {
+    private Metric getMetricsDocForBean(MetricBean metricBean, List<Dimension> dimensions) {
         Instant metricTime = Instant.now();
-        Metric metric = new Metric();
+        Metric metricsDoc = new Metric();
         try {
             AttributeList attributeList = server.getAttributes(new ObjectName(metricBean.getName()),
                     metricBean.getAttributes().toArray(new String[0]));
@@ -130,7 +130,7 @@ public class JavaAgentClient extends MBeanClient {
             Map<String, Number> metricToValue = flatten(attrValues);
             if (!metricToValue.isEmpty()) {
                 try {
-                    metric = new Metric(metricToValue, metricTime, dimensions);
+                    metricsDoc = new Metric(metricToValue, metricTime, dimensions);
                 } catch (IllegalArgumentException e) {
                     logger.warn("Failed converting metric name to Logz.io-friendly name: metricsBean.getName = {}", metricBean.getName(), e);
                 }
@@ -138,7 +138,7 @@ public class JavaAgentClient extends MBeanClient {
         } catch (MalformedObjectNameException | ReflectionException | InstanceNotFoundException | IllegalArgumentException e) {
             throw new MBeanClientPollingFailure("Failed to poll Mbean " + e.getMessage(), e);
         }
-        return metric;
+        return metricsDoc;
     }
 
     /**

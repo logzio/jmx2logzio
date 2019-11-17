@@ -125,7 +125,7 @@ public class JolokiaClient extends MBeanClient {
 
             List<Metric> metrics = Lists.newArrayList();
             for (Map<String, Object> response : responses) {
-                Metric metric = getMetricsForResponse(response);
+                Metric metric = getMetricsDocForResponse(response);
                 if (metric != null) {
                     metrics.add(metric);
                 }
@@ -146,7 +146,7 @@ public class JolokiaClient extends MBeanClient {
      * @param response A response map from the Jolokia server
      * @return a list of logz.io metrics
      */
-    private Metric getMetricsForResponse(Map<String, Object> response) {
+    private Metric getMetricsDocForResponse(Map<String, Object> response) {
         Map<String, Object> request = (Map<String, Object>) response.get(RESPONSE_REQUEST_KEY);
         String mBeanName = (String) request.get(REQUEST_MBEAN_KEY);
         int status = (int) response.get(RESPONSE_STATUS_KEY);
@@ -169,8 +169,8 @@ public class JolokiaClient extends MBeanClient {
 
         Map<String, Object> attrValues = (Map<String, Object>) response.get(RESPONSE_VALUE_KEY);
         Map<String, Number> metricToValue = flatten(attrValues);
-        Metric metric = new Metric(metricToValue, metricTime, dimensions);
-        return metric;
+        Metric metricsDoc = new Metric(metricToValue, metricTime, dimensions);
+        return metricsDoc;
     }
 
     private HttpResponse sendToJolokia(String jolokiaFullURL, String requestBody) {
