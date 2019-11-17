@@ -70,9 +70,9 @@ public class LogzioSenderTest {
         List<Dimension> dimensions = new ArrayList<>();
         dimensions.add(0, new Dimension("type", "myType"));
         List<Metric> metrics = new ArrayList<>();
-        Map<String, Number> keyvalues =  new HashMap<>();
-        keyvalues.put(key,value);
-        metrics.add(new Metric(keyvalues, Instant.now(), dimensions));
+        Map<String, Number> metricsNamesToValues = new HashMap<>();
+        metricsNamesToValues.put(key, value);
+        metrics.add(new Metric(metricsNamesToValues, Instant.now(), dimensions));
 
         ListenerWriter writer = new ListenerWriter(config);
         writer.writeMetrics(metrics);
