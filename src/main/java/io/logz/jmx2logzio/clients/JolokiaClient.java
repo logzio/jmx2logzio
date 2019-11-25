@@ -125,7 +125,10 @@ public class JolokiaClient extends MBeanClient {
 
             List<Metric> metrics = Lists.newArrayList();
             for (Map<String, Object> response : responses) {
-                metrics.addAll(getMetricsForResponse(response));
+                Metric metric = getMetricsDocForResponse(response);
+                if (!metric.getMetricMap().isEmpty()) {
+                    metrics.add(metric);
+                }
             }
             return metrics;
         } catch (IOException e) {
@@ -143,20 +146,20 @@ public class JolokiaClient extends MBeanClient {
      * @param response A response map from the Jolokia server
      * @return a list of logz.io metrics
      */
-    private List<Metric> getMetricsForResponse(Map<String, Object> response) {
+    private Metric getMetricsDocForResponse(Map<String, Object> response) {
         Map<String, Object> request = (Map<String, Object>) response.get(RESPONSE_REQUEST_KEY);
         String mBeanName = (String) request.get(REQUEST_MBEAN_KEY);
         int status = (int) response.get(RESPONSE_STATUS_KEY);
         if (status != HttpURLConnection.HTTP_OK) {
             logger.warn("Failed reading mbean '" + mBeanName + "': " + status + " - " + response.get(RESPONSE_ERROR_KEY) +
                     ". Stacktrace = {}", response.get(RESPONSE_STACKTRACE_KEY));
-            return new ArrayList<>();
+            return null;
         }
         Instant metricTime = Instant.ofEpochMilli((int) response.get(RESPONSE_TIMESTAMP_KEY));
         String[] serviceNameAndArgs = mBeanName.split(":");
         if (serviceNameAndArgs.length != 2) {
             logger.debug("metric name {} not valid", mBeanName);
-            return new ArrayList<>();
+            return null;
         }
 
         String serviceName = serviceNameAndArgs[SERVICE_NAME_INDEX];
@@ -166,20 +169,8 @@ public class JolokiaClient extends MBeanClient {
 
         Map<String, Object> attrValues = (Map<String, Object>) response.get(RESPONSE_VALUE_KEY);
         Map<String, Number> metricToValue = flatten(attrValues);
-        List<Metric> metrics = new ArrayList<>();
-        for (String attrMetricName : metricToValue.keySet()) {
-            try {
-                metrics.add(new Metric(
-                        attrMetricName,
-                        metricToValue.get(attrMetricName),
-                        metricTime,
-                        dimensions
-                ));
-            } catch (IllegalArgumentException e) {
-                logger.error("Can't send Metric since it's invalid: " + e.getMessage(), e);
-            }
-        }
-        return metrics;
+        Metric metricsDoc = new Metric(metricToValue, metricTime, dimensions);
+        return metricsDoc;
     }
 
     private HttpResponse sendToJolokia(String jolokiaFullURL, String requestBody) {

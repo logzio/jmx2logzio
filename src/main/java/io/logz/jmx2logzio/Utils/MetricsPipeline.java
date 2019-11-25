@@ -124,7 +124,7 @@ public class MetricsPipeline {
 
     private List<Metric> changeTimeTo(Instant newTime, List<Metric> metrics) {
         return metrics.stream()
-                .map(m -> new Metric(m.getName(), m.getValue(), newTime, m.getDimensions()))
+                .map(m -> new Metric(m.getMetricMap(), newTime, m.getDimensions()))
                 .collect(Collectors.toList());
     }
 

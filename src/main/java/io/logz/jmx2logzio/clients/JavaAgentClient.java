@@ -101,7 +101,10 @@ public class JavaAgentClient extends MBeanClient {
         for (MetricBean metricBean : beans) {
             List<Dimension> dimensions = getDimensions(metricBean);
             if (dimensions != null) {
-                metrics.addAll(getMetricsForBean(metricBean, dimensions));
+                Metric metric = getMetricsDocForBean(metricBean, dimensions);
+                if (metric.getMetricMap() != null) {
+                    metrics.add(metric);
+                }
             }
         }
         return metrics;
@@ -113,9 +116,9 @@ public class JavaAgentClient extends MBeanClient {
      * @param dimensions a list of dimensions for the specific metric
      * @return a list of logz.io metrics
      */
-    private List<Metric> getMetricsForBean(MetricBean metricBean, List<Dimension> dimensions) {
-        List<Metric> metrics = Lists.newArrayList();
+    private Metric getMetricsDocForBean(MetricBean metricBean, List<Dimension> dimensions) {
         Instant metricTime = Instant.now();
+        Metric metricsDoc = new Metric();
         try {
             AttributeList attributeList = server.getAttributes(new ObjectName(metricBean.getName()),
                     metricBean.getAttributes().toArray(new String[0]));
@@ -125,23 +128,17 @@ public class JavaAgentClient extends MBeanClient {
                     attrValues.put(attr.getName(), attr.getValue()));
 
             Map<String, Number> metricToValue = flatten(attrValues);
-
-            for (String attrMetricName : metricToValue.keySet()) {
+            if (!metricToValue.isEmpty()) {
                 try {
-                    metrics.add(new Metric(
-                            attrMetricName,
-                            metricToValue.get(attrMetricName),
-                            metricTime,
-                            dimensions
-                    ));
+                    metricsDoc = new Metric(metricToValue, metricTime, dimensions);
                 } catch (IllegalArgumentException e) {
-                    logger.warn("Failed converting metric name to Logz.io-friendly name: metricsBean.getName = {}, attrMetricName = {}", metricBean.getName(), attrMetricName, e);
+                    logger.warn("Failed converting metric name to Logz.io-friendly name: metricsBean.getName = {}", metricBean.getName(), e);
                 }
             }
         } catch (MalformedObjectNameException | ReflectionException | InstanceNotFoundException | IllegalArgumentException e) {
             throw new MBeanClientPollingFailure("Failed to poll Mbean " + e.getMessage(), e);
         }
-        return metrics;
+        return metricsDoc;
     }
 
     /**

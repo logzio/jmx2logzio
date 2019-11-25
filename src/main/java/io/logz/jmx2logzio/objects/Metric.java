@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Metric {
     public static DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ").withZone(ZoneId.of("UTC"));
@@ -25,31 +25,19 @@ public class Metric {
     private Map<String, Number> metricMap;
 
     @JsonIgnore
-    private String name;
-    private Number value;
+
     private List<Dimension> dimensions;
 
     public Metric() {
     }
 
-    public Metric(String name, Number value, Instant timestamp, List<Dimension> dimensions) {
-
-        this.name = name;
-        this.value = value;
+    public Metric(Map<String, Number> metricMap, Instant timestamp, List<Dimension> dimensions) {
         this.timestamp = timestampFormatter.format(timestamp);
-        this.dimensions = dimensions.stream().collect(Collectors.toList());
+        this.dimensions = new ArrayList<>(dimensions);
         this.dimensionsMap = getDimensionsMap();
-        this.metricMap = getMetricMap();
+        this.metricMap = metricMap;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    @JsonIgnore
-    public Number getValue() {
-        return value;
-    }
 
     @JsonProperty("@timestamp")
     public String getTimestamp() {
@@ -64,13 +52,11 @@ public class Metric {
     @Override
     public String toString() {
         return "Metric{" +
-                ",name='" + name + '\'' +
-                ", value=" + value +
+                ", map=" + metricMap.toString() +
                 ", timestamp=" + timestamp +
                 ", dimensions=" + dimensions.toString() +
                 '}';
     }
-
 
     /**
      * Converts the dimensions property to map for jsonify
@@ -85,9 +71,7 @@ public class Metric {
     }
 
     public Map<String, Number> getMetricMap() {
-        Map<String, Number> metric = new HashMap<>();
-        metric.put(this.name,this.value);
-        return metric;
+        return metricMap;
     }
 
     public void addDimensionsToStart(List<Dimension> dimensionToAdd) {
