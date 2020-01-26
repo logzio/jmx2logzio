@@ -32,6 +32,7 @@ public class Jmx2LogzioConfigurationTest {
     private static final String WHITE_LIST_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070,LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=com.yog.examplerunningapp,WHITE_LIST_REGEX=.*MemoryUsagePercent.*";
     private static final String BLACK_LIST_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070,LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=com.yog.examplerunningapp,BLACK_LIST_REGEX=.*Max.*";
     private static final String EXTRA_DIMENSIONS_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070,LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=com.yog.examplerunningapp,EXTRA_DIMENSIONS={origin=local:framework=spring}";
+    private static final String MALFORMED_EXTRA_DIMENSIONS_ARGUMENT_CONFIGURATION = "LISTENER_URL=http://127.0.0.1:8070,LOGZIO_TOKEN=LogzioToken,SERVICE_NAME=com.yog.examplerunningapp,EXTRA_DIMENSIONS={origin=:framework=spring:=ip}";
     private static Logger logger;
 
     private static Config getIntegratedConfiguration(String agentArgument) {
@@ -136,5 +137,14 @@ public class Jmx2LogzioConfigurationTest {
         Assert.assertEquals(extraDimensions.get(0).getValue(), "local");
     }
 
+    @Test
+    public void MalformedExtraDimensionsArgumentParsingTest() {
+        String testArguments = MALFORMED_EXTRA_DIMENSIONS_ARGUMENT_CONFIGURATION;
+        Jmx2LogzioConfiguration configuration = new Jmx2LogzioConfiguration(getIntegratedConfiguration(testArguments));
+        List<Dimension> extraDimensions = configuration.getExtraDimensions();
+
+        Assert.assertEquals(extraDimensions.size(), 2); //agent's version automatically added to the dimensions
+
+    }
 
 }

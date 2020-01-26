@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 
 public class Jmx2LogzioConfiguration {
     private static final String JMX2LOGZIO_AGENT_VERSION_DIMENSION = "jmx2logzio.agent.version";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
     private final Logger logger = LoggerFactory.getLogger(Jmx2LogzioConfiguration.class);
 
     private static final String POLLER_MBEAN_DIRECT = "service.poller.mbean-direct";
@@ -76,7 +78,7 @@ public class Jmx2LogzioConfiguration {
         final Properties properties = new Properties();
         try {
             properties.load(this.getClass().getClassLoader().getResourceAsStream(".properties"));
-            extraDimensions.add(new Dimension(JMX2LOGZIO_AGENT_VERSION_DIMENSION,properties.getProperty("agent.version")));
+            extraDimensions.add(new Dimension(JMX2LOGZIO_AGENT_VERSION_DIMENSION, properties.getProperty("agent.version")));
         } catch (IOException | NullPointerException e) {
             logger.warn("couldn't add jmx2logzio agent version as a dimension", e);
         }
@@ -105,22 +107,31 @@ public class Jmx2LogzioConfiguration {
     private List<Dimension> parseExtraDimensions(Config config) {
         List<Dimension> result = new ArrayList<>();
         config.entrySet().forEach(entry ->
-                result.add(new Dimension(entry.getKey(),config.getString(entry.getKey()))));
+                result.add(new Dimension(entry.getKey(), config.getString(entry.getKey()))));
         return result;
     }
 
 
     private List<Dimension> parseExtraDimensions(String extraParams) {
-        if (extraParams.charAt(0) != '{' || extraParams.charAt(extraParams.length()-1) != '}') {
+        if (extraParams.charAt(0) != '{' || extraParams.charAt(extraParams.length() - 1) != '}') {
             logger.error("malformed missing encapsulating chars '{' or '}' or wrong extra dimensions pattern - expected pattern is {key=value:key=value...} , ignoring extra dimensions..");
             return new ArrayList<>();
         }
-        extraParams = extraParams.substring(1,extraParams.length()-1);
-        List<Dimension> result = Splitter.on(':').splitToList(extraParams).stream().map((param) -> {
-            String[] keyval = param.split("=");
-            return new Dimension(keyval[0],keyval[1]);
-        }).collect(Collectors.toList());
-        return result;
+        extraParams = extraParams.substring(1, extraParams.length() - 1);
+        return Splitter.on(':').splitToList(extraParams).stream().map((param) -> {
+            try {
+                String[] keyval = param.split("=");
+                if (keyval[KEY_INDEX].isEmpty() || keyval[VALUE_INDEX].isEmpty()) {
+                    throw new IllegalConfiguration("Dimension's key and/or value can't be empty");
+                }
+                return new Dimension(keyval[KEY_INDEX], keyval[VALUE_INDEX]);
+            } catch (IndexOutOfBoundsException | IllegalConfiguration e) {
+                logger.error(String.format("malformed extra dimensions pattern - expected pattern is {key=value:key=value...} , ignoring extra dimension: %s", param), e);
+            }
+            return null;
+        })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     private void setDiskStorageParams(Config config) {
@@ -149,7 +160,7 @@ public class Jmx2LogzioConfiguration {
             @Override
             public boolean validatePredicate(Object result) {
                 String urlString = (String) result;
-                urlString = urlString.substring(0,(urlString.lastIndexOf(":")));
+                urlString = urlString.substring(0, (urlString.lastIndexOf(":")));
                 return new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS).isValid(urlString);
             }
         };
