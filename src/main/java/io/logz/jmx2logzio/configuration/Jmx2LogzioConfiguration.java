@@ -156,18 +156,8 @@ public class Jmx2LogzioConfiguration {
     }
 
     private void setListenerURL(Config config) {
-
-        ConfigValidator urlValidator = new ConfigValidator() {
-            @Override
-            public boolean validatePredicate(Object result) {
-                String urlString = (String) result;
-                urlString = urlString.substring(0, (urlString.lastIndexOf(":")));
-                return new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS).isValid(urlString);
-            }
-        };
-        String malformedURLMsg = "URL {} is invalid. Using default listener URL: " + logzioJavaSenderParams.getUrl();
         ConfigSetter configSetter = (url) -> logzioJavaSenderParams.setUrl((String) url);
-        setSingleConfig(config, Jmx2LogzioJolokia.LISTENER_URL, malformedURLMsg, configSetter, urlValidator, String.class);
+        setSingleConfig(config, Jmx2LogzioJolokia.LISTENER_URL, null, configSetter, new ConfigValidator() {}, String.class);
     }
 
     private void setFilterPatterns(Config config) {
