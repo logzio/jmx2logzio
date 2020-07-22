@@ -32,7 +32,7 @@ public class MetricsPipeline {
 
     public MetricsPipeline(Jmx2LogzioConfiguration conf, MBeanClient client) {
         metricsPrefix = new ArrayList<>();
-        listenerClient = new ListenerWriter(conf);
+        listenerClient = new ListenerWriter(conf.getSenderParams());
         this.client = client;
         this.pollingIntervalSeconds = conf.getMetricsPollingIntervalInSeconds();
         this.beansWhiteListPattern = conf.getWhiteListPattern();

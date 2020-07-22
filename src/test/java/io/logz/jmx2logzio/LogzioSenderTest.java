@@ -74,7 +74,7 @@ public class LogzioSenderTest {
         metricsNamesToValues.put(key, value);
         metrics.add(new Metric(metricsNamesToValues, Instant.now(), dimensions));
 
-        ListenerWriter writer = new ListenerWriter(config);
+        ListenerWriter writer = new ListenerWriter(config.getSenderParams());
         writer.writeMetrics(metrics);
         writer.getSender().drainQueueAndSend();
         recordedRequests = mockServerClient.retrieveRecordedRequests(request().withMethod("POST"));

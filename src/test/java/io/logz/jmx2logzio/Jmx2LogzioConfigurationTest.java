@@ -83,8 +83,9 @@ public class Jmx2LogzioConfigurationTest {
     }
 
     public static String getShaQueueDir() {
+        LogzioJavaSenderParams logzioJavaSenderParams = new LogzioJavaSenderParams();
         String tokenTypeSha = Hashing.sha256()
-                .hashString(LogzioJavaSenderParams.TYPE + "LogzioToken", StandardCharsets.UTF_8)
+                .hashString(logzioJavaSenderParams.getType() + "LogzioToken", StandardCharsets.UTF_8)
                 .toString();
 
         String queuePath = System.getProperty("user.dir");
