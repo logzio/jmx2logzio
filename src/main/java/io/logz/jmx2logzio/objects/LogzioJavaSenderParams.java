@@ -9,7 +9,7 @@ public class LogzioJavaSenderParams {
 
 
     private String url = "https://listener.logz.io:8071";
-    public static String type = "jmx2LogzioType";
+    private String type = "jmx2LogzioType";
     private String token;
     private int threadPoolSize = 3;
     private boolean debug = true;
