@@ -31,8 +31,8 @@ public class ListenerWriter implements Shutdownable {
     private final LogzioSender logzioSender;
     private ScheduledExecutorService senderExecutors;
 
-    public ListenerWriter(Jmx2LogzioConfiguration requestConf) {
-        this.logzioSenderParams = requestConf.getSenderParams();
+    public ListenerWriter(LogzioJavaSenderParams senderParams) {
+        this.logzioSenderParams = senderParams;
         this.logzioSender = getLogzioSender();
         this.logzioSender.start();
     }
@@ -55,7 +55,7 @@ public class ListenerWriter implements Shutdownable {
         } catch (LogzioParameterErrorException e) {
             logger.error("problem in one or more parameters with error {}", e.getMessage(), e);
         }
-        SenderStatusReporter statusReporter = StatusReporterFactory.newSenderStatusReporter(LoggerFactory.getLogger(LogzioSender.class));
+        SenderStatusReporter statusReporter = StatusReporterFactory.newSenderStatusReporter(LoggerFactory.getLogger(logzioSenderParams.getLoggerName()));
         LogzioSender.Builder senderBuilder = LogzioSender
                 .builder();
         senderBuilder.setTasksExecutor(senderExecutors);

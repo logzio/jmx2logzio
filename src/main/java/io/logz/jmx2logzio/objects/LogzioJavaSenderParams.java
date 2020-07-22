@@ -9,12 +9,13 @@ public class LogzioJavaSenderParams {
 
 
     private String url = "https://listener.logz.io:8071";
-    public static String TYPE = "jmx2LogzioType";
+    public static String type = "jmx2LogzioType";
     private String token;
     private int threadPoolSize = 3;
     private boolean debug = true;
     private boolean compressRequests = true;
     private boolean fromDisk = true;
+    private String loggerName = "jmx2LogzioLogger";
 
     // In-memory queue parameters
     private int inMemoryQueueCapacityInBytes = 1024 * 1024 * 100;
@@ -32,7 +33,7 @@ public class LogzioJavaSenderParams {
 
     public void setQueueDir() {
         String tokenTypeSha = Hashing.sha256()
-                .hashString(TYPE + token, StandardCharsets.UTF_8)
+                .hashString(type + token, StandardCharsets.UTF_8)
                 .toString();
 
         String queuePath = System.getProperty("user.dir");
@@ -50,8 +51,10 @@ public class LogzioJavaSenderParams {
     }
 
     public String getType() {
-        return TYPE;
+        return type;
     }
+
+    public void setType(String type) { this.type = type; }
 
 
     public String getToken() {
@@ -126,4 +129,8 @@ public class LogzioJavaSenderParams {
     public void setFromDisk(boolean fromDisk) {
         this.fromDisk = fromDisk;
     }
+
+    public void setLoggerName(String loggerName) { this.loggerName = loggerName; }
+
+    public String getLoggerName() {return loggerName; }
 }
