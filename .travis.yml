@@ -4,10 +4,5 @@ sudo: false
 cache:
   directories:
   - "$HOME/.m2"
-before_install:
-  - PB_REL="https://github.com/protocolbuffers/protobuf/releases"
-  - curl -LO $PB_REL/download/v3.13.0/protoc-3.13.0-linux-x86_64.zip
-  - unzip protoc-3.13.0-linux-x86_64.zip -d $HOME/.local
-  - export PATH="$PATH:$HOME/.local/bin"
 install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script: mvn test -B

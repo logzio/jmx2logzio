@@ -22,6 +22,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>1.4.10</kotlin.version>
+        <protobuf.version>3.13.0</protobuf.version>
+        <grpc.version>1.16.1</grpc.version>
     </properties>
 
     <developers>
@@ -40,13 +42,31 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.6.1</version>
+            </extension>
+        </extensions>
         <plugins>
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.6.1</version>
                 <configuration>
-<!--                                        <protocExecutable>/usr/local/bin/protoc</protocExecutable>-->
+                    <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+                    <pluginId>grpc-java</pluginId>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
+                    <protocPlugins>
+                        <protocPlugin>
+                            <id>GrpcKotlinGenerator</id>
+                            <groupId>io.rouz</groupId>
+                            <artifactId>grpc-kotlin-gen</artifactId>
+                            <version>0.0.6</version>
+                            <mainClass>io.rouz.grpc.kotlin.GrpcKotlinGenerator</mainClass>
+                        </protocPlugin>
+                    </protocPlugins>
                 </configuration>
                 <executions>
                     <execution>
@@ -311,7 +331,7 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.13.0</version>
+            <version>${protobuf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.xerial.snappy</groupId>
