@@ -4,5 +4,7 @@ sudo: false
 cache:
   directories:
   - "$HOME/.m2"
-install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+install:
+  apt install -y protobuf-compiler
+  mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script: mvn test -B
