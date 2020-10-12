@@ -16,7 +16,7 @@ public class Metric {
     public static final String SERVICE_NAME = "serviceName";
     public static final String SERVICE_HOST = "serviceHost";
     public static final String DOMAIN_NAME = "domainName";
-    private String timestamp;
+    private Instant timestamp;
 
     @JsonProperty("dim")
     private Map<String, Object> dimensionsMap;
@@ -32,7 +32,7 @@ public class Metric {
     }
 
     public Metric(Map<String, Number> metricMap, Instant timestamp, List<Dimension> dimensions) {
-        this.timestamp = timestampFormatter.format(timestamp);
+        this.timestamp = timestamp;
         this.dimensions = new ArrayList<>(dimensions);
         this.dimensionsMap = getDimensionsMap();
         this.metricMap = metricMap;
@@ -40,7 +40,12 @@ public class Metric {
 
 
     @JsonProperty("@timestamp")
-    public String getTimestamp() {
+    public String getFormattedTimestamp() {
+        return timestampFormatter.format(timestamp);
+    }
+
+    @JsonIgnore
+    public Instant getTimestamp() {
         return timestamp;
     }
 

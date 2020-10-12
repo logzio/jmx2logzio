@@ -2,11 +2,14 @@ package io.logz.jmx2logzio.Utils;
 
 import com.google.common.base.Stopwatch;
 import io.logz.jmx2logzio.MetricBean;
-import io.logz.jmx2logzio.clients.ListenerWriter;
+import io.logz.jmx2logzio.listener.json.JsonListenerWriter;
+import io.logz.jmx2logzio.listener.ListenerWriter;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
+import io.logz.jmx2logzio.listener.prometheus.PromListenerWriter;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.MBeanClient;
 import io.logz.jmx2logzio.objects.Metric;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,39 +22,29 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration.MetricEndpointType.JSON_HTTP;
+import static io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration.MetricEndpointType.PROMETHEUS_REMOTE_WRITE;
+
 
 public class MetricsPipeline {
     private static final DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ").withZone(ZoneId.of("UTC"));
     private final Logger logger = LoggerFactory.getLogger(MetricsPipeline.class);
     private final Pattern beansWhiteListPattern;
     private final Pattern beansBlackListPattern;
-    private final List<Dimension> metricsPrefix;
+    private final List<Dimension> commonDimensions;
     private final int pollingIntervalSeconds;
-    private final ListenerWriter listenerClient;
+    private final ListenerWriter listenerWriter;
     private final MBeanClient client;
 
     public MetricsPipeline(Jmx2LogzioConfiguration conf, MBeanClient client) {
-        metricsPrefix = new ArrayList<>();
-        listenerClient = new ListenerWriter(conf.getSenderParams());
+        this.listenerWriter = createListenerWriter(conf);
         this.client = client;
         this.pollingIntervalSeconds = conf.getMetricsPollingIntervalInSeconds();
         this.beansWhiteListPattern = conf.getWhiteListPattern();
         this.beansBlackListPattern = conf.getBlackListPattern();
-        listenerClient.start();
+        this.commonDimensions = createCommonDimensions(conf);
 
-        String serviceName = conf.getServiceName();
-        String serviceHost = conf.getServiceHost();
-
-        if (serviceName != null && !serviceName.isEmpty()) {
-            Dimension serviceMap = new Dimension(Metric.SERVICE_NAME, MetricsUtils.sanitizeMetricName(serviceName));
-            metricsPrefix.add(serviceMap);
-        }
-
-        if (serviceHost != null && !serviceHost.isEmpty()) {
-            Dimension serviceHostMap = new Dimension(Metric.SERVICE_HOST, MetricsUtils.sanitizeMetricName(serviceHost, false));
-            metricsPrefix.add(serviceHostMap);
-        }
-
+        listenerWriter.start();
     }
 
     private List<Metric> poll() {
@@ -129,11 +122,39 @@ public class MetricsPipeline {
     }
 
     private void addPrefix(List<Metric> metrics) {
-        metrics.forEach(metric -> metric.addDimensionsToStart(metricsPrefix));
+        metrics.forEach(metric -> metric.addDimensionsToStart(commonDimensions));
     }
 
     private void sendToListener(List<Metric> metrics) {
-        listenerClient.writeMetrics(metrics);
+        listenerWriter.writeMetrics(metrics);
     }
 
+    @NotNull
+    private ListenerWriter createListenerWriter(Jmx2LogzioConfiguration conf) {
+        if (conf.getMetricEndpointType() == JSON_HTTP) {
+            return new JsonListenerWriter(conf.getSenderParams());
+        } else if (conf.getMetricEndpointType() == PROMETHEUS_REMOTE_WRITE) {
+            return new PromListenerWriter(conf.getSenderParams());
+        } else {
+            throw new IllegalArgumentException(String.format("%s endpoint type is not supported", conf.getMetricEndpointType().name()));
+        }
+    }
+
+    private ArrayList<Dimension> createCommonDimensions(Jmx2LogzioConfiguration conf) {
+        ArrayList<Dimension> commonDimensions = new ArrayList<>();
+
+        String serviceName = conf.getServiceName();
+        if (serviceName != null && !serviceName.isEmpty()) {
+            Dimension serviceMap = new Dimension(Metric.SERVICE_NAME, MetricsUtils.sanitizeMetricName(serviceName));
+            commonDimensions.add(serviceMap);
+        }
+
+        String serviceHost = conf.getServiceHost();
+        if (serviceHost != null && !serviceHost.isEmpty()) {
+            Dimension serviceHostMap = new Dimension(Metric.SERVICE_HOST, MetricsUtils.sanitizeMetricName(serviceHost, false));
+            commonDimensions.add(serviceHostMap);
+        }
+
+        return commonDimensions;
+    }
 }

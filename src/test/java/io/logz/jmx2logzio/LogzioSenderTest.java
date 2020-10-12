@@ -1,6 +1,6 @@
 package io.logz.jmx2logzio;
 
-import io.logz.jmx2logzio.clients.ListenerWriter;
+import io.logz.jmx2logzio.listener.json.JsonListenerWriter;
 import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
 import io.logz.jmx2logzio.objects.Dimension;
 import io.logz.jmx2logzio.objects.Metric;
@@ -74,7 +74,7 @@ public class LogzioSenderTest {
         metricsNamesToValues.put(key, value);
         metrics.add(new Metric(metricsNamesToValues, Instant.now(), dimensions));
 
-        ListenerWriter writer = new ListenerWriter(config.getSenderParams());
+        JsonListenerWriter writer = new JsonListenerWriter(config.getSenderParams());
         writer.writeMetrics(metrics);
         writer.getSender().drainQueueAndSend();
         recordedRequests = mockServerClient.retrieveRecordedRequests(request().withMethod("POST"));

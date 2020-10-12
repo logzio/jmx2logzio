@@ -51,11 +51,19 @@ public class Jmx2LogzioConfiguration {
 
     // Which client should we use
     private MetricClientType metricClientType;
+
+    private MetricEndpointType metricEndpointType;
+
     private List<Dimension> extraDimensions;
 
     public enum MetricClientType {
         JOLOKIA,
         MBEAN_PLATFORM
+    }
+
+    public enum MetricEndpointType {
+        JSON_HTTP,
+        PROMETHEUS_REMOTE_WRITE
     }
 
     public Jmx2LogzioConfiguration(Config config) throws IllegalConfiguration {
@@ -67,6 +75,7 @@ public class Jmx2LogzioConfiguration {
         serviceName = config.getString(Jmx2LogzioJolokia.SERVICE_NAME);
         logzioJavaSenderParams = new LogzioJavaSenderParams();
         setListenerURL(config);
+        metricEndpointType = config.getString(Jmx2LogzioJolokia.ENDPOINT_TYPE) != null ? config.getEnum(MetricEndpointType.class, Jmx2LogzioJolokia.ENDPOINT_TYPE) : MetricEndpointType.JSON_HTTP;
 
         extraDimensions = new ArrayList<>();
         if (config.hasPath(Jmx2LogzioJolokia.EXTRA_DIMENSIONS)) {
@@ -270,6 +279,8 @@ public class Jmx2LogzioConfiguration {
     public MetricClientType getMetricClientType() {
         return metricClientType;
     }
+
+    public MetricEndpointType getMetricEndpointType() { return metricEndpointType; }
 
     public List<Dimension> getExtraDimensions() {
         return extraDimensions;

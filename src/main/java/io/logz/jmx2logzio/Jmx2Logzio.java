@@ -28,11 +28,9 @@ public class Jmx2Logzio implements Shutdownable {
     public Jmx2Logzio(Jmx2LogzioConfiguration conf) {
         this.conf = conf;
         this.taskScheduler = newSingleThreadScheduledExecutor();
-        this.client = conf.getMetricClientType() == JOLOKIA ? new JolokiaClient(conf.getJolokiaFullUrl()) : new JavaAgentClient();
+        this.client = conf.getMetricClientType() == JOLOKIA ? createJolokiaClient(conf.getJolokiaFullUrl()) : createMBeanClient();
         List<Dimension> extraDimensions = conf.getExtraDimensions();
         client.setExtraDimensions(extraDimensions);
-        String clientString = conf.getMetricClientType() == JOLOKIA ? "Jolokia agent URL: " + conf.getJolokiaFullUrl() : "Mbean client";
-        logger.info("Running with {}", clientString);
     }
 
     /**
@@ -75,5 +73,15 @@ public class Jmx2Logzio implements Shutdownable {
     private void enableHangupSupport() {
         HangupInterceptor interceptor = new HangupInterceptor(this);
         Runtime.getRuntime().addShutdownHook(interceptor);
+    }
+
+    private MBeanClient createMBeanClient() {
+        logger.info("Running with MBean client");
+        return new JavaAgentClient();
+    }
+
+    private MBeanClient createJolokiaClient(String jolokiaFullUrl) {
+        logger.info("Running with Jolokia agent URL: " + jolokiaFullUrl);
+        return new JolokiaClient(jolokiaFullUrl);
     }
 }

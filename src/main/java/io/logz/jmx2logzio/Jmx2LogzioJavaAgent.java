@@ -15,6 +15,7 @@ public class Jmx2LogzioJavaAgent {
 
 
     private static final String LISTENER_URL = "LISTENER_URL";
+    private static final String ENDPOINT_TYPE = "ENDPOINT_TYPE";
     private static final String WHITE_LIST_REGEX = "WHITE_LIST_REGEX";
     private static final String BLACK_LIST_REGEX = "BLACK_LIST_REGEX";
     private static final String LOGZIO_TOKEN = "LOGZIO_TOKEN";
@@ -128,6 +129,8 @@ public class Jmx2LogzioJavaAgent {
                 return Jmx2LogzioJolokia.FILE_SYSTEM_SPACE_LIMIT;
             case CLEAN_SENT_METRICS_INTERVAL:
                 return Jmx2LogzioJolokia.CLEAN_SENT_METRICS_INTERVAL;
+            case ENDPOINT_TYPE:
+                return Jmx2LogzioJolokia.ENDPOINT_TYPE;
             default:
                 throw new IllegalConfiguration("Unknown configuration option: " + key);
         }

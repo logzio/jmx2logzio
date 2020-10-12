@@ -1,10 +1,9 @@
-package io.logz.jmx2logzio.clients;
+package io.logz.jmx2logzio.listener.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.logz.jmx2logzio.Utils.HangupInterceptor;
-import io.logz.jmx2logzio.Utils.Shutdownable;
-import io.logz.jmx2logzio.configuration.Jmx2LogzioConfiguration;
+import io.logz.jmx2logzio.listener.ListenerWriter;
 import io.logz.jmx2logzio.objects.LogzioJavaSenderParams;
 import io.logz.jmx2logzio.objects.Metric;
 import io.logz.jmx2logzio.objects.StatusReporterFactory;
@@ -22,18 +21,16 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 
-public class ListenerWriter implements Shutdownable {
+public class JsonListenerWriter implements ListenerWriter {
     private final Logger logger = LoggerFactory.getLogger(ListenerWriter.class);
 
     private final static ObjectMapper mapper = new ObjectMapper();
     private HttpsRequestConfiguration requestConf;
-    private final LogzioJavaSenderParams logzioSenderParams;
     private final LogzioSender logzioSender;
     private ScheduledExecutorService senderExecutors;
 
-    public ListenerWriter(LogzioJavaSenderParams senderParams) {
-        this.logzioSenderParams = senderParams;
-        this.logzioSender = getLogzioSender();
+    public JsonListenerWriter(LogzioJavaSenderParams senderParams) {
+        this.logzioSender = getLogzioSender(senderParams);
         this.logzioSender.start();
     }
 
@@ -41,23 +38,22 @@ public class ListenerWriter implements Shutdownable {
      * Create a logz.io java sender with the received configuration
      * @return LogzioSender object
      */
-    private LogzioSender getLogzioSender() {
-
+    private LogzioSender getLogzioSender(LogzioJavaSenderParams logzioSenderParams) {
         senderExecutors = Executors.newScheduledThreadPool(logzioSenderParams.getThreadPoolSize());
         try {
             requestConf = HttpsRequestConfiguration
-                    .builder()
-                    .setLogzioListenerUrl(logzioSenderParams.getUrl())
-                    .setLogzioType(logzioSenderParams.getType())
-                    .setLogzioToken(logzioSenderParams.getToken())
-                    .setCompressRequests(logzioSenderParams.isCompressRequests())
-                    .build();
+                .builder()
+                .setLogzioListenerUrl(logzioSenderParams.getUrl())
+                .setLogzioType(logzioSenderParams.getType())
+                .setLogzioToken(logzioSenderParams.getToken())
+                .setCompressRequests(logzioSenderParams.isCompressRequests())
+                .build();
         } catch (LogzioParameterErrorException e) {
             logger.error("problem in one or more parameters with error {}", e.getMessage(), e);
         }
         SenderStatusReporter statusReporter = StatusReporterFactory.newSenderStatusReporter(LoggerFactory.getLogger(logzioSenderParams.getLoggerName()));
         LogzioSender.Builder senderBuilder = LogzioSender
-                .builder();
+            .builder();
         senderBuilder.setTasksExecutor(senderExecutors);
         senderBuilder.setReporter(statusReporter);
         senderBuilder.setHttpsRequestConfiguration(requestConf);
@@ -65,16 +61,16 @@ public class ListenerWriter implements Shutdownable {
 
         if (logzioSenderParams.isFromDisk()) {
             senderBuilder.withDiskQueue()
-                    .setQueueDir(logzioSenderParams.getQueueDir())
-                    .setCheckDiskSpaceInterval(logzioSenderParams.getDiskSpaceCheckInterval())
-                    .setFsPercentThreshold(logzioSenderParams.getFileSystemFullPercentThreshold())
-                    .setGcPersistedQueueFilesIntervalSeconds(logzioSenderParams.getGcPersistedQueueFilesIntervalSeconds())
-                    .endDiskQueue();
+                .setQueueDir(logzioSenderParams.getQueueDir())
+                .setCheckDiskSpaceInterval(logzioSenderParams.getDiskSpaceCheckInterval())
+                .setFsPercentThreshold(logzioSenderParams.getFileSystemFullPercentThreshold())
+                .setGcPersistedQueueFilesIntervalSeconds(logzioSenderParams.getGcPersistedQueueFilesIntervalSeconds())
+                .endDiskQueue();
         } else {
             senderBuilder.withInMemoryQueue()
-                    .setCapacityInBytes(logzioSenderParams.getInMemoryQueueCapacityInBytes())
-                    .setLogsCountLimit(logzioSenderParams.getLogsCountLimit())
-                    .endInMemoryQueue();
+                .setCapacityInBytes(logzioSenderParams.getInMemoryQueueCapacityInBytes())
+                .setLogsCountLimit(logzioSenderParams.getLogsCountLimit())
+                .endInMemoryQueue();
         }
         try {
             return senderBuilder.build();
@@ -88,6 +84,7 @@ public class ListenerWriter implements Shutdownable {
      * Add metrics the sender to be sent
      * @param metrics a list of metrics to be sent
      */
+    @Override
     public void writeMetrics(List<Metric> metrics) {
         logger.debug("sending {} metrics", metrics.size());
         metrics.stream().forEach(metric -> {
@@ -96,7 +93,6 @@ public class ListenerWriter implements Shutdownable {
             logzioSender.send(metricAsBytes);
         });
     }
-
 
     public LogzioSender getSender() {
         return logzioSender;
