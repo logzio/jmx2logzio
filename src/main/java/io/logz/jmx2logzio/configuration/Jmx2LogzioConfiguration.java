@@ -75,7 +75,7 @@ public class Jmx2LogzioConfiguration {
         serviceName = config.getString(Jmx2LogzioJolokia.SERVICE_NAME);
         logzioJavaSenderParams = new LogzioJavaSenderParams();
         setListenerURL(config);
-        metricEndpointType = config.getString(Jmx2LogzioJolokia.ENDPOINT_TYPE) != null ? config.getEnum(MetricEndpointType.class, Jmx2LogzioJolokia.ENDPOINT_TYPE) : MetricEndpointType.JSON_HTTP;
+        metricEndpointType = config.hasPath(Jmx2LogzioJolokia.ENDPOINT_TYPE) ? config.getEnum(MetricEndpointType.class, Jmx2LogzioJolokia.ENDPOINT_TYPE) : MetricEndpointType.JSON_HTTP;
 
         extraDimensions = new ArrayList<>();
         if (config.hasPath(Jmx2LogzioJolokia.EXTRA_DIMENSIONS)) {
