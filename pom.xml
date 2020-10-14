@@ -82,7 +82,6 @@
                         <configuration>
                             <sourceDirs>
                                 <sourceDir>${project.basedir}/src/main/java</sourceDir>
-                                <sourceDir>${project.basedir}/src/main/resources</sourceDir>
                                 <sourceDir>${project.build.directory}/generated-sources/protobuf/java/</sourceDir>
                                 <sourceDir>${project.build.directory}/generated-sources/protobuf/grpc-java/</sourceDir>
                             </sourceDirs>
@@ -96,7 +95,6 @@
                         <configuration>
                             <sourceDirs>
                                 <sourceDir>${project.basedir}/src/test/java</sourceDir>
-                                <sourceDir>${project.basedir}/src/test/resources</sourceDir>
                             </sourceDirs>
                         </configuration>
                     </execution>
