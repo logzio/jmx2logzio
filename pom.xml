@@ -41,6 +41,8 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+
+        <!-- This extension is generating OS information as Maven Properties, used below in protobuf-maven-plugin for downloading OS-matching protobuf compiler (which is a binary) -->
         <extensions>
             <extension>
                 <groupId>kr.motd.maven</groupId>
@@ -48,6 +50,7 @@
                 <version>1.6.1</version>
             </extension>
         </extensions>
+
         <plugins>
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
@@ -55,15 +58,6 @@
                 <version>0.6.1</version>
                 <configuration>
                     <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
-                    <protocPlugins>
-                        <protocPlugin>
-                            <id>GrpcKotlinGenerator</id>
-                            <groupId>io.rouz</groupId>
-                            <artifactId>grpc-kotlin-gen</artifactId>
-                            <version>0.0.6</version>
-                            <mainClass>io.rouz.grpc.kotlin.GrpcKotlinGenerator</mainClass>
-                        </protocPlugin>
-                    </protocPlugins>
                 </configuration>
                 <executions>
                     <execution>
