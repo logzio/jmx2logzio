@@ -18,7 +18,7 @@ public class Jmx2LogzioJolokia {
     public static final String METRICS_POLLING_INTERVAL = "service.poller.metrics-polling-interval-in-seconds";
     public static final String EXTRA_DIMENSIONS = "extra-dimensions";
     public static final String LISTENER_URL = "logzio-java-sender.url";
-    public static final String ENDPOINT_TYPE = "logzio-java-sender.endpointType";
+    public static final String ENDPOINT_TYPE = "endpointType";
     public static final String LOGZIO_TOKEN = "logzio-java-sender.token";
     public static final String FROM_DISK = "logzio-java-sender.from-disk";
     public static final String IN_MEMORY_QUEUE_CAPACITY = "logzio-java-sender.in-memory-queue-capacity";

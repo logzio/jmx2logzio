@@ -73,15 +73,17 @@ class PromHttpsSyncSender(
 
     private fun shouldRetry(responseCode: Int, responseMessage: String, conn: HttpURLConnection): Boolean {
         return when(responseCode) {
-            HttpURLConnection.HTTP_BAD_REQUEST -> {
-                reporter.warning(readErrorStream(conn))
-                false
-            }
             HttpURLConnection.HTTP_UNAUTHORIZED -> {
                 reporter.error("Logz.io: Got forbidden! Your token is not right. Unfortunately, dropping logs. Message: $responseMessage")
                 false
             }
-            else -> true
+            HttpURLConnection.HTTP_INTERNAL_ERROR -> {
+                true
+            }
+            else -> {
+                reporter.warning(readErrorStream(conn))
+                false
+            }
         }
     }
 
@@ -107,7 +109,7 @@ class PromHttpsSyncSender(
             try {
                 bufferedReader = BufferedReader(InputStreamReader(errorStream))
                 bufferedReader.lines().forEach { line: String? -> problemDescription.append("\n").append(line) }
-                return "Got 400 from logzio, here is the output: $problemDescription"
+                return "Got error response from logzio, here is the output: $problemDescription"
             } finally {
                 try {
                     bufferedReader?.close()
@@ -115,6 +117,6 @@ class PromHttpsSyncSender(
             }
         }
 
-        return "Got 400 from logzio, couldn't read the output"
+        return "Got error response from logzio, couldn't read the output"
     }
 }

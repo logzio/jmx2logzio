@@ -4,12 +4,11 @@ import io.logz.prometheus.protobuf.Types
 import io.logz.sender.HttpsRequestConfiguration
 import io.logz.sender.SenderStatusReporter
 import io.logz.sender.exceptions.LogzioServerErrorException
-import java.util.concurrent.ExecutionException
-import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.locks.ReentrantLock
+
 
 class PromLogzioSender(
     private val reporter: SenderStatusReporter,
@@ -20,57 +19,37 @@ class PromLogzioSender(
     httpsRequestConfiguration: HttpsRequestConfiguration
 ) {
     companion object {
-        private const val MAX_SIZE_IN_BYTES = 3 * 1024 * 1024 // 3 MB
+        private const val MAX_DEQUEUE_BATCH_SIZE_IN_BYTES = 3 * 1024 * 1024 // 3 MB
         private const val FINAL_DRAIN_TIMEOUT_SEC = 20
     }
 
     private val promHttpsSyncSender = PromHttpsSyncSender(httpsRequestConfiguration, reporter)
-    private val drainRunning = AtomicBoolean(false)
+    private val drainLock = ReentrantLock()
 
     init {
         debug("Created new LogzioPrometheusSender class")
     }
 
     fun start() {
-        tasksExecutor.scheduleAtFixedRate(this::drainQueueAndSend, 0, drainTimeoutSec, TimeUnit.SECONDS)
+        tasksExecutor.scheduleWithFixedDelay(this::drainQueueAndSend, 0, drainTimeoutSec, TimeUnit.SECONDS)
     }
 
-    fun stop() {
-        // Creating a scheduled executor, outside of logback to try and drain the queue one last time
-        val executorService = Executors.newSingleThreadExecutor()
-        debug("Got stop request, Submitting a final drain queue task to drain before shutdown. Will timeout in $FINAL_DRAIN_TIMEOUT_SEC seconds.")
+    fun send(timeSeries: Types.TimeSeries) {
+        timeSeriesQueue.enqueue(timeSeries.toByteArray())
+    }
 
+    private fun drainQueueAndSend() {
         try {
-            executorService.submit { this.drainQueue() }[FINAL_DRAIN_TIMEOUT_SEC.toLong(), TimeUnit.SECONDS]
-        } catch (e: InterruptedException) {
-            debug("Waited $FINAL_DRAIN_TIMEOUT_SEC seconds, but could not finish draining. quitting.", e)
-        } catch (e: ExecutionException) {
-            debug("Waited $FINAL_DRAIN_TIMEOUT_SEC seconds, but could not finish draining. quitting.", e)
-        } catch (e: TimeoutException) {
-            debug("Waited $FINAL_DRAIN_TIMEOUT_SEC seconds, but could not finish draining. quitting.", e)
-        } finally {
-            executorService.shutdownNow()
-        }
-    }
-
-    fun send(message: ByteArray) {
-        timeSeriesQueue.enqueue(message)
-    }
-
-    fun drainQueueAndSend() {
-        try {
-            if (drainRunning.get()) {
+            if (!drainLock.tryLock()) {
                 debug("Drain is running so we won't run another one in parallel")
                 return
-            } else {
-                drainRunning.set(true)
             }
             drainQueue()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             // We cant throw anything out, or the task will stop, so just swallow all
             reporter.error("Uncaught error from LogzioPrometheusSender", e)
         } finally {
-            drainRunning.set(false)
+            drainLock.unlock()
         }
     }
 
@@ -103,7 +82,7 @@ class PromLogzioSender(
         val timeSeriesList = mutableListOf<Types.TimeSeries>()
         var totalSize = 0
 
-        while (!timeSeriesQueue.isEmpty() && totalSize < MAX_SIZE_IN_BYTES) {
+        while (!timeSeriesQueue.isEmpty() && totalSize < MAX_DEQUEUE_BATCH_SIZE_IN_BYTES) {
             val rawTimeSeries = timeSeriesQueue.dequeue()
             if (rawTimeSeries != null && rawTimeSeries.isNotEmpty()) {
                 timeSeriesList.add(Types.TimeSeries.parseFrom(rawTimeSeries))

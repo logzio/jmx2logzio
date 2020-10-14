@@ -25,18 +25,17 @@ class PromListenerWriter(
     }
 
     private val senderExecutors: ScheduledExecutorService = Executors.newScheduledThreadPool(senderParams.threadPoolSize);
-    private val sender: PromLogzioSender = createSender(senderExecutors, senderParams)!!.also {
+    private val sender: PromLogzioSender = createSender(senderExecutors, senderParams).also {
         it.start()
     }
 
-    private fun createSender(senderExecutors: ScheduledExecutorService, logzioSenderParams: LogzioJavaSenderParams): PromLogzioSender? {
+    private fun createSender(senderExecutors: ScheduledExecutorService, logzioSenderParams: LogzioJavaSenderParams): PromLogzioSender {
         try {
             val statusReporter = StatusReporterFactory.newSenderStatusReporter(LoggerFactory.getLogger(logzioSenderParams.loggerName))
 
             val requestConf = HttpsRequestConfiguration
                 .builder()
                 .setLogzioListenerUrl(logzioSenderParams.url)
-                .setLogzioType(logzioSenderParams.type)
                 .setLogzioToken(logzioSenderParams.token)
                 .build()
 
@@ -48,23 +47,19 @@ class PromListenerWriter(
 
             return PromLogzioSender(statusReporter, senderExecutors, diskQueue, httpsRequestConfiguration = requestConf)
         } catch (e: LogzioParameterErrorException) {
-            logger.error("problem in one or more parameters with error {}", e.message, e)
+            throw RuntimeException("problem in one or more parameters with error ${e.message}", e)
         }
-
-        return null
     }
 
-    override fun writeMetrics(metricDocs: List<Metric>) {
-        logger.debug("sending ${metricDocs.size} metrics")
+    override fun writeMetrics(metrics: List<Metric>) {
+        logger.debug("sending ${metrics.size} metrics")
         try {
-            metricDocs.forEach {
-                val timeSeriesList = buildTimeSeries(it)
-                timeSeriesList.forEach { ts ->
-                    sender.send(ts.toByteArray())
-                }
+            metrics.forEach {
+                val timeSeriesList = buildTimeSeriesList(it)
+                timeSeriesList.forEach { ts -> sender.send(ts) }
             }
         } catch (e: IOException) {
-            e.printStackTrace()
+            logger.error("error sending metrics: ${e.message}\n${e.printStackTrace()}")
         }
     }
 
@@ -74,7 +69,6 @@ class PromListenerWriter(
     }
 
     override fun shutdown() {
-        sender.stop()
         senderExecutors.shutdown()
         try {
             senderExecutors.awaitTermination(20, TimeUnit.SECONDS)
@@ -87,15 +81,15 @@ class PromListenerWriter(
         logger.info("Closing Listener Writer...")
     }
 
-    private fun buildTimeSeries(metricDoc: Metric): List<TimeSeries> {
-        val metrics = metricDoc.metricMap
-        val labels = metricDoc.dimensionsMap.map { (key, value) -> buildLabel(key, value.toString()) }
+    private fun buildTimeSeriesList(metric: Metric): List<TimeSeries> {
+        val metrics = metric.metricMap
+        val labels = metric.dimensionsMap.map { (key, value) -> buildLabel(key, value.toString()) }
 
         val timeSeriesList = metrics.map { (name, value) ->
             TimeSeries.newBuilder()
                 .addLabels(buildLabel("__name__", name))
                 .addAllLabels(labels)
-                .addSamples(buildSample(metricDoc.timestamp.toEpochMilli(), value.toDouble()))
+                .addSamples(buildSample(metric.timestamp.toEpochMilli(), value.toDouble()))
                 .build()
         }
         return timeSeriesList
