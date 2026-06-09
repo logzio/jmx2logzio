@@ -15,7 +15,6 @@ import io.logz.sender.exceptions.LogzioParameterErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -80,6 +79,8 @@ public class ListenerWriter implements Shutdownable {
             return senderBuilder.build();
         } catch (LogzioParameterErrorException e) {
             logger.error("problem in one or more parameters with error {}", e.getMessage(), e);
+        } catch (java.io.IOException e) {
+            logger.error("failed to build logzio sender with error {}", e.getMessage(), e);
         }
         return null;
     }
@@ -113,7 +114,6 @@ public class ListenerWriter implements Shutdownable {
     /**
      * Start a scheduled task to poll the metrics from the metrics queue and send them
      */
-    @PostConstruct
     public void start() {
         enableHangupSupport();
     }
